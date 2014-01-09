@@ -1,0 +1,26 @@
+{ "name": "pimatic-plugin-template",
+  "description": "The plugin description",
+  "author": "Your Name <you@example.com> (http://your-website)",
+  "main": "my-plugin",
+  "files": [
+    "my-plugin.coffee",
+    "README.md",
+    "my-device-config-shema.coffee",
+    "my-plugin-config-shema.coffee"
+  ],
+  "version": "0.4.1",
+  "homepage": "http://your-plugin-website",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sweetpi/pimatic-plugin-template.git"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "pimatic": "0.4.*"
+  },
+  "engines": {
+    "node": ">0.8.x",
+    "npm": ">1.1.x"
+  }
+}
