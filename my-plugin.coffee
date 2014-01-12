@@ -38,8 +38,9 @@ module.exports = (env) ->
     # #####params:
     #  * `app` is the [express] instance the framework is using.
     #  * `framework` the framework itself
-    #  * `config` the properties the user specified as config for your plugin in the `plugins` section
-    #     of the config.json file 
+    #  * `config` the properties the user specified as config for your plugin in the `plugins` 
+    #     section of the config.json file 
+    #     
     # 
     init: (app, @framework, config) =>
       # Require your config shema
