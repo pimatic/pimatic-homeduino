@@ -47,8 +47,67 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 2,
-                "title": "Where to put the files?",
-                "slug": "where-to-put-the-files"
+                "title": "Setup the development envirement",
+                "slug": "setup-the-development-envirement"
+              },
+              "depth": 2,
+              "children": [
+                {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "Instal node.js and CoffeeScript",
+                    "slug": "instal-nodejs-and-coffeescript"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "Download pimatic for development",
+                    "slug": "download-pimatic-for-development"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "Setup  your plugin",
+                    "slug": "setup-your-plugin"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "Adding package dependencies",
+                    "slug": "adding-package-dependencies"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "Commit your changes to git",
+                    "slug": "commit-your-changes-to-git"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "Running pimatic with your plugin",
+                    "slug": "running-pimatic-with-your-plugin"
+                  },
+                  "depth": 3
+                }
+              ]
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 2,
+                "title": "Editor / IDE Setup",
+                "slug": "editor--ide-setup"
               },
               "depth": 2
             }
@@ -78,8 +137,67 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
           "type": "heading",
           "data": {
             "level": 2,
-            "title": "Where to put the files?",
-            "slug": "where-to-put-the-files"
+            "title": "Setup the development envirement",
+            "slug": "setup-the-development-envirement"
+          },
+          "depth": 2,
+          "children": [
+            {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "Instal node.js and CoffeeScript",
+                "slug": "instal-nodejs-and-coffeescript"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "Download pimatic for development",
+                "slug": "download-pimatic-for-development"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "Setup  your plugin",
+                "slug": "setup-your-plugin"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "Adding package dependencies",
+                "slug": "adding-package-dependencies"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "Commit your changes to git",
+                "slug": "commit-your-changes-to-git"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "Running pimatic with your plugin",
+                "slug": "running-pimatic-with-your-plugin"
+              },
+              "depth": 3
+            }
+          ]
+        }, {
+          "type": "heading",
+          "data": {
+            "level": 2,
+            "title": "Editor / IDE Setup",
+            "slug": "editor--ide-setup"
           },
           "depth": 2
         }
@@ -410,6 +528,7 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
   links = {
     "pimatic framework": "..",
     "cron": "../pimatic-cron",
+    "datalogger": "../pimatic-datalogger",
     "filebrowser": "../pimatic-filebrowser",
     "gpio": "../pimatic-gpio",
     "log-reader": "../pimatic-log-reader",

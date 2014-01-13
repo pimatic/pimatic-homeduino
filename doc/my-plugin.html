@@ -18,8 +18,8 @@ a look at the dependencies section in pimatics package.json</p></div></div></div
 <ul>
 <li><code>app</code> is the [express] instance the framework is using.</li>
 <li><code>framework</code> the framework itself</li>
-<li><code>config</code> the properties the user specified as config for your plugin in the <code>plugins</code> section
-of the config.json file </li>
+<li><code>config</code> the properties the user specified as config for your plugin in the <code>plugins</code> 
+section of the config.json file </li>
 </ul></div></div><div class="code"><div class="wrapper">    <span class="nv">init: </span><span class="nf">(app, @framework, config) =&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Require your config shema</p></div></div><div class="code"><div class="wrapper">      <span class="vi">@conf = </span><span class="nx">convict</span> <span class="nx">require</span><span class="p">(</span><span class="s">&quot;./my-plugin-config-shema&quot;</span><span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>and validate the given config.</p></div></div><div class="code"><div class="wrapper">      <span class="nx">@conf</span><span class="p">.</span><span class="nx">load</span> <span class="nx">config</span>
       <span class="nx">@conf</span><span class="p">.</span><span class="nx">validate</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>You can use <code>@conf.get "myOption"</code> to get a config option.</p></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h4 id="createdevice">createDevice()</h4>
 
