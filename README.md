@@ -81,6 +81,7 @@ install a Ubuntu.
 Editor / IDE Setup
 ------------------
 Coffescript is whitespcae sensitiv so be sure to use the following editor settings:
+
 * tab size: 2
 * translate tabs to spaces: true
 * max line length: 100
