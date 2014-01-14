@@ -72,7 +72,7 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "type": "heading",
                   "data": {
                     "level": 3,
-                    "title": "Setup  your plugin",
+                    "title": "Setup your plugin",
                     "slug": "setup-your-plugin"
                   },
                   "depth": 3
@@ -162,7 +162,7 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 3,
-                "title": "Setup  your plugin",
+                "title": "Setup your plugin",
                 "slug": "setup-your-plugin"
               },
               "depth": 3

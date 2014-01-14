@@ -60,11 +60,11 @@ install a Ubuntu.</p>
 <li>Make the changes you wish and add your plugin name without the <code>pimatic-</code> prefix to the plugins section.</li>
 </ul>
 
-<h3 id="setup-your-plugin">Setup  your plugin</h3>
+<h3 id="setup-your-plugin">Setup your plugin</h3>
 
 <ul>
 <li>Clone this plugin template on github.</li>
-<li>Chnage to the <code>pimatic/dev/node_modules</code> folder where pimatic was installed: <code>cd node_modules</code></li>
+<li>Chnage to the <code>pimatic-dev/node_modules</code> folder where pimatic was installed: <code>cd node_modules</code></li>
 <li>Clone your repository: <code>git clone ...</code>. Your repository should now be in 
 <code>pimatic-dev/node_modules/pimatic-your-plugin</code>.</li>
 <li>Change into your plugin folder <code>cd pimatic-your-plugin</code> and edit the <code>package.json</code>. Take a look
@@ -76,13 +76,14 @@ at the <a href="https://npmjs.org/doc/json.html">npm package.json documentation<
 <ul>
 <li>You can add other package dependencies by running <code>npm install something --save</code>. With the <code>--save</code>
 option npm will auto add the installed dependency in your <code>package.json</code></li>
-<li>You can allways install all dependencies in the package.json with <code>npm install</code></li>
+<li>You can always install all dependencies in the package.json with <code>npm install</code></li>
 </ul>
 
 <h3 id="commit-your-changes-to-git">Commit your changes to git</h3>
 
 <ul>
-<li>Add all edited files like <code>git add package.json</code> then commit you changes with <code>git commit</code>.</li>
+<li>Add all edited files with <code>git add file</code>. For example: <code>git add package.json</code> then commit you changes 
+with <code>git commit</code>.</li>
 <li>After that you can push you commited work to github: <code>git push</code></li>
 </ul>
 
@@ -98,7 +99,7 @@ will check you source files.</li>
 
 <h2 id="editor--ide-setup">Editor / IDE Setup</h2>
 
-<p>Coffescript is whitespcae sensitiv so be sure to use the following editor settings:</p>
+<p>Coffescript is whitespace sensitiv so be sure to use the following editor settings:</p>
 
 <ul>
 <li>tab size: 2</li>
@@ -106,8 +107,7 @@ will check you source files.</li>
 <li>max line length: 100</li>
 </ul>
 
-<p>I'm using <a href="http://www.sublimetext.com/">sublime text</a> with <a href="https://github.com/aponxi/sublime-better-coffeescript">BetterCoffee package</a> as a editor. 
-A example config would be:</p>
+<p>I'm using <a href="http://www.sublimetext.com/">sublime text</a> as a editor. A example project config would be:</p>
 
 <pre><code>{
   "folders":
@@ -124,6 +124,8 @@ A example config would be:</p>
   }
 }
 </code></pre>
+
+<p>If you use sublime then install <a href="https://github.com/aponxi/sublime-better-coffeescript">BetterCoffee</a>.</p>
 
 <p>Feel free to ask questions on github: 
 <a href="https://github.com/sweetpi/pimatic-plugin-template/issues">https://github.com/sweetpi/pimatic-plugin-template/issues</a></p></div></div></div></div></body></html>
