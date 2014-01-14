@@ -54,9 +54,9 @@ install a Ubuntu.
 * Copy the default config: `cp node_modules/pimatic/congig_default.json config.json`
 * Make the changes you wish and add your plugin name without the `pimatic-` prefix to the plugins section.
 
-###Setup  your plugin
+###Setup your plugin
 * Clone this plugin template on github.
-* Chnage to the `pimatic/dev/node_modules` folder where pimatic was installed: `cd node_modules`
+* Chnage to the `pimatic-dev/node_modules` folder where pimatic was installed: `cd node_modules`
 * Clone your repository: `git clone ...`. Your repository should now be in 
   `pimatic-dev/node_modules/pimatic-your-plugin`.
 * Change into your plugin folder `cd pimatic-your-plugin` and edit the `package.json`. Take a look
@@ -65,10 +65,11 @@ install a Ubuntu.
 ###Adding package dependencies
 * You can add other package dependencies by running `npm install something --save`. With the `--save`
   option npm will auto add the installed dependency in your `package.json`
-* You can allways install all dependencies in the package.json with `npm install`
+* You can always install all dependencies in the package.json with `npm install`
 
 ###Commit your changes to git
-* Add all edited files like `git add package.json` then commit you changes with `git commit`.
+* Add all edited files with `git add file`. For example: `git add package.json` then commit you changes 
+  with `git commit`.
 * After that you can push you commited work to github: `git push`
 
 ###Running pimatic with your plugin
@@ -80,14 +81,13 @@ install a Ubuntu.
 
 Editor / IDE Setup
 ------------------
-Coffescript is whitespcae sensitiv so be sure to use the following editor settings:
+Coffescript is whitespace sensitiv so be sure to use the following editor settings:
 
 * tab size: 2
 * translate tabs to spaces: true
 * max line length: 100
 
-I'm using [sublime text](http://www.sublimetext.com/) with [BetterCoffee package](https://github.com/aponxi/sublime-better-coffeescript) as a editor. 
-A example config would be:
+I'm using [sublime text](http://www.sublimetext.com/) as a editor. A example project config would be:
 
     {
       "folders":
@@ -104,6 +104,7 @@ A example config would be:
       }
     }
 
+If you use sublime then install [BetterCoffee](https://github.com/aponxi/sublime-better-coffeescript).
 
 Feel free to ask questions on github: 
 [https://github.com/sweetpi/pimatic-plugin-template/issues](https://github.com/sweetpi/pimatic-plugin-template/issues)
