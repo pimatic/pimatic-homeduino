@@ -8,7 +8,7 @@
     "my-device-config-shema.coffee",
     "my-plugin-config-shema.coffee"
   ],
-  "version": "0.4.1",
+  "version": "0.5.0",
   "homepage": "http://your-plugin-website",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   "dependencies": {
   },
   "peerDependencies": {
-    "pimatic": "0.4.*"
+    "pimatic": "0.5.*"
   },
   "engines": {
     "node": ">0.8.x",
