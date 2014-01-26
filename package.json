@@ -8,7 +8,7 @@
     "my-device-config-schema.coffee",
     "my-plugin-config-schema.coffee"
   ],
-  "version": "0.5.0",
+  "version": "0.5.1",
   "homepage": "http://your-plugin-website",
   "private": true,
   "repository": {
