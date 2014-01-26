@@ -43,8 +43,8 @@ module.exports = (env) ->
     #     
     # 
     init: (app, @framework, config) =>
-      # Require your config shema
-      @conf = convict require("./my-plugin-config-shema")
+      # Require your config schema
+      @conf = convict require("./my-plugin-config-schema")
       # and validate the given config.
       @conf.load config
       @conf.validate()
@@ -82,8 +82,8 @@ module.exports = (env) ->
     # ####constructor()
     # Your constructor function must assign a name and id to the device.
     constructor: (deviceConfig) ->
-      # Require your actuator config shema
-      @conf = convict require("./device-config-shema")
+      # Require your actuator config schema
+      @conf = convict require("./device-config-schema")
       # and validate the given device config.
       @conf.load deviceConfig
       @conf.validate()

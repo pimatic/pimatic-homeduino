@@ -5,8 +5,8 @@
   "files": [
     "my-plugin.coffee",
     "README.md",
-    "my-device-config-shema.coffee",
-    "my-plugin-config-shema.coffee"
+    "my-device-config-schema.coffee",
+    "my-plugin-config-schema.coffee"
   ],
   "version": "0.5.0",
   "homepage": "http://your-plugin-website",
