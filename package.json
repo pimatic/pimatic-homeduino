@@ -10,9 +10,10 @@
   ],
   "version": "0.5.0",
   "homepage": "http://your-plugin-website",
+  "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/sweetpi/pimatic-plugin-template.git"
+    "url": "git://github.com/pimatic/pimatic-plugin-template.git"
   },
   "dependencies": {
   },
