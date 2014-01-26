@@ -25,12 +25,12 @@ If you like videos more:
 Files
 -----
 
-* [my-plugin.coffee](http://sweetpi.de/pimatic/docs/pimatic-plugin-template/my-plugin.html): 
+* [my-plugin.coffee](http://www.pimatic.org/docs/pimatic-plugin-template/my-plugin.html): 
   This should become the main source file of your Plugin. It provides a short source walkthrough.
-* [my-plugin-config-shema.coffee](http://sweetpi.de/pimatic/docs/pimatic-plugin-template/my-plugin-config-shema.html): 
+* [my-plugin-config-shema.coffee](http://www.pimatic.org/docs/pimatic-plugin-template/my-plugin-config-shema.html): 
   Template for config definitions for your
   plugin.
-* [my-device-config-shema.coffee](http://sweetpi.de/pimatic/docs/pimatic-plugin-template/my-device-config-shema): 
+* [my-device-config-shema.coffee](http://www.pimatic.org/docs/pimatic-plugin-template/my-device-config-shema): 
   Template for config definitions for a device the plugin could provide.
 * package.json: The [npm package specification](https://npmjs.org/doc/json.html).
 
