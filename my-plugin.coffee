@@ -90,6 +90,7 @@ module.exports = (env) ->
       # Then assign the given name and id to the object.
       @name = conf.get "name"
       @id = conf.get "id"
+      super()
 
     # ####changeStateTo(state)
     # The `changeStateTo` function should change the state of the switch, when called by the 
