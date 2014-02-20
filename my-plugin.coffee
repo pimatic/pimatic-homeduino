@@ -83,7 +83,7 @@ module.exports = (env) ->
     # Your constructor function must assign a name and id to the device.
     constructor: (deviceConfig) ->
       # Require your actuator config schema
-      @conf = convict require("./device-config-schema")
+      @conf = convict require("./my-device-config-schema")
       # and validate the given device config.
       @conf.load deviceConfig
       @conf.validate()
