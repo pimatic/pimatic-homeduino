@@ -88,8 +88,8 @@ module.exports = (env) ->
       @conf.load deviceConfig
       @conf.validate()
       # Then assign the given name and id to the object.
-      @name = conf.get "name"
-      @id = conf.get "id"
+      @name = @conf.get "name"
+      @id = @conf.get "id"
       super()
 
     # ####changeStateTo(state)
