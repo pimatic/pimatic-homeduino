@@ -46,78 +46,10 @@ module.exports = (env) ->
       # Require your config schema
       @conf = convict require("./my-plugin-config-schema")
       # and validate the given config.
-      @conf.load config
+      @conf.load(config)
       @conf.validate()
-      # You can use `@conf.get "myOption"` to get a config option.
-
-    # ####createDevice()
-    # The `createDevice` function is called by the framework for every device in the `devices`
-    # section of the config.json file.
-    # 
-    # You should create your device here, if the class of the given deviceConfig matches on of 
-    # yours.
-    # 
-    # #####params:
-    #  * `deviceConfig` the properties the user specified in the `devices` section of the 
-    #    config.json file
-    # 
-    createDevice: (deviceConfig) =>
-      # if the class option of the given config is...
-      switch deviceConfig.class
-        # ...matches your switch class
-        when "MySwitch" 
-          # then create a instance of your device and register it
-          @framework.registerDevice(new MySwitch deviceConfig)
-          # and return true.
-          return true
-        # ... not matching your classes
-        else
-          # then return false.
-          return false
-
-  # ###MySwitch class
-  # An example class for a switch device
-  class MySwitch extends env.devices.PowerSwitch
-
-    # ####constructor()
-    # Your constructor function must assign a name and id to the device.
-    constructor: (deviceConfig) ->
-      # Require your actuator config schema
-      @conf = convict require("./my-device-config-schema")
-      # and validate the given device config.
-      @conf.load deviceConfig
-      @conf.validate()
-      # Then assign the given name and id to the object.
-      @name = @conf.get "name"
-      @id = @conf.get "id"
-      super()
-
-    # ####changeStateTo(state)
-    # The `changeStateTo` function should change the state of the switch, when called by the 
-    # framework.
-    changeStateTo: (state) ->
-      # If state is aleady set, just return a empty promise
-      if @_state is state then return Q()
-      # else return a promise
-      else return Q.fcall =>
-        # that does the magic stuff
-        yourChangeStateImplementation()
-        # and calls `PowerSwitch::_setState` so that `_state` is set and 
-        # a event is emitted.
-        @_setState state
-
-
-    # ####getState()
-    # Should return a promise with the state of the switch.
-    getState: () ->
-      # If the state is cached then return it
-      return if @_state? then Q @_state
-      # else 
-      else Q.fcall => 
-        # get the state from somwhere
-        @_state = yourGetStateImplementation()
-        # and return it.
-        return @_state
+      # You can use `@conf.get "myConfigOption"` to get a config option.
+      env.logger.info("Hello World")
 
   # ###Finally
   # Create a instance of my plugin
