@@ -5,7 +5,6 @@
   "files": [
     "my-plugin.coffee",
     "README.md",
-    "my-device-config-schema.coffee",
     "my-plugin-config-schema.coffee"
   ],
   "version": "0.5.1",
