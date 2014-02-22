@@ -7,7 +7,7 @@
     "README.md",
     "my-plugin-config-schema.coffee"
   ],
-  "version": "0.5.1",
+  "version": "0.6.0",
   "homepage": "http://your-plugin-website",
   "private": true,
   "repository": {
@@ -17,7 +17,7 @@
   "dependencies": {
   },
   "peerDependencies": {
-    "pimatic": "0.5.*"
+    "pimatic": "0.6.*"
   },
   "engines": {
     "node": ">0.8.x",
