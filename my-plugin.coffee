@@ -42,13 +42,7 @@ module.exports = (env) ->
     #     section of the config.json file 
     #     
     # 
-    init: (app, @framework, config) =>
-      # Require your config schema
-      @conf = convict require("./my-plugin-config-schema")
-      # and validate the given config.
-      @conf.load(config)
-      @conf.validate()
-      # You can use `@conf.get "myConfigOption"` to get a config option.
+    init: (app, @framework, @config) =>
       env.logger.info("Hello World")
 
   # ###Finally

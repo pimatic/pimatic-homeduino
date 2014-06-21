@@ -14,6 +14,7 @@
     "type": "git",
     "url": "git://github.com/pimatic/pimatic-plugin-template.git"
   },
+  "configSchema": "my-plugin-config-schema.coffee",
   "dependencies": {
   },
   "peerDependencies": {
