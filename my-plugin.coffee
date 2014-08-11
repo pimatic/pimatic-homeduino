@@ -14,11 +14,8 @@ module.exports = (env) ->
   # To require modules that are included in pimatic use `env.require`. For available packages take 
   # a look at the dependencies section in pimatics package.json
 
-  # Require [convict](https://github.com/mozilla/node-convict) for config validation.
-  convict = env.require "convict"
-
-  # Require the [Q](https://github.com/kriskowal/q) promise library
-  Q = env.require 'q'
+  # Require the  bluebird promise library
+  Promise = env.require 'bluebird'
 
   # Require the [cassert library](https://github.com/rhoot/cassert).
   assert = env.require 'cassert'
