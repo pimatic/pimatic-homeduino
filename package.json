@@ -1,20 +1,20 @@
-{ "name": "pimatic-sysinfo",
+{ "name": "pimatic-plugin-template",
   "description": "The plugin description",
-  "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://pimatic.org)",
-  "main": "sysinfo",
+  "author": "Your Name <you@example.com> (http://your-website)",
+  "main": "my-plugin",
   "files": [
-    "sysinfo.coffee",
+    "my-plugin.coffee",
     "README.md",
-    "sysinfo-config-schema.coffee"
+    "my-plugin-config-schema.coffee"
   ],
   "version": "0.8.0",
-  "homepage": "http://github.com/pimatic/pimatic-sysinfo",
+  "homepage": "http://your-plugin-website",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/pimatic/pimatic-sysinfo.git"
+    "url": "git://github.com/pimatic/pimatic-plugin-template.git"
   },
-  "configSchema": "sysinfo-config-schema.coffee",
+  "configSchema": "my-plugin-config-schema.coffee",
   "dependencies": {
   },
   "peerDependencies": {
