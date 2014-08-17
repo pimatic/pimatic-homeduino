@@ -25,6 +25,18 @@ module.exports = {
         type: "object"
     required: ["protocol", "protocolOptions"]
   }
+  HomeduinoRFTemperature: {
+    title: "HomeduinoRFTemperature config options"
+    type: "object"
+    properties:
+      protocol:
+        description: "The weather protocol to use."
+        type: "string"
+      protocolOptions:
+        description: "The protocol options"
+        type: "object"
+    required: ["protocol", "protocolOptions"]
+  }
   HomeduinoKeypad: {
     title: "HomeduinoKeypad config options"
     type: "object"

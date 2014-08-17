@@ -43,7 +43,8 @@ module.exports = (env) ->
 
       deviceClasses = [
         HomeduinoDHTSensor,
-        HomeduinoRFSwitch
+        HomeduinoRFSwitch,
+        HomeduinoRFTemperature
       ]
 
       for Cl in deviceClasses
@@ -128,6 +129,34 @@ module.exports = (env) ->
         @_setState state
       )
 
+  class HomeduinoRFTemperature extends env.devices.TemperatureSensor
+
+    constructor: (@config, @board) ->
+      @id = config.id
+      @name = config.name
+
+      @board.on('rf', (event) =>
+        match = no
+        if event.protocol is @config.protocol
+          match = yes
+          for optName, optValue of @config.protocolOptions
+            #console.log "check", optName, optValue, event.values[optName]
+            if event.values[optName] isnt optValue
+              match = no
+        if match
+          temperature = event.values.temperature
+          now = (new Date()).getTime()
+          # discard value if it is the same and was received just under two second ago
+          if @_lastReceiveTime?
+            if temperature is @_temperatue and (now - @_lastReceiveTime) < 2000
+              return
+          @emit "temperature", temperature
+          @_temperatue = temperature
+          @_lastReceiveTime = now
+      )
+      super()
+
+    getTemperature: -> Promise.resolve @_temperatue
 
   hdPlugin = new HomeduinoPlugin()
   return hdPlugin
