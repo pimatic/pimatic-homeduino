@@ -1,11 +1,14 @@
 # #homeduino configuration options
-# Declare your config option for your plugin here. 
 module.exports = {
-  title: "my plugin config options"
+  title: "homeduino config"
   type: "object"
   properties:
-    option1:
-      description: "Some option"
+    serialDevice:
+      description: "The name of the serial device to use"
       type: "string"
-      default: "foo"
+      default: "/dev/ttyUSB0"
+    baudrate:
+      description: "The baudrate to use for serial communication"
+      type: "integer"
+      default: 9600
 }

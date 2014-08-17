@@ -1,4 +1,5 @@
-{ "name": "pimatic-homeduino",
+{
+  "name": "pimatic-homeduino",
   "description": "The plugin description",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://www.sweetpi.de)",
   "main": "homeduino",
@@ -16,6 +17,7 @@
   },
   "configSchema": "homeduino-config-schema.coffee",
   "dependencies": {
+    "homeduino": "git+https://github.com/pimatic/homeduinojs.git"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"
