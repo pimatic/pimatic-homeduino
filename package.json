@@ -1,20 +1,20 @@
-{ "name": "pimatic-plugin-template",
+{ "name": "pimatic-homeduino",
   "description": "The plugin description",
-  "author": "Your Name <you@example.com> (http://your-website)",
-  "main": "my-plugin",
+  "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://www.sweetpi.de)",
+  "main": "homeduino",
   "files": [
-    "my-plugin.coffee",
+    "homeduino.coffee",
     "README.md",
-    "my-plugin-config-schema.coffee"
+    "homeduino-config-schema.coffee"
   ],
   "version": "0.8.0",
-  "homepage": "http://your-plugin-website",
+  "homepage": "http://pimatic.org",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/pimatic/pimatic-plugin-template.git"
+    "url": "git://github.com/pimatic/pimatic-homeduino.git"
   },
-  "configSchema": "my-plugin-config-schema.coffee",
+  "configSchema": "homeduino-config-schema.coffee",
   "dependencies": {
   },
   "peerDependencies": {
