@@ -1,5 +1,5 @@
 module.exports = {
-  title: "homedion device config schemes"
+  title: "homeduino device config schemes"
   HomeduinoDHTSensor: {
     title: "HomeduinoDHTSensor config options"
     type: "object"
@@ -12,9 +12,21 @@ module.exports = {
         description: "The digital pin, the DHT sensor is connected to."
         type: "integer"
     required: ["pin"]
+  },
+  HomeduinoRFSwitch: {
+    title: "HomeduinoRFSwitch config options"
+    type: "object"
+    properties:
+      protocol:
+        description: "The switch protocol to use."
+        type: "string"
+      protocolOptions:
+        description: "The protocol options"
+        type: "object"
+    required: ["protocol", "protocolOptions"]
   }
-  HomedionKeypad: {
-    title: "HomedionKeypad config options"
+  HomeduinoKeypad: {
+    title: "HomeduinoKeypad config options"
     type: "object"
     properties:
       buttons:

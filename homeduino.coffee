@@ -13,16 +13,37 @@ module.exports = (env) ->
 
     init: (app, @framework, @config) =>
       @board = new Board(@config.serialDevice, @config.baudrate)
-      @pendingConnect = @board.connect().then( ->
+
+      @board.on("data", (data) ->
+        env.logger.debug("data: \"#{data}\"")
+      )
+
+      @board.on("rfReceive", (event) -> 
+        env.logger.debug 'received:', event.pulseLengths, event.pulses
+      )
+
+      @board.on("rf", (event) -> 
+        env.logger.debug "#{event.protocol}: ", event.values
+      )
+
+      @pendingConnect = @board.connect().then( =>
         env.logger.info("Connected to homeduino device.")
-      ).catch( (err) ->
+        if @config.enableReceiving?
+          @board.rfControlStartReceiving(@config.receiverPin).then( =>
+            env.logger.debug("Receiving on pin #{@config.receiverPin}")
+          ).catch( (err) =>
+            env.logger.error("Couldn't start receiving: #{err.message}.")
+          )
+        return
+      ).catch( (err) =>
         env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
       )
 
       deviceConfigDef = require("./homeduino-device-config-schema")
 
       deviceClasses = [
-        HomeduinoDHTSensor
+        HomeduinoDHTSensor,
+        HomeduinoRFSwitch
       ]
 
       for Cl in deviceClasses
@@ -60,7 +81,7 @@ module.exports = (env) ->
         ).catch( (err) =>
           env.logger.error("Error reading DHT Sensor: #{err.message}.")
         )
-      ), 5000)
+      ), 10000)
     
     _readSensor: -> 
       # Already reading? return the reading promise
@@ -81,6 +102,31 @@ module.exports = (env) ->
       
     getTemperature: -> @_readSensor().then( (result) -> result.temperature )
     getHumidity: -> @_readSensor().then( (result) -> result.humidity )
+
+  class HomeduinoRFSwitch extends env.devices.PowerSwitch
+
+    constructor: (@config, @board) ->
+      @id = config.id
+      @name = config.name
+
+      @board.on('rf', (event) =>
+        match = no
+        if event.protocol is @config.protocol
+          match = yes
+          for optName, optValue of @config.protocolOptions
+            #console.log "check", optName, optValue, event.values[optName]
+            if event.values[optName] isnt optValue
+              match = no
+        @_setState(event.values.state) if match
+      )
+      super()
+
+    changeStateTo: (state) ->
+      if @_state is state then return Promise.resolve true
+      else return Promise.try( =>
+        #todo: send...
+        @_setState state
+      )
 
 
   hdPlugin = new HomeduinoPlugin()

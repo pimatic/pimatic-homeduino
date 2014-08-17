@@ -11,4 +11,16 @@ module.exports = {
       description: "The baudrate to use for serial communication"
       type: "integer"
       default: 9600
+    enableReceiving:
+      description: "Enable the receiving of 433mhz rf signals?"
+      type: "boolean"
+      default: true
+    receiverPin:
+      description: "The arduino interrupt pin, the 433mhz receiver is connected to."
+      type: "integer"
+      default: 0
+    transmitterPin:
+      description: "The arduino digital pin, the 433mhz transmitter is connected to."
+      type: "integer"
+      default: 3
 }
