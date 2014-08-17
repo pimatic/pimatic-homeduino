@@ -10,7 +10,7 @@ module.exports = {
     baudrate:
       description: "The baudrate to use for serial communication"
       type: "integer"
-      default: 9600
+      default: 115200
     enableReceiving:
       description: "Enable the receiving of 433mhz rf signals?"
       type: "boolean"
