@@ -82,16 +82,16 @@ module.exports = (env) ->
         ).catch( (err) =>
           env.logger.error("Error reading DHT Sensor: #{err.message}.")
         )
-      ), 10000)
+      ), @config.interval)
     
-    _readSensor: -> 
+    _readSensor: (attempt = 0)-> 
       # Already reading? return the reading promise
       if @_pendingRead? then return @_pendingRead
-      # Don't read the sensor to frequently, the minimal reading interal should be 2 seconds
+      # Don't read the sensor to frequently, the minimal reading interal should be 2.5 seconds
       if @_lastReadResult?
         now = new Date().getTime()
         if (now - @_lastReadTime) < 2000
-          return @_lastReadResult
+          return Promise.resolve @_lastReadResult
       @_pendingRead = @board.whenReady().then( =>
         return @board.readDHT(@config.type, @config.pin).then( (result) =>
           @_lastReadResult = result
@@ -99,6 +99,13 @@ module.exports = (env) ->
           @_pendingRead = null
           return result
         )
+      ).catch( (err) =>
+        @_pendingRead = null
+        if err.message is "checksum_error" and attempt < 5
+          env.logger.debug "got checksum_error while reading dht sensor, retrying: #{attempt} of 5"
+          return Promise.delay(2500).then( => @_readSensor(attempt+1) )
+        else
+          throw err
       )
       
     getTemperature: -> @_readSensor().then( (result) -> result.temperature )
