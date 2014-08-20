@@ -101,8 +101,8 @@ module.exports = (env) ->
         )
       ).catch( (err) =>
         @_pendingRead = null
-        if err.message is "checksum_error" and attempt < 5
-          env.logger.debug "got checksum_error while reading dht sensor, retrying: #{attempt} of 5"
+        if e(rr.message is "checksum_error" or err.message is "timeout_error") and attempt < 5
+          env.logger.debug "got #{err.message} while reading dht sensor, retrying: #{attempt} of 5"
           return Promise.delay(2500).then( => @_readSensor(attempt+1) )
         else
           throw err
