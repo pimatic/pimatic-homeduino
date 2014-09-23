@@ -7,7 +7,7 @@ Plugin for using various 433mhz devices and sensors with a connected arduino wit
 This plugins supports all 433mhz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs) 
 [protocol implementations](https://github.com/pimatic/rfcontroljs/tree/master/src/protocols).
 
-![Hardware](hardware.png)  
+![Hardware](hardware.jpg)  
 
 Configuration
 -------------
