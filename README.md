@@ -7,6 +7,7 @@ Plugin for using various 433mhz devices and sensors with a connected arduino wit
 This plugins supports all 433mhz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs) 
 [protocol implementations](https://github.com/pimatic/rfcontroljs/tree/master/src/protocols).
 
+![Hardware](hardware.png)  
 
 Configuration
 -------------
@@ -28,7 +29,7 @@ in the `plugins` section. For all configuration options see
 The pin numbers are arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
 The `transmitterPin` can be any digitial pin.
 
-![nano-pins](pins-nano.png)  
+![nano-pins](pins-nano.png)
 
 Devices must be added manually to the device section of your pimatic config:
 
