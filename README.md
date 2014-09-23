@@ -5,7 +5,7 @@ Plugin for using various 433mhz devices and sensors with a connected arduino wit
 [homeduino](https://github.com/pimatic/homeduino) sketch.
 
 This plugins supports all 433mhz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs) 
-[protocol implementations](https://github.com/pimatic/rfcontroljs/tree/master/src/protocols).
+[protocol implementations](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
 ![Hardware](hardware.jpg)  
 
@@ -31,7 +31,9 @@ The `transmitterPin` can be any digitial pin.
 
 ![nano-pins](pins-nano.png)
 
-Devices must be added manually to the device section of your pimatic config:
+Devices must be added manually to the device section of your pimatic config. 
+
+A list with all supported protocols and protocol-options can be found [here](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
 ### weather-station sensor example:
 
@@ -76,6 +78,7 @@ For protocol options see:
   "pin": 13
 }
 ```
+
 
 TODO
 ----
