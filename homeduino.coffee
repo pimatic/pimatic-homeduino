@@ -142,6 +142,27 @@ module.exports = (env) ->
       @id = config.id
       @name = config.name
 
+      @_protocol = Board.getRfProtocol(@config.protocol)
+      unless @_protocol?
+        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+      unless @_protocol.type is "weather"
+        throw new Error("\"#{@config.protocol}\" is not a weather protocol.")
+
+      @attributes = {}
+
+      if @_protocol.values.temperature?
+        @attributes.temperature = {
+          description: "the messured temperature"
+          type: "number"
+          unit: '°C'
+        }
+      if @_protocol.values.humidity?
+        @attributes.humidity = {
+          description: "the messured humidity"
+          type: "number"
+          unit: '%'
+        }
+
       @board.on('rf', (event) =>
         match = no
         if event.protocol is @config.protocol
@@ -151,19 +172,27 @@ module.exports = (env) ->
             if event.values[optName] isnt optValue
               match = no
         if match
-          temperature = event.values.temperature
           now = (new Date()).getTime()
-          # discard value if it is the same and was received just under two second ago
-          if @_lastReceiveTime?
-            if temperature is @_temperatue and (now - @_lastReceiveTime) < 2000
-              return
-          @emit "temperature", temperature
-          @_temperatue = temperature
+          timeDelta = (
+            if @_lastReceiveTime? then (now - @_lastReceiveTime)
+            else 9999999
+          )
+          if timeDelta < 2000
+            return 
+          if @_protocol.values.temperature?
+            @_temperatue = event.values.temperature
+            # discard value if it is the same and was received just under two second ago
+            @emit "temperature", @_temperatue
+          if @_protocol.values.humidity?
+            @_humidity = event.values.humidity
+            # discard value if it is the same and was received just under two second ago
+            @emit "humidity", @_humidity
           @_lastReceiveTime = now
       )
       super()
 
     getTemperature: -> Promise.resolve @_temperatue
+    getHumidity: -> Promise.resolve @_humidity
 
   hdPlugin = new HomeduinoPlugin()
   return hdPlugin
