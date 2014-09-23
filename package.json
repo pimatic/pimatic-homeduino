@@ -6,7 +6,7 @@
   "files": [
     "homeduino.coffee",
     "README.md",
-    "homeduino-config-schema.coffee"
+    "homeduino-config-schema.coffee",
     "device-config-schema.coffee"
   ],
   "version": "0.8.1",
