@@ -39,7 +39,7 @@ module.exports = (env) ->
         env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
       )
 
-      deviceConfigDef = require("./homeduino-device-config-schema")
+      deviceConfigDef = require("./device-config-schema")
 
       deviceClasses = [
         HomeduinoDHTSensor,
