@@ -52,7 +52,7 @@ module.exports = (env) ->
           @framework.deviceManager.registerDeviceClass(Cl.name, {
             configDef: deviceConfigDef[Cl.name]
             createCallback: (deviceConfig) => 
-              device = new Cl(deviceConfig, @board)
+              device = new Cl(deviceConfig, @board, @config)
               return device
           })
 
@@ -113,9 +113,15 @@ module.exports = (env) ->
 
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
-    constructor: (@config, @board) ->
+    constructor: (@config, @board, @_pluginConfig) ->
       @id = config.id
       @name = config.name
+
+      @_protocol = Board.getRfProtocol(@config.protocol)
+      unless @_protocol?
+        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+      unless @_protocol.type is "switch"
+        throw new Error("\"#{@config.protocol}\" is not a switch protocol.")
 
       @board.on('rf', (event) =>
         match = no
@@ -132,8 +138,13 @@ module.exports = (env) ->
     changeStateTo: (state) ->
       if @_state is state then return Promise.resolve true
       else return Promise.try( =>
-        #todo: send...
-        @_setState state
+        options = _.copy(@config.protocolOptions)
+        unless options.all? then options.protocol.all = no
+        options.state = state
+        return @board
+          .rfControlSendMessage(@_pluginConfig.transmitterPin, @protocol, options).then( =>
+            @_setState(state)
+          )
       )
 
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
