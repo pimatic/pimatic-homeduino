@@ -5,8 +5,9 @@ module.exports = (env) ->
 
   # Require the [cassert library](https://github.com/rhoot/cassert).
   assert = env.require 'cassert'
-
+  _ = env.require('lodash')
   homeduino = require('homeduino')
+
   Board = homeduino.Board
 
   class HomeduinoPlugin extends env.plugins.Plugin
@@ -138,13 +139,17 @@ module.exports = (env) ->
     changeStateTo: (state) ->
       if @_state is state then return Promise.resolve true
       else return Promise.try( =>
-        options = _.copy(@config.protocolOptions)
-        unless options.all? then options.protocol.all = no
+        options = _.clone(@config.protocolOptions)
+        unless options.all? then options.all = no
         options.state = state
-        return @board
-          .rfControlSendMessage(@_pluginConfig.transmitterPin, @protocol, options).then( =>
-            @_setState(state)
-          )
+        return @board.rfControlSendMessage(
+          @_pluginConfig.transmitterPin, 
+          @config.protocol, 
+          options
+        ).then( =>
+          @_setState(state)
+          return
+        )
       )
 
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
