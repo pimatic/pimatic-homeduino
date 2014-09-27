@@ -45,7 +45,8 @@ module.exports = (env) ->
       deviceClasses = [
         HomeduinoDHTSensor,
         HomeduinoRFSwitch,
-        HomeduinoRFTemperature
+        HomeduinoRFTemperature,
+        HomeduinoRFPir
       ]
 
       for Cl in deviceClasses
@@ -151,6 +152,42 @@ module.exports = (env) ->
           return
         )
       )
+
+  class HomeduinoRFPir extends env.devices.PresenceSensor
+
+    constructor: (@config, @board, @_pluginConfig) ->
+      @id = config.id
+      @name = config.name
+
+      @_protocol = Board.getRfProtocol(@config.protocol)
+      unless @_protocol?
+        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+      unless @_protocol.type is "pir"
+        throw new Error("\"#{@config.protocol}\" is not a pir protocol.")
+
+      @_presence = no
+      resetPresence = ( =>
+        @_setPresence(no)
+      )
+
+      @board.on('rf', (event) =>
+        match = no
+        if event.protocol is @config.protocol
+          match = yes
+          for optName, optValue of @config.protocolOptions
+            #console.log "check", optName, optValue, event.values[optName]
+            if event.values[optName] isnt optValue
+              match = no
+        if match
+          unless @_setPresence is event.values.presence
+            @_setPresence(event.values.presence)
+          clearTimeout(@_resetPresenceTimeout)
+          @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
+      )
+      super()
+
+    getPresence: -> Promise.resolve @_presence
+
 
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
 

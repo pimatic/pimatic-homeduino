@@ -57,5 +57,21 @@ module.exports = {
               type: "string"
             text:
               type: "string"
+  },
+  HomeduinoRFPir: {
+    title: "HomeduinoRFPir config options"
+    type: "object"
+    properties:
+      protocol:
+        description: "The switch protocol to use."
+        type: "string"
+      protocolOptions:
+        description: "The protocol options"
+        type: "object"
+      resetTime:
+        description: "Time after that the presence value is resettet to absent."
+        type: "integer"
+        default: 10
+    required: ["protocol", "protocolOptions"]
   }
 }
