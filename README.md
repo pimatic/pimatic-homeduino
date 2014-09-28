@@ -79,6 +79,22 @@ For protocol options see:
 }
 ```
 
+### PIR sensor example:
+
+```json
+{
+      "id": "homeduino-pir",
+      "name": "PIR",
+      "class": "HomeduinoRFPir",
+      "protocol": "pir1",
+      "protocolOptions": {
+        "unit": 0,
+        "id": 17
+      },
+      "resetTime": 6000
+}
+```
+
 
 TODO
 ----
