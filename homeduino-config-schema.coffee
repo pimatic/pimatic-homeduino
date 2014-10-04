@@ -23,4 +23,8 @@ module.exports = {
       description: "The arduino digital pin, the 433mhz transmitter is connected to."
       type: "integer"
       default: 3
+    connectionTimeout: 
+      description: "Time to wait for ready package on connection"
+      type: "integer"
+      default: 60000
 }

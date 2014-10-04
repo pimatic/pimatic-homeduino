@@ -27,7 +27,7 @@ module.exports = (env) ->
         env.logger.debug "#{event.protocol}: ", event.values
       )
 
-      @pendingConnect = @board.connect().then( =>
+      @pendingConnect = @board.connect(@config.connectionTimeout).then( =>
         env.logger.info("Connected to homeduino device.")
         if @config.enableReceiving?
           @board.rfControlStartReceiving(@config.receiverPin).then( =>
