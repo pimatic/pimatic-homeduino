@@ -77,12 +77,18 @@ module.exports = (env) ->
       @name = config.name
       super()
 
+      lastError = null
       setInterval(( => 
         @_readSensor().then( (result) =>
+          lastError = null
           @emit 'temperature', result.temperature
           @emit 'humidity', result.humidity
         ).catch( (err) =>
+          if lastError is err.message
+            env.logger.debug("Suppressing repeated error message from dht read: #{err.message}")
+            return
           env.logger.error("Error reading DHT Sensor: #{err.message}.")
+          lastError = err.message
         )
       ), @config.interval)
     
