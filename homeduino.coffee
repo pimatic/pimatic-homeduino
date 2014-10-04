@@ -27,6 +27,10 @@ module.exports = (env) ->
         env.logger.debug "#{event.protocol}: ", event.values
       )
 
+      @board.on("reconnect", (err) ->
+        env.logger.debug "Couldn't connect (#{err.message}), retrying..."
+      )
+
       @pendingConnect = @board.connect(@config.connectionTimeout).then( =>
         env.logger.info("Connected to homeduino device.")
         if @config.enableReceiving?
