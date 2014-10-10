@@ -30,7 +30,7 @@ in the `plugins` section. For all configuration options see
 [homeduino-config-schema](homeduino-config-schema.coffee)
 
 The pin numbers are arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
-The `transmitterPin` can be any digitial pin.
+The `transmitterPin` can must bq a digitial pin between `2` (D2) and `13` (D13) .
 
 ![nano-pins](pins-nano.png)
 

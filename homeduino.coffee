@@ -13,6 +13,13 @@ module.exports = (env) ->
   class HomeduinoPlugin extends env.plugins.Plugin
 
     init: (app, @framework, @config) =>
+      #check transmitterPin and receiverPin
+      if @config.driver is "serialport"
+        unless @config.receiverPin in [0, 1]
+          throw new Error("receiverPin must be 0 or 1")
+        unless 2 <= @config.transmitterPin <= 13
+          throw new Error("transmitterPin must be between 2 and 13")
+
       @board = new Board(@config.driver, @config.driverOptions)
 
       @board.on("data", (data) ->
