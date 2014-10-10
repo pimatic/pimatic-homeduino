@@ -16,10 +16,13 @@ You can load the plugin by editing your `config.json` to include:
 ```json
 {
   "plugin": "homeduino",
-  "serialDevice": "/dev/ttyUSB0",
-  "baudrate": 115200,
+  "driver": "serialport",
+  "driverOptions": {
+    "serialDevice": "/dev/ttyUSB0",
+    "baudrate": 115200
+  },
   "receiverPin": 0,
-  "transmitterPin": 1
+  "transmitterPin": 4
 }
 ```
 

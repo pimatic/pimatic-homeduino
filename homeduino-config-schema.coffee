@@ -3,14 +3,27 @@ module.exports = {
   title: "homeduino config"
   type: "object"
   properties:
-    serialDevice:
-      description: "The name of the serial device to use"
+    driver:
+      description: "The diver to connect to the arduino or virtualarduino"
       type: "string"
-      default: "/dev/ttyUSB0"
-    baudrate:
-      description: "The baudrate to use for serial communication"
-      type: "integer"
-      default: 115200
+      enum: ["serialport"]
+      default: "serialport"
+    driverOptions:
+      description: "Options for the driver"
+      oneOf: [
+        {
+          title: "serialport driver options"
+          properties:
+            serialDevice:
+              description: "The name of the serial device to use"
+              type: "string"
+              default: "/dev/ttyUSB0"
+            baudrate:
+              description: "The baudrate to use for serial communication"
+              type: "integer"
+              default: 115200
+        }
+      ]
     enableReceiving:
       description: "Enable the receiving of 433mhz rf signals?"
       type: "boolean"
@@ -22,7 +35,7 @@ module.exports = {
     transmitterPin:
       description: "The arduino digital pin, the 433mhz transmitter is connected to."
       type: "integer"
-      default: 3
+      default: 4
     connectionTimeout: 
       description: "Time to wait for ready package on connection"
       type: "integer"

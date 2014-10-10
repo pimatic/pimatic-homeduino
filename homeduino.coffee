@@ -13,7 +13,7 @@ module.exports = (env) ->
   class HomeduinoPlugin extends env.plugins.Plugin
 
     init: (app, @framework, @config) =>
-      @board = new Board(@config.serialDevice, @config.baudrate)
+      @board = new Board(@config.driver, @config.driverOptions)
 
       @board.on("data", (data) ->
         env.logger.debug("data: \"#{data}\"")
