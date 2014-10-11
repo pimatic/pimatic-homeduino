@@ -10,6 +10,11 @@ module.exports = {
       default: "serialport"
     driverOptions:
       description: "Options for the driver"
+      type: "object"
+      default: {
+        "serialDevice": "/dev/ttyUSB0",
+        "baudrate": 115200
+      }
       oneOf: [
         {
           title: "serialport driver options"
