@@ -3,6 +3,7 @@ module.exports = {
   HomeduinoDHTSensor: {
     title: "HomeduinoDHTSensor config options"
     type: "object"
+    extensions: ["xLink"]
     properties:
       type:
         description: "The type of the dht sensor (22, 33, 44 or 55)"
@@ -20,6 +21,7 @@ module.exports = {
   HomeduinoRFSwitch: {
     title: "HomeduinoRFSwitch config options"
     type: "object"
+    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
       protocol:
         description: "The switch protocol to use."
@@ -32,6 +34,7 @@ module.exports = {
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"
     type: "object"
+    extensions: ["xLink"]
     properties:
       protocol:
         description: "The weather protocol to use."
@@ -44,6 +47,7 @@ module.exports = {
   HomeduinoKeypad: {
     title: "HomeduinoKeypad config options"
     type: "object"
+    extensions: ["xLink"]
     properties:
       buttons:
         description: "Buttons of the keypad"
@@ -61,6 +65,7 @@ module.exports = {
   HomeduinoRFPir: {
     title: "HomeduinoRFPir config options"
     type: "object"
+    extensions: ["xLink", "xPresentLabel", "xAbsentLabel"]
     properties:
       protocol:
         description: "The switch protocol to use."
