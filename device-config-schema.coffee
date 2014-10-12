@@ -44,6 +44,49 @@ module.exports = {
         type: "object"
     required: ["protocol", "protocolOptions"]
   }
+  HomeduinoRFGenericSensor: {
+    title: "HomeduinoRFGenericSensor config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      protocol:
+        description: "The gernic protocol to use."
+        type: "string"
+        default: "generic"
+      protocolOptions:
+        description: "The protocol options"
+        type: "object"
+      attributes:
+        description: "The attributes (sensor values) of the sensor"
+        type: "array"
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              description: "Name for the attribute."
+              type: "string"
+            type:
+              description: "The type of this attribute in the rf message."
+              type: "integer"
+            decimals:
+              description: "Decimals of the value in the rf message"
+              type: "integer"
+              default: 0
+            baseValue:
+              description: "Offset that will be added to the value in the rf message"
+              type: "integer"
+              default: 0
+            unit:
+              description: "The unit of the attribute"
+              type: "string"
+              default: ""
+            label:
+              description: "A custom label to use in the frontend."
+              type: "string"
+              default: ""
+
+  }
   HomeduinoKeypad: {
     title: "HomeduinoKeypad config options"
     type: "object"

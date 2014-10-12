@@ -54,10 +54,11 @@ module.exports = (env) ->
       deviceConfigDef = require("./device-config-schema")
 
       deviceClasses = [
-        HomeduinoDHTSensor,
-        HomeduinoRFSwitch,
-        HomeduinoRFTemperature,
+        HomeduinoDHTSensor
+        HomeduinoRFSwitch
+        HomeduinoRFTemperature
         HomeduinoRFPir
+        HomeduinoRFGenericSensor
       ]
 
       for Cl in deviceClasses
@@ -263,6 +264,84 @@ module.exports = (env) ->
 
     getTemperature: -> Promise.resolve @_temperatue
     getHumidity: -> Promise.resolve @_humidity
+
+  class HomeduinoRFGenericSensor extends env.devices.Sensor
+
+    constructor: (@config, @board) ->
+      @id = config.id
+      @name = config.name
+
+      @_protocol = Board.getRfProtocol(@config.protocol)
+      unless @_protocol?
+        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+      unless @_protocol.type is "generic"
+        throw new Error("\"#{@config.protocol}\" is not a generic protocol.")
+
+      @attributes = {}
+      for attributeConfig in @config.attributes
+        @_createAttribute(attributeConfig)
+
+      super()
+
+      @_lastReceiveTimes = {}
+      @board.on('rf', (event) =>
+        match = no
+        if event.protocol is @config.protocol
+          match = yes
+          for optName, optValue of @config.protocolOptions
+            #console.log "check", optName, optValue, event.values[optName]
+            if event.values[optName] isnt optValue
+              match = no
+        if match
+          for attributeConfig in @config.attributes
+            @_updateAttribute(attributeConfig, event)
+      )
+      super()
+
+    _createAttribute: (attributeConfig) ->
+      name = attributeConfig.name
+      if @attributes[name]?
+        throw new Error(
+          "Two attributes with the same name in HomeduinoRFGenericSensor config \"#{name}\""
+        )
+      # Set description and label
+      @attributes[name] = {
+        description: name
+        label: (
+          if attributeConfig.label? and attributeConfig.label.length > 0 then attributeConfig.label 
+          else name
+        )
+        type: "number"
+      }
+      # Set unit
+      if attributeConfig.unit? and attributeConfig.unit.length > 0
+        @attributes[name].unit = attributeConfig.unit
+      # gnerate getter:
+      @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
+
+    _updateAttribute: (attributeConfig, event) ->
+      name = attributeConfig.name
+      now = (new Date()).getTime()
+      timeDelta = (
+        if @_lastReceiveTimes[name]? then (now - @_lastReceiveTimes[name])
+        else 9999999
+      )
+      if timeDelta < 2000
+        return
+
+      unless event.values.value?
+        return
+
+      unless event.values.type is attributeConfig.type
+        return
+
+      baseValue = attributeConfig.baseValue
+      decimalsDivider = Math.pow(10, attributeConfig.decimals)
+      value = event.values.value / decimalsDivider
+      value = -value if event.values.positive is false
+      value += baseValue
+      @emit name, realValue
+      @_lastReceiveTimes[name] = now
 
   hdPlugin = new HomeduinoPlugin()
   return hdPlugin
