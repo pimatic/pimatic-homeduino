@@ -98,6 +98,30 @@ For protocol options see:
 }
 ```
 
+### Generic RF Sensor with arduino sender
+
+```json
+{
+  "id": "homeduino-generic-sensor",
+  "name": "RFGenericSensor",
+  "class": "HomeduinoRFGenericSensor",
+  "protocol": "generic",
+  "protocolOptions": {
+    "id": 42
+  },
+  "attributes": [
+    {
+      "name": "temperature",
+      "type": 10,
+      "decimals": 2,
+      "baseValue": 0,
+      "unit": "°C",
+      "label": "Temperature"
+    }
+  ]
+}
+```
+
 
 TODO
 ----
