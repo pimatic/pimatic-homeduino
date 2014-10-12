@@ -6,7 +6,7 @@ module.exports = {
     driver:
       description: "The diver to connect to the arduino or virtualarduino"
       type: "string"
-      enum: ["serialport"]
+      enum: ["serialport", "gpio"]
       default: "serialport"
     driverOptions:
       description: "Options for the driver"
@@ -27,6 +27,9 @@ module.exports = {
               description: "The baudrate to use for serial communication"
               type: "integer"
               default: 115200
+        },
+        {
+          properties: {}
         }
       ]
     enableReceiving:
