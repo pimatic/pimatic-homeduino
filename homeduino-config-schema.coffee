@@ -15,23 +15,23 @@ module.exports = {
         "serialDevice": "/dev/ttyUSB0",
         "baudrate": 115200
       }
-      oneOf: [
-        {
-          title: "serialport driver options"
-          properties:
-            serialDevice:
-              description: "The name of the serial device to use"
-              type: "string"
-              default: "/dev/ttyUSB0"
-            baudrate:
-              description: "The baudrate to use for serial communication"
-              type: "integer"
-              default: 115200
-        },
-        {
-          properties: {}
-        }
-      ]
+      # oneOf: [
+      #   {
+      #     title: "serialport driver options"
+      #     properties:
+      #       serialDevice:
+      #         description: "The name of the serial device to use"
+      #         type: "string"
+      #         default: "/dev/ttyUSB0"
+      #       baudrate:
+      #         description: "The baudrate to use for serial communication"
+      #         type: "integer"
+      #         default: 115200
+      #   },
+      #   {
+      #     properties: {}
+      #   }
+      #]
     enableReceiving:
       description: "Enable the receiving of 433mhz rf signals?"
       type: "boolean"
