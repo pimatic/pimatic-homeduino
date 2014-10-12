@@ -2,14 +2,25 @@ pimatic-homeduino
 =======================
 
 Plugin for using various 433mhz devices and sensors with a connected arduino with 
-[homeduino](https://github.com/pimatic/homeduino) sketch.
+[homeduino](https://github.com/pimatic/homeduino) sketch or directly with capable hardware like the Raspberry Pi.
 
 This plugins supports all 433mhz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs) 
 [protocol implementations](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
+
+Drivers
+------
+
+The plugin can be used with two differend hardware combinations:
+
+*  A. Computer with connected arduino (with homeduin sketch) and 433mhz transmitter and receiver (recommended)
+*  B. Raspberry Pi (or Banana Pi or Hummingboard) with [ATTiny45 / 85 Prefilter](https://github.com/pilight/pilight_firmware#pinout) and 433mhz transmitter and receiver
+
+
+### A.Connected arduino (recommended)
+
 ![Hardware](hardware.jpg)  
 
-Configuration
 -------------
 You can load the plugin by editing your `config.json` to include:
 
@@ -26,13 +37,34 @@ You can load the plugin by editing your `config.json` to include:
 }
 ```
 
-in the `plugins` section. For all configuration options see 
-[homeduino-config-schema](homeduino-config-schema.coffee)
+in the `plugins` section. For all configuration options see [homeduino-config-schema](homeduino-config-schema.coffee)
 
 The pin numbers are arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
 The `transmitterPin` can must bq a digitial pin between `2` (D2) and `13` (D13) .
 
 ![nano-pins](pins-nano.png)
+
+
+### B. Raspberry Pi with ATTiny45 / 85 Prefilter
+
+You can load the plugin by editing your `config.json` to include:
+
+```json
+{
+  "plugin": "homeduino",
+  "driver": "gpio",
+  "driverOptions": {},
+  "receiverPin": 0,
+  "transmitterPin": 4
+}
+```
+
+in the `plugins` section. For all configuration options see [homeduino-config-schema](homeduino-config-schema.coffee)
+
+The pin numbers are [wiringPi pin numbers](http://wiringpi.com/pins/).
+
+Devices
+------
 
 Devices must be added manually to the device section of your pimatic config. 
 
