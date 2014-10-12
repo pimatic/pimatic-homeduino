@@ -112,7 +112,7 @@ For protocol options see:
   "attributes": [
     {
       "name": "temperature",
-      "type": 10,
+      "type": 3,
       "decimals": 2,
       "baseValue": 0,
       "unit": "°C",
