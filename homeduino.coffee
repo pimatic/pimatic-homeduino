@@ -343,6 +343,7 @@ module.exports = (env) ->
       value = event.values.value / decimalsDivider
       value = -value if event.values.positive is false
       value += baseValue
+      realValue = value
       @emit name, realValue
       @_lastReceiveTimes[name] = now
 
