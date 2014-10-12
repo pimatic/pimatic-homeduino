@@ -343,7 +343,7 @@ module.exports = (env) ->
       value = event.values.value / decimalsDivider
       value = -value if event.values.positive is false
       value += baseValue
-      @emit name, realValue
+      @emit name, value
       @_lastReceiveTimes[name] = now
 
   hdPlugin = new HomeduinoPlugin()
