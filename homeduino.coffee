@@ -65,8 +65,8 @@ module.exports = (env) ->
         do (Cl) =>
           @framework.deviceManager.registerDeviceClass(Cl.name, {
             configDef: deviceConfigDef[Cl.name]
-            createCallback: (deviceConfig) => 
-              device = new Cl(deviceConfig, @board, @config)
+            createCallback: (deviceConfig, lastState) => 
+              device = new Cl(deviceConfig, lastState, @board, @config)
               return device
           })
 
@@ -84,7 +84,7 @@ module.exports = (env) ->
         unit: '%'
 
 
-    constructor: (@config, @board) ->
+    constructor: (@config, lastState, @board) ->
       @id = config.id
       @name = config.name
       super()
@@ -133,9 +133,10 @@ module.exports = (env) ->
 
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
-    constructor: (@config, @board, @_pluginConfig) ->
+    constructor: (@config, lastState, @board, @_pluginConfig) ->
       @id = config.id
       @name = config.name
+      @_state = lastState?.state?.value
 
       @_protocol = Board.getRfProtocol(@config.protocol)
       unless @_protocol?
@@ -173,9 +174,10 @@ module.exports = (env) ->
 
   class HomeduinoRFPir extends env.devices.PresenceSensor
 
-    constructor: (@config, @board, @_pluginConfig) ->
+    constructor: (@config, lastState, @board, @_pluginConfig) ->
       @id = config.id
       @name = config.name
+      @_presence = lastState?.presence?.value
 
       @_protocol = Board.getRfProtocol(@config.protocol)
       unless @_protocol?
@@ -183,7 +185,6 @@ module.exports = (env) ->
       unless @_protocol.type is "pir"
         throw new Error("\"#{@config.protocol}\" is not a pir protocol.")
 
-      @_presence = no
       resetPresence = ( =>
         @_setPresence(no)
       )
@@ -209,9 +210,11 @@ module.exports = (env) ->
 
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
 
-    constructor: (@config, @board) ->
+    constructor: (@config, lastState, @board) ->
       @id = config.id
       @name = config.name
+      @_temperatue = lastState?.temperature?.value
+      @_humidity = lastState?.humidity?.value
 
       @_protocol = Board.getRfProtocol(@config.protocol)
       unless @_protocol?
@@ -267,7 +270,7 @@ module.exports = (env) ->
 
   class HomeduinoRFGenericSensor extends env.devices.Sensor
 
-    constructor: (@config, @board) ->
+    constructor: (@config, lastState, @board) ->
       @id = config.id
       @name = config.name
 
