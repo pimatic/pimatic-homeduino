@@ -75,7 +75,7 @@ module.exports = {
               default: 0
             baseValue:
               description: "Offset that will be added to the value in the rf message"
-              type: "integer"
+              type: "number"
               default: 0
             unit:
               description: "The unit of the attribute"
