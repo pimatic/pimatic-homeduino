@@ -45,10 +45,12 @@ module.exports = (env) ->
             env.logger.debug("Receiving on pin #{@config.receiverPin}")
           ).catch( (err) =>
             env.logger.error("Couldn't start receiving: #{err.message}.")
+            env.logger.debug(err.stack)
           )
         return
       ).catch( (err) =>
         env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
+        env.logger.error(err)
       )
 
       deviceConfigDef = require("./device-config-schema")
