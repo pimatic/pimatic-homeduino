@@ -130,6 +130,40 @@ For protocol options see:
 }
 ```
 
+### Contact sensor example:
+
+```json
+{
+      "id": "homeduino-contact",
+      "name": "Contact",
+      "class": "HomeduinoRFContactSensor",
+      "protocol": "contact1",
+      "protocolOptions": {
+        "unit": 0,
+        "id": 42
+      }
+}
+```
+
+
+### Shutter sensor example:
+
+*Can use switch protocols.*
+
+```json
+{
+      "id": "homeduino-contact",
+      "name": "Shutter Controller",
+      "class": "HomeduinoRFShutter",
+      "protocol": "switch1",
+      "protocolOptions": {
+        "unit": 0,
+        "id": 42
+      }
+}
+```
+
+
 ### Generic RF Sensor with arduino sender
 
 ```json

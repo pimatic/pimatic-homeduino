@@ -31,6 +31,32 @@ module.exports = {
         type: "object"
     required: ["protocol", "protocolOptions"]
   }
+  HomeduinoRFContactSensor: {
+    title: "HomeduinoRFContactSensor config options"
+    type: "object"
+    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
+    properties:
+      protocol:
+        description: "The contact protocol to use."
+        type: "string"
+      protocolOptions:
+        description: "The protocol options"
+        type: "object"
+    required: ["protocol", "protocolOptions"]
+  }
+  HomeduinoRFShutter: {
+    title: "HomeduinoRFSwitch config options"
+    type: "object"
+    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
+    properties:
+      protocol:
+        description: "The switch protocol to use."
+        type: "string"
+      protocolOptions:
+        description: "The protocol options"
+        type: "object"
+    required: ["protocol", "protocolOptions"]
+  }
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"
     type: "object"

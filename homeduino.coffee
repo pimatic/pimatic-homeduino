@@ -60,6 +60,8 @@ module.exports = (env) ->
         HomeduinoRFSwitch
         HomeduinoRFTemperature
         HomeduinoRFPir
+        HomeduinoRFContactSensor
+        HomeduinoRFShutter
         HomeduinoRFGenericSensor
       ]
 
@@ -133,6 +135,18 @@ module.exports = (env) ->
     getTemperature: -> @_readSensor().then( (result) -> result.temperature )
     getHumidity: -> @_readSensor().then( (result) -> result.humidity )
 
+
+  doesProtocolMatch = (event, protocol, protocolOptions) ->
+    match = no
+    if event.protocol is protocol
+      match = yes
+      for optName, optValue of protocolOptions
+        #console.log "check", optName, optValue, event.values[optName]
+        if event.values[optName] isnt optValue
+          match = no
+    return match
+
+
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -147,13 +161,7 @@ module.exports = (env) ->
         throw new Error("\"#{@config.protocol}\" is not a switch protocol.")
 
       @board.on('rf', (event) =>
-        match = no
-        if event.protocol is @config.protocol
-          match = yes
-          for optName, optValue of @config.protocolOptions
-            #console.log "check", optName, optValue, event.values[optName]
-            if event.values[optName] isnt optValue
-              match = no
+        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
         @_setState(event.values.state) if match
       )
       super()
@@ -174,12 +182,85 @@ module.exports = (env) ->
         )
       )
 
+  class HomeduinoRFContactSensor extends env.devices.ContactSensor
+
+    constructor: (@config, lastState, @board, @_pluginConfig) ->
+      @id = config.id
+      @name = config.name
+      @_contact = lastState?.contact?.value or false
+
+      @_protocol = Board.getRfProtocol(@config.protocol)
+      unless @_protocol?
+        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+
+      @board.on('rf', (event) =>
+        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
+        @_setContact(event.values.state) if match
+      )
+      super()
+
+  class HomeduinoRFShutter extends env.devices.ShutterController
+
+    constructor: (@config, lastState, @board, @_pluginConfig) ->
+      @id = config.id
+      @name = config.name
+      @_position = lastState?.position?.value or 'stopped'
+
+      @_protocol = Board.getRfProtocol(@config.protocol)
+      unless @_protocol?
+        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+
+      @board.on('rf', (event) =>
+        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
+        unless match
+          return
+        now = new Date().getTime()
+        # ignore own send messages
+        if (now - @_lastSendTime) < 3000
+          return
+        if @_position is 'stopped'
+          @_setPosition(if event.values.state then 'up' else 'down')
+        else
+          @_setPosition('stopped')
+      )
+      super()
+
+    stop: ->
+      if @_position is 'stopped' then return Promise.resolve()
+      @_sendState(@_position is 'up').then( =>
+        @_setPosition('stopped')
+      )
+      
+      return Promise.resolve()
+
+    # Retuns a promise that is fulfilled when done.
+    moveToPosition: (position) ->
+      if position is @_position then return Promise.resolve()
+      if position is 'stopped' then return @stop()
+      else return @_sendState(position is 'up').then( =>
+        @_lastSendTime = new Date().getTime()
+        @_setPosition(position)
+      )
+
+
+    _sendState: (state) ->
+      return Promise.try( =>
+        options = _.clone(@config.protocolOptions)
+        unless options.all? then options.all = no
+        options.state = state
+        return @board.rfControlSendMessage(
+          @_pluginConfig.transmitterPin, 
+          @config.protocol, 
+          options
+        )
+      )
+
   class HomeduinoRFPir extends env.devices.PresenceSensor
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
       @id = config.id
       @name = config.name
-      @_presence = lastState?.presence?.value
+      @_presence = lastState?.presence?.value or false
 
       @_protocol = Board.getRfProtocol(@config.protocol)
       unless @_protocol?
@@ -192,13 +273,7 @@ module.exports = (env) ->
       )
 
       @board.on('rf', (event) =>
-        match = no
-        if event.protocol is @config.protocol
-          match = yes
-          for optName, optValue of @config.protocolOptions
-            #console.log "check", optName, optValue, event.values[optName]
-            if event.values[optName] isnt optValue
-              match = no
+        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
         if match
           unless @_setPresence is event.values.presence
             @_setPresence(event.values.presence)
@@ -240,13 +315,7 @@ module.exports = (env) ->
         }
 
       @board.on('rf', (event) =>
-        match = no
-        if event.protocol is @config.protocol
-          match = yes
-          for optName, optValue of @config.protocolOptions
-            #console.log "check", optName, optValue, event.values[optName]
-            if event.values[optName] isnt optValue
-              match = no
+        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
         if match
           now = (new Date()).getTime()
           timeDelta = (
@@ -290,13 +359,7 @@ module.exports = (env) ->
 
       @_lastReceiveTimes = {}
       @board.on('rf', (event) =>
-        match = no
-        if event.protocol is @config.protocol
-          match = yes
-          for optName, optValue of @config.protocolOptions
-            #console.log "check", optName, optValue, event.values[optName]
-            if event.values[optName] isnt optValue
-              match = no
+        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
         if match
           for attributeConfig in @config.attributes
             @_updateAttribute(attributeConfig, event)
