@@ -142,8 +142,9 @@ module.exports = (env) ->
       match = yes
       for optName, optValue of protocolOptions
         #console.log "check", optName, optValue, event.values[optName]
-        if event.values[optName] isnt optValue
-          match = no
+        unless optName is "unit" and event.values.all is true
+          if event.values[optName] isnt optValue
+            match = no
     return match
 
 
