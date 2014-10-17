@@ -196,7 +196,7 @@ module.exports = (env) ->
 
       @board.on('rf', (event) =>
         match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        @_setContact(event.values.state) if match
+        @_setContact(not event.values.state) if match
       )
       super()
 
