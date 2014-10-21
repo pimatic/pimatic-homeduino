@@ -58,6 +58,7 @@ module.exports = (env) ->
       deviceClasses = [
         HomeduinoDHTSensor
         HomeduinoRFSwitch
+        HomeduinoRFButtonsDevice
         HomeduinoRFTemperature
         HomeduinoRFPir
         HomeduinoRFContactSensor
@@ -182,6 +183,37 @@ module.exports = (env) ->
           return
         )
       )
+      
+    class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
+
+    constructor: (@config, @board, @_pluginConfig) ->
+      @id = config.id
+      @name = config.name
+
+      #for b in @config.buttons
+      #  @_protocol = Board.getRfProtocol(@b.protocol)
+      #  unless @_protocol?
+      #    throw new Error("Could not find a protocol with the name \"#{@b.protocol}\" in config of button \"#{@b.id}\".")
+      #  unless @_protocol.type is "switch"
+      #    throw new Error("\"#{@b.protocol}\" in config of button \"#{@b.id}\" is not a switch protocol.")
+      super()
+
+    buttonPressed: (buttonId) ->
+      for b in @config.buttons
+        if b.id is buttonId
+          @_lastPressedButton = b.id
+          return Promise.try( =>
+            options = _.clone(@b.protocolOptions)
+            unless options.all? then options.all = no
+            return @board.rfControlSendMessage(
+              @_pluginConfig.transmitterPin, 
+              @b.protocol, 
+              options
+            )
+          )
+          return
+      throw new Error("No button with the id #{buttonId} found")
+      
 
   class HomeduinoRFContactSensor extends env.devices.ContactSensor
 
