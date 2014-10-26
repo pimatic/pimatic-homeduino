@@ -31,6 +31,31 @@ module.exports = {
         type: "object"
     required: ["protocol", "protocolOptions"]
   }
+    HomeduinoRFButtonsDevice: {
+    title: "HomeduinoRFButtonsDevice config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      buttons:
+        description: "Buttons to display"
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+            text:
+              type: "string"
+            protocol:
+              description: "The switch protocol to use."
+              type: "string"
+            protocolOptions:
+              description: "The protocol options"
+              type: "object"
+            required: ["protocol", "protocolOptions"]
+  }
   HomeduinoRFContactSensor: {
     title: "HomeduinoRFContactSensor config options"
     type: "object"
