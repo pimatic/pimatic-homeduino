@@ -50,7 +50,7 @@ module.exports = (env) ->
         return
       ).catch( (err) =>
         env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
-        env.logger.error(err)
+        env.logger.error(err.stack)
       )
 
       deviceConfigDef = require("./device-config-schema")
