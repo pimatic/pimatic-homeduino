@@ -118,15 +118,15 @@ For protocol options see:
 
 ```json
 {
-      "id": "homeduino-pir",
-      "name": "PIR",
-      "class": "HomeduinoRFPir",
-      "protocol": "pir1",
-      "protocolOptions": {
-        "unit": 0,
-        "id": 17
-      },
-      "resetTime": 6000
+  "id": "homeduino-pir",
+  "name": "PIR",
+  "class": "HomeduinoRFPir",
+  "protocol": "pir1",
+  "protocolOptions": {
+    "unit": 0,
+    "id": 17
+  },
+  "resetTime": 6000
 }
 ```
 
@@ -134,14 +134,14 @@ For protocol options see:
 
 ```json
 {
-      "id": "homeduino-contact",
-      "name": "Contact",
-      "class": "HomeduinoRFContactSensor",
-      "protocol": "contact1",
-      "protocolOptions": {
-        "unit": 0,
-        "id": 42
-      }
+  "id": "homeduino-contact",
+  "name": "Contact",
+  "class": "HomeduinoRFContactSensor",
+  "protocol": "contact1",
+  "protocolOptions": {
+    "unit": 0,
+    "id": 42
+  }
 }
 ```
 
@@ -152,14 +152,14 @@ For protocol options see:
 
 ```json
 {
-      "id": "homeduino-contact",
-      "name": "Shutter Controller",
-      "class": "HomeduinoRFShutter",
-      "protocol": "switch1",
-      "protocolOptions": {
-        "unit": 0,
-        "id": 42
-      }
+  "id": "homeduino-contact",
+  "name": "Shutter Controller",
+  "class": "HomeduinoRFShutter",
+  "protocol": "switch1",
+  "protocolOptions": {
+    "unit": 0,
+    "id": 42
+  }
 }
 ```
 
@@ -183,6 +183,28 @@ For protocol options see:
       "baseValue": 0,
       "unit": "°C",
       "label": "Temperature"
+    }
+  ]
+}
+```
+
+### Buttons Device example:
+
+```json
+{
+  "id": "homeduino-buttons",
+  "name": "Buttons",
+  "class": "HomeduinoRFButtonsDevice",
+  "buttons": [
+    {
+      "id": "test-button",
+      "text": "test",
+      "protocol": "switch1",
+      "protocolOptions": {
+        "unit": 0,
+        "id": 42,
+        "state": true
+      }
     }
   ]
 }

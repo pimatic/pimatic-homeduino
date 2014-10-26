@@ -31,7 +31,7 @@ module.exports = {
         type: "object"
     required: ["protocol", "protocolOptions"]
   }
-    HomeduinoRFButtonsDevice: {
+  HomeduinoRFButtonsDevice: {
     title: "HomeduinoRFButtonsDevice config options"
     type: "object"
     extensions: ["xLink"]

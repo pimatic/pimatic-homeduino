@@ -186,16 +186,21 @@ module.exports = (env) ->
       
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
-    constructor: (@config, @board, @_pluginConfig) ->
+    constructor: (@config, lastState, @board, @_pluginConfig) ->
       @id = config.id
       @name = config.name
 
       for b in config.buttons
         _protocol = Board.getRfProtocol(b.protocol)
         unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{b.protocol}\" in config of button \"#{b.id}\".")
+          throw new Error(
+            "Could not find a protocol with the name \"#{b.protocol}\" in config" +
+            " of button \"#{b.id}\"."
+          )
         unless _protocol.type is "switch"
-          throw new Error("\"#{b.protocol}\" in config of button \"#{b.id}\" is not a switch protocol.")
+          throw new Error(
+            "\"#{b.protocol}\" in config of button \"#{b.id}\" is not a switch protocol."
+          )
       super(config)
 
     buttonPressed: (buttonId) ->
