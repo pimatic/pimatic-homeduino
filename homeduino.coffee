@@ -155,34 +155,38 @@ module.exports = (env) ->
       @id = config.id
       @name = config.name
       @_state = lastState?.state?.value
-
-      @_protocol = Board.getRfProtocol(@config.protocol)
-      unless @_protocol?
-        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
-      unless @_protocol.type is "switch"
-        throw new Error("\"#{@config.protocol}\" is not a switch protocol.")
+      
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.protocol)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.protocol}\".")
+        unless _protocol.type is "switch"
+          throw new Error("\"#{p.protocol}\" is not a switch protocol.")
 
       @board.on('rf', (event) =>
-        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        @_setState(event.values.state) if match
-      )
+        for p in @config.protocols
+          if p.receive
+            match = doesProtocolMatch(event, p.protocol, p.protocolOptions)
+            @_setState(event.values.state) if match
+        )
       super()
 
     changeStateTo: (state) ->
       if @_state is state then return Promise.resolve true
       else return Promise.try( =>
-        options = _.clone(@config.protocolOptions)
-        unless options.all? then options.all = no
-        options.state = state
-        return @board.rfControlSendMessage(
-          @_pluginConfig.transmitterPin, 
-          @config.protocol, 
-          options
-        ).then( =>
-          @_setState(state)
-          return
-        )
-      )
+        for p in @config.protocols
+          if p.send
+            options = _.clone(p.protocolOptions)
+            unless options.all? then options.all = no
+            options.state = state
+            @board.rfControlSendMessage(
+              @_pluginConfig.transmitterPin, 
+              p.protocol, 
+              options
+            ).then( =>
+              @_setState(state)
+            )
+          )
       
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
