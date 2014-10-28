@@ -23,6 +23,19 @@ module.exports = {
     type: "object"
     extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
+      protocol:
+        description: "The switch protocol to use."
+        type: "string"
+      protocolOptions:
+        description: "The protocol options"
+        type: "object"
+    required: ["protocol", "protocolOptions"]
+  },
+  HomeduinoRFSwitchMP: {
+    title: "HomeduinoRFSwitchMP config options"
+    type: "object"
+    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
+    properties:
       protocols:
         description: "The switch protocols to use."
         type: "array"
