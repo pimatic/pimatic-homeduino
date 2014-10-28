@@ -19,7 +19,7 @@ module.exports = {
     required: ["pin"]
   },
   HomeduinoRFSwitch: {
-    title: "HomeduinoRFSwitchMP config options"
+    title: "HomeduinoRFSwitch config options"
     type: "object"
     extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
