@@ -44,9 +44,9 @@ module.exports = {
         items:
           type: "object"
           properties:
-          	protocol:
-          	  type: "string"
-          	protocolOptions:
+            protocol:
+              type: "string"
+            protocolOptions:
               description: "The protocol options"
               type: "object"
             send:
@@ -57,7 +57,7 @@ module.exports = {
               type: "boolean"
               description: "Toggle receive with this protocol"
               default: true
-    		#required: ["protocol", "protocolOptions"]
+            #required: ["protocol", "protocolOptions"]
     required: ["protocols"]
   }
   HomeduinoRFButtonsDevice: {
