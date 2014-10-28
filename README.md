@@ -102,6 +102,36 @@ For protocol options see:
 }
 ```
 
+### Multi protocol switch example:
+
+```json
+    {
+      "id": "extswitch",
+      "name": "extSwitch",
+      "class": "HomeduinoRFSwitchMP",
+      "protocols": [
+        {
+          "protocol": "switch1",
+          "protocolOptions": {
+            "id": 9509718,
+            "unit": 0
+          },
+          "send": true,
+          "receive": true
+        },
+        {
+          "protocol": "switch1",
+          "protocolOptions": {
+            "id": 9509718,
+            "unit": 1
+          },
+          "send": false,
+          "receive": true
+        }
+      ]
+    }
+```
+
 ### DHT11/22 sensor example:
 
 ```json
