@@ -106,8 +106,8 @@ For protocol options see:
 
 ```json
     {
-      "id": "extswitch",
-      "name": "extSwitch",
+      "id": "switchmp",
+      "name": "Multi Switch",
       "class": "HomeduinoRFSwitchMP",
       "protocols": [
         {
