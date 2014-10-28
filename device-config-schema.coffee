@@ -19,23 +19,18 @@ module.exports = {
     required: ["pin"]
   },
   HomeduinoRFSwitch: {
-    title: "HomeduinoRFSwitch config options"
+    title: "HomeduinoRFSwitchMP config options"
     type: "object"
     extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
       protocol:
         description: "The switch protocol to use."
         type: "string"
+        default: ""
       protocolOptions:
         description: "The protocol options"
         type: "object"
-    required: ["protocol", "protocolOptions"]
-  },
-  HomeduinoRFSwitchMP: {
-    title: "HomeduinoRFSwitchMP config options"
-    type: "object"
-    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
-    properties:
+        default: {}
       protocols:
         description: "The switch protocols to use."
         type: "array"
@@ -58,8 +53,8 @@ module.exports = {
               description: "Toggle receive with this protocol"
               default: true
             #required: ["protocol", "protocolOptions"]
-    required: ["protocols"]
-  }
+    #required: ["protocols"]
+  },
   HomeduinoRFButtonsDevice: {
     title: "HomeduinoRFButtonsDevice config options"
     type: "object"
