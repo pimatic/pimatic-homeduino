@@ -178,7 +178,7 @@ is used for sending or receiving. Default is `true` for both.
   "name": "Contact",
   "class": "HomeduinoRFContactSensor",
   "protocols": [{
-    "name": contact1",
+    "name": "contact1",
     "options": {
       "unit": 0,
       "id": 42
