@@ -148,7 +148,6 @@ module.exports = (env) ->
             match = no
     return match
 
-
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -156,33 +155,57 @@ module.exports = (env) ->
       @name = config.name
       @_state = lastState?.state?.value
 
-      @_protocol = Board.getRfProtocol(@config.protocol)
-      unless @_protocol?
-        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
-      unless @_protocol.type is "switch"
-        throw new Error("\"#{@config.protocol}\" is not a switch protocol.")
+      env.logger.debug("Loading HomeduinoRFSwitch")
+
+      unless config.protocol is ""
+        env.logger.debug("Old config found in \"#{@id}\". Convert in to new config.")
+        prot = 
+          protocolOptions: _.clone(config.protocolOptions)
+          protocol: config.protocol
+          send: true
+          receive: true 
+        config.protocols.push prot
+      
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.protocol)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.protocol}\".")
+        unless _protocol.type is "switch"
+          throw new Error("\"#{p.protocol}\" is not a switch protocol.")
+        if (p.send is false and p.receive is false)
+          throw new Error("It is useless to define a protocol, which do nothing. send = false and receive = false.")
+                          #Pls check language. is it possible to throw a Info or Warn? So this isnt a Error
+        env.logger.debug("protocol: \"#{p.protocol}\"")
+        env.logger.debug("id: \"#{p.protocolOptions.id}\"")
+        env.logger.debug("unit: \"#{p.protocolOptions.unit}\"")
+        env.logger.debug("send: \"#{p.send}\"")
+        env.logger.debug("receive: \"#{p.receive}\"")
+        env.logger.debug("")
 
       @board.on('rf', (event) =>
-        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        @_setState(event.values.state) if match
-      )
+        for p in @config.protocols
+          if p.receive
+            match = doesProtocolMatch(event, p.protocol, p.protocolOptions)
+            @_setState(event.values.state) if match
+        )
       super()
 
     changeStateTo: (state) ->
       if @_state is state then return Promise.resolve true
       else return Promise.try( =>
-        options = _.clone(@config.protocolOptions)
-        unless options.all? then options.all = no
-        options.state = state
-        return @board.rfControlSendMessage(
-          @_pluginConfig.transmitterPin, 
-          @config.protocol, 
-          options
-        ).then( =>
-          @_setState(state)
-          return
-        )
-      )
+        for p in @config.protocols
+          if p.send
+            options = _.clone(p.protocolOptions)
+            unless options.all? then options.all = no
+            options.state = state
+            @board.rfControlSendMessage(
+              @_pluginConfig.transmitterPin, 
+              p.protocol, 
+              options
+            ).then( =>
+              @_setState(state)
+            )
+          )
       
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 

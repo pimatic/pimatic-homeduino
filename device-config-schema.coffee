@@ -26,11 +26,35 @@ module.exports = {
       protocol:
         description: "The switch protocol to use."
         type: "string"
+        default: ""
       protocolOptions:
         description: "The protocol options"
         type: "object"
-    required: ["protocol", "protocolOptions"]
-  }
+        default: {}
+      protocols:
+        description: "The switch protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            protocol:
+              type: "string"
+            protocolOptions:
+              description: "The protocol options"
+              type: "object"
+            send:
+              type: "boolean"
+              description: "Toggle send with this protocol"
+              default: true
+            receive:
+              type: "boolean"
+              description: "Toggle receive with this protocol"
+              default: true
+            #required: ["protocol", "protocolOptions"]
+    #required: ["protocols"]
+  },
   HomeduinoRFButtonsDevice: {
     title: "HomeduinoRFButtonsDevice config options"
     type: "object"
