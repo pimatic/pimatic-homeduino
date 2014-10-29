@@ -69,6 +69,22 @@ module.exports = (env) ->
       for Cl in deviceClasses
         do (Cl) =>
           @framework.deviceManager.registerDeviceClass(Cl.name, {
+            prepareConfig: (config) =>
+              # legacy support for old configs (with just one protocol):
+              if config.protocol? and config.protocolOptions?
+                config.protocols = [
+                  { name: config.protocol, options: config.protocolOptions}
+                ]
+                delete config.protocol
+                delete config.protocolOptions
+              if config['class'] is "HomeduinoRFButtonsDevice"
+                for b in config.buttons
+                  if b.protocol? and b.protocolOptions
+                    b.protocols = [
+                      { name: b.protocol, options: b.protocolOptions}
+                    ]
+                    delete b.protocol
+                    delete b.protocolOptions
             configDef: deviceConfigDef[Cl.name]
             createCallback: (deviceConfig, lastState) => 
               device = new Cl(deviceConfig, lastState, @board, @config)
@@ -137,16 +153,30 @@ module.exports = (env) ->
     getHumidity: -> @_readSensor().then( (result) -> result.humidity )
 
 
-  doesProtocolMatch = (event, protocol, protocolOptions) ->
+  doesProtocolMatch = (event, protocol) ->
     match = no
-    if event.protocol is protocol
+    if event.protocol is protocol.name
       match = yes
-      for optName, optValue of protocolOptions
+      for optName, optValue of protocol.options
         #console.log "check", optName, optValue, event.values[optName]
         unless optName is "unit" and event.values.all is true
           if event.values[optName] isnt optValue
             match = no
     return match
+
+  sendToSwitchesMixin = (protocols, state = null) ->
+    pending = []
+    for p in protocols
+      unless p.send is false
+        options = _.clone(p.options)
+        unless options.all? then options.all = no
+        options.state = state if state?
+        pending.push @board.rfControlSendMessage(
+          @_pluginConfig.transmitterPin, 
+          p.name, 
+          options
+        )
+    return Promise.all(pending)
 
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
@@ -154,59 +184,31 @@ module.exports = (env) ->
       @id = config.id
       @name = config.name
       @_state = lastState?.state?.value
-
-      env.logger.debug("Loading HomeduinoRFSwitch")
-
-      unless config.protocol is ""
-        env.logger.debug("Old config found in \"#{@id}\". Convert in to new config.")
-        prot = 
-          protocolOptions: _.clone(config.protocolOptions)
-          protocol: config.protocol
-          send: true
-          receive: true 
-        config.protocols.push prot
       
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.protocol)
+        _protocol = Board.getRfProtocol(p.name)
         unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.protocol}\".")
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
         unless _protocol.type is "switch"
-          throw new Error("\"#{p.protocol}\" is not a switch protocol.")
-        if (p.send is false and p.receive is false)
-          throw new Error("It is useless to define a protocol, which do nothing. send = false and receive = false.")
-                          #Pls check language. is it possible to throw a Info or Warn? So this isnt a Error
-        env.logger.debug("protocol: \"#{p.protocol}\"")
-        env.logger.debug("id: \"#{p.protocolOptions.id}\"")
-        env.logger.debug("unit: \"#{p.protocolOptions.unit}\"")
-        env.logger.debug("send: \"#{p.send}\"")
-        env.logger.debug("receive: \"#{p.receive}\"")
-        env.logger.debug("")
+          throw new Error("\"#{p.name}\" is not a switch protocol.")
 
       @board.on('rf', (event) =>
         for p in @config.protocols
-          if p.receive
-            match = doesProtocolMatch(event, p.protocol, p.protocolOptions)
+          unless p.receive is false
+            match = doesProtocolMatch(event, p)
             @_setState(event.values.state) if match
         )
       super()
 
+    _sendStateToSwitches: sendToSwitchesMixin
+
     changeStateTo: (state) ->
       if @_state is state then return Promise.resolve true
-      else return Promise.try( =>
-        for p in @config.protocols
-          if p.send
-            options = _.clone(p.protocolOptions)
-            unless options.all? then options.all = no
-            options.state = state
-            @board.rfControlSendMessage(
-              @_pluginConfig.transmitterPin, 
-              p.protocol, 
-              options
-            ).then( =>
-              @_setState(state)
-            )
-          )
-      
+      else 
+        @_sendStateToSwitches(@config.protocols, state).then( =>
+          @_setState(state)
+        )
+  
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -214,33 +216,25 @@ module.exports = (env) ->
       @name = config.name
 
       for b in config.buttons
-        _protocol = Board.getRfProtocol(b.protocol)
-        unless _protocol?
-          throw new Error(
-            "Could not find a protocol with the name \"#{b.protocol}\" in config" +
-            " of button \"#{b.id}\"."
-          )
-        unless _protocol.type is "switch"
-          throw new Error(
-            "\"#{b.protocol}\" in config of button \"#{b.id}\" is not a switch protocol."
-          )
+        for p in b.protocols
+          _protocol = Board.getRfProtocol(p.name)
+          unless _protocol?
+            throw new Error(
+              "Could not find a protocol with the name \"#{p.name}\" in config" +
+              " of button \"#{b.id}\"."
+            )
+          unless _protocol.type is "switch"
+            throw new Error(
+              "\"#{p.name}\" in config of button \"#{b.id}\" is not a switch protocol."
+            )
       super(config)
+
+    _sendStateToSwitches: sendToSwitchesMixin
 
     buttonPressed: (buttonId) ->
       for b in @config.buttons
         if b.id is buttonId
-          @_lastPressedButton = b.id
-          return Promise.try( =>
-            options = _.clone(b.protocolOptions)
-            options.state = true
-            unless options.all? then options.all = no
-            return @board.rfControlSendMessage(
-              @_pluginConfig.transmitterPin, 
-              b.protocol, 
-              options
-            )
-          )
-          return
+          return @_sendStateToSwitches(b.protocols)
       throw new Error("No button with the id #{buttonId} found")
       
 
@@ -251,13 +245,15 @@ module.exports = (env) ->
       @name = config.name
       @_contact = lastState?.contact?.value or false
 
-      @_protocol = Board.getRfProtocol(@config.protocol)
-      unless @_protocol?
-        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
 
       @board.on('rf', (event) =>
-        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        @_setContact(not event.values.state) if match
+        for p in @config.protocols
+          match = doesProtocolMatch(event, p)
+          @_setContact(not event.values.state) if match
       )
       super()
 
@@ -268,28 +264,32 @@ module.exports = (env) ->
       @name = config.name
       @_position = lastState?.position?.value or 'stopped'
 
-      @_protocol = Board.getRfProtocol(@config.protocol)
-      unless @_protocol?
-        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
 
       @board.on('rf', (event) =>
-        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        unless match
-          return
-        now = new Date().getTime()
-        # ignore own send messages
-        if (now - @_lastSendTime) < 3000
-          return
-        if @_position is 'stopped'
-          @_setPosition(if event.values.state then 'up' else 'down')
-        else
-          @_setPosition('stopped')
+        for p in @config.protocols
+          match = doesProtocolMatch(event, p)
+          unless match
+            return
+          now = new Date().getTime()
+          # ignore own send messages
+          if (now - @_lastSendTime) < 3000
+            return
+          if @_position is 'stopped'
+            @_setPosition(if event.values.state then 'up' else 'down')
+          else
+            @_setPosition('stopped')
       )
       super()
 
+    _sendStateToSwitches: sendToSwitchesMixin
+
     stop: ->
       if @_position is 'stopped' then return Promise.resolve()
-      @_sendState(@_position is 'up').then( =>
+      @_sendStateToSwitches(@config.protocols, @_position is 'up').then( =>
         @_setPosition('stopped')
       )
       
@@ -299,23 +299,12 @@ module.exports = (env) ->
     moveToPosition: (position) ->
       if position is @_position then return Promise.resolve()
       if position is 'stopped' then return @stop()
-      else return @_sendState(position is 'up').then( =>
+      else return @_sendStateToSwitches(@config.protocols, position is 'up').then( =>
         @_lastSendTime = new Date().getTime()
         @_setPosition(position)
       )
 
 
-    _sendState: (state) ->
-      return Promise.try( =>
-        options = _.clone(@config.protocolOptions)
-        unless options.all? then options.all = no
-        options.state = state
-        return @board.rfControlSendMessage(
-          @_pluginConfig.transmitterPin, 
-          @config.protocol, 
-          options
-        )
-      )
 
   class HomeduinoRFPir extends env.devices.PresenceSensor
 
@@ -324,23 +313,25 @@ module.exports = (env) ->
       @name = config.name
       @_presence = lastState?.presence?.value or false
 
-      @_protocol = Board.getRfProtocol(@config.protocol)
-      unless @_protocol?
-        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
-      unless @_protocol.type is "pir"
-        throw new Error("\"#{@config.protocol}\" is not a pir protocol.")
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        unless _protocol.type is "pir"
+          throw new Error("\"#{p.name}\" is not a pir protocol.")
 
       resetPresence = ( =>
         @_setPresence(no)
       )
 
       @board.on('rf', (event) =>
-        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        if match
-          unless @_setPresence is event.values.presence
-            @_setPresence(event.values.presence)
-          clearTimeout(@_resetPresenceTimeout)
-          @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
+        for p in @config.protocols
+          match = doesProtocolMatch(event, p)
+          if match
+            unless @_setPresence is event.values.presence
+              @_setPresence(event.values.presence)
+            clearTimeout(@_resetPresenceTimeout)
+            @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
       )
       super()
 
@@ -355,21 +346,26 @@ module.exports = (env) ->
       @_temperatue = lastState?.temperature?.value
       @_humidity = lastState?.humidity?.value
 
-      @_protocol = Board.getRfProtocol(@config.protocol)
-      unless @_protocol?
-        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
-      unless @_protocol.type is "weather"
-        throw new Error("\"#{@config.protocol}\" is not a weather protocol.")
+      hasTemperature = false
+      hasHumidity = false
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        unless _protocol.type is "weather"
+          throw new Error("\"#{p.name}\" is not a weather protocol.")
+        hasTemperature = true if _protocol.values.temperature?
+        hasHumidity = true if _protocol.values.humidity?
 
       @attributes = {}
 
-      if @_protocol.values.temperature?
+      if hasTemperature
         @attributes.temperature = {
           description: "the messured temperature"
           type: "number"
           unit: '°C'
         }
-      if @_protocol.values.humidity?
+      if hasHumidity
         @attributes.humidity = {
           description: "the messured humidity"
           type: "number"
@@ -377,24 +373,25 @@ module.exports = (env) ->
         }
 
       @board.on('rf', (event) =>
-        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        if match
-          now = (new Date()).getTime()
-          timeDelta = (
-            if @_lastReceiveTime? then (now - @_lastReceiveTime)
-            else 9999999
-          )
-          if timeDelta < 2000
-            return 
-          if @_protocol.values.temperature?
-            @_temperatue = event.values.temperature
-            # discard value if it is the same and was received just under two second ago
-            @emit "temperature", @_temperatue
-          if @_protocol.values.humidity?
-            @_humidity = event.values.humidity
-            # discard value if it is the same and was received just under two second ago
-            @emit "humidity", @_humidity
-          @_lastReceiveTime = now
+        for p in @config.protocols
+          match = doesProtocolMatch(event, p)
+          if match
+            now = (new Date()).getTime()
+            timeDelta = (
+              if @_lastReceiveTime? then (now - @_lastReceiveTime)
+              else 9999999
+            )
+            if timeDelta < 2000
+              return 
+            if event.values.temperature?
+              @_temperatue = event.values.temperature
+              # discard value if it is the same and was received just under two second ago
+              @emit "temperature", @_temperatue
+            if event.values.humidity?
+              @_humidity = event.values.humidity
+              # discard value if it is the same and was received just under two second ago
+              @emit "humidity", @_humidity
+            @_lastReceiveTime = now
       )
       super()
 
@@ -407,11 +404,12 @@ module.exports = (env) ->
       @id = config.id
       @name = config.name
 
-      @_protocol = Board.getRfProtocol(@config.protocol)
-      unless @_protocol?
-        throw new Error("Could not find a protocol with the name \"#{@config.protocol}\".")
-      unless @_protocol.type is "generic"
-        throw new Error("\"#{@config.protocol}\" is not a generic protocol.")
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        unless _protocol.type is "generic"
+          throw new Error("\"#{p.name}\" is not a generic protocol.")
 
       @attributes = {}
       for attributeConfig in @config.attributes
@@ -421,10 +419,11 @@ module.exports = (env) ->
 
       @_lastReceiveTimes = {}
       @board.on('rf', (event) =>
-        match = doesProtocolMatch(event, @config.protocol, @config.protocolOptions)
-        if match
-          for attributeConfig in @config.attributes
-            @_updateAttribute(attributeConfig, event)
+        for p in @config.protocols
+          match = doesProtocolMatch(event, p)
+          if match
+            for attributeConfig in @config.attributes
+              @_updateAttribute(attributeConfig, event)
       )
       super()
 

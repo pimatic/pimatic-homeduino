@@ -77,11 +77,13 @@ A list with all supported protocols and protocol-options can be found [here](htt
   "id": "rftemperature",
   "name": "Temperature",
   "class": "HomeduinoRFTemperature",
-  "protocol": "weather2",
-  "protocolOptions": {
-    "id": 42,
-    "channel": 1
-  }
+  "protocols": [{
+    "name": "weather2",
+    "options": {
+      "id": 42,
+      "channel": 1
+    }
+  }]
 }
 ```
 
@@ -94,13 +96,19 @@ For protocol options see:
   "id": "rfswitch",
   "name": "RFSwitch",
   "class": "HomeduinoRFSwitch",
-  "protocol": "switch1",
-  "protocolOptions": {
-    "id": 42,
-    "unit": 0
-  }
+  "protocols": [{
+    "name": "switch1",
+    "options": {
+      "id": 42,
+      "unit": 0
+    }
+  }]
 }
 ```
+
+A switch (and other devcies) can be controled or send to outlets with multiple protocols. Just
+add more protocols to the `protocols` array. You can also set if a protocols
+is used for sending or receiving. Default is `true` for both.
 
 ### Multi protocol switch example:
 
@@ -108,11 +116,11 @@ For protocol options see:
     {
       "id": "switchmp",
       "name": "Multi Switch",
-      "class": "HomeduinoRFSwitchMP",
+      "class": "HomeduinoRFSwitch",
       "protocols": [
         {
-          "protocol": "switch1",
-          "protocolOptions": {
+          "name": "switch1",
+          "options": {
             "id": 9509718,
             "unit": 0
           },
@@ -120,8 +128,8 @@ For protocol options see:
           "receive": true
         },
         {
-          "protocol": "switch1",
-          "protocolOptions": {
+          "name": "switch1",
+          "options": {
             "id": 9509718,
             "unit": 1
           },
@@ -151,11 +159,13 @@ For protocol options see:
   "id": "homeduino-pir",
   "name": "PIR",
   "class": "HomeduinoRFPir",
-  "protocol": "pir1",
-  "protocolOptions": {
-    "unit": 0,
-    "id": 17
-  },
+  "protocols": [{
+    "name": "pir1",
+    "options": {
+      "unit": 0,
+      "id": 17
+    }
+  }],
   "resetTime": 6000
 }
 ```
@@ -167,11 +177,13 @@ For protocol options see:
   "id": "homeduino-contact",
   "name": "Contact",
   "class": "HomeduinoRFContactSensor",
-  "protocol": "contact1",
-  "protocolOptions": {
-    "unit": 0,
-    "id": 42
-  }
+  "protocols": [{
+    "name": contact1",
+    "options": {
+      "unit": 0,
+      "id": 42
+    }
+  }]
 }
 ```
 
@@ -185,11 +197,13 @@ For protocol options see:
   "id": "homeduino-contact",
   "name": "Shutter Controller",
   "class": "HomeduinoRFShutter",
-  "protocol": "switch1",
-  "protocolOptions": {
-    "unit": 0,
-    "id": 42
-  }
+  "protocols": [{
+    "name": "switch1",
+    "options": {
+      "unit": 0,
+      "id": 42
+    }
+  }]
 }
 ```
 
@@ -201,10 +215,12 @@ For protocol options see:
   "id": "homeduino-generic-sensor",
   "name": "RFGenericSensor",
   "class": "HomeduinoRFGenericSensor",
-  "protocol": "generic",
-  "protocolOptions": {
-    "id": 42
-  },
+  "protocols": [{
+    "name": "generic",
+    "options": {
+      "id": 42
+    }
+  }],
   "attributes": [
     {
       "name": "temperature",
@@ -229,19 +245,16 @@ For protocol options see:
     {
       "id": "test-button",
       "text": "test",
-      "protocol": "switch1",
-      "protocolOptions": {
-        "unit": 0,
-        "id": 42,
-        "state": true
-      }
+      "protocols": [{
+        "name": "switch1",
+        "options": {
+          "unit": 0,
+          "id": 42,
+          "state": true
+        }
+      }]
     }
   ]
 }
 ```
 
-
-TODO
-----
-
-*  Protocol documentation (options, ...)

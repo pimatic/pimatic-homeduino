@@ -39,9 +39,9 @@ module.exports = {
         items:
           type: "object"
           properties:
-            protocol:
+            name:
               type: "string"
-            protocolOptions:
+            options:
               description: "The protocol options"
               type: "object"
             send:
@@ -72,65 +72,99 @@ module.exports = {
               type: "string"
             text:
               type: "string"
-            protocol:
-              description: "The switch protocol to use."
-              type: "string"
-            protocolOptions:
-              description: "The protocol options"
-              type: "object"
-            required: ["protocol", "protocolOptions"]
+            protocols:
+              description: "The protocols to use."
+              type: "array"
+              default: []
+              format: "table"
+              items:
+                type: "object"
+                properties:
+                  name:
+                    type: "string"
+                  options:
+                    description: "The protocol options"
+                    type: "object"
+            required: ["protocols"]
   }
   HomeduinoRFContactSensor: {
     title: "HomeduinoRFContactSensor config options"
     type: "object"
     extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
-      protocol:
-        description: "The contact protocol to use."
-        type: "string"
-      protocolOptions:
-        description: "The protocol options"
-        type: "object"
-    required: ["protocol", "protocolOptions"]
+      protocols:
+        description: "The protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
+    required: ["protocols"]
   }
   HomeduinoRFShutter: {
     title: "HomeduinoRFSwitch config options"
     type: "object"
     extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
-      protocol:
-        description: "The switch protocol to use."
-        type: "string"
-      protocolOptions:
-        description: "The protocol options"
-        type: "object"
-    required: ["protocol", "protocolOptions"]
+      protocols:
+        description: "The protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
+    required: ["protocols"]
   }
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"
     type: "object"
     extensions: ["xLink"]
     properties:
-      protocol:
-        description: "The weather protocol to use."
-        type: "string"
-      protocolOptions:
-        description: "The protocol options"
-        type: "object"
-    required: ["protocol", "protocolOptions"]
+      protocols:
+        description: "The protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
+    required: ["protocols"]
   }
   HomeduinoRFGenericSensor: {
     title: "HomeduinoRFGenericSensor config options"
     type: "object"
     extensions: ["xLink"]
     properties:
-      protocol:
-        description: "The gernic protocol to use."
-        type: "string"
-        default: "generic"
-      protocolOptions:
-        description: "The protocol options"
-        type: "object"
+      protocols:
+        description: "The protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
       attributes:
         description: "The attributes (sensor values) of the sensor"
         type: "array"
@@ -185,16 +219,23 @@ module.exports = {
     type: "object"
     extensions: ["xLink", "xPresentLabel", "xAbsentLabel"]
     properties:
-      protocol:
-        description: "The switch protocol to use."
-        type: "string"
-      protocolOptions:
-        description: "The protocol options"
-        type: "object"
+      protocols:
+        description: "The protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
       resetTime:
         description: "Time after that the presence value is resettet to absent."
         type: "integer"
         default: 10
-    required: ["protocol", "protocolOptions"]
+    required: ["protocols"]
   }
 }
