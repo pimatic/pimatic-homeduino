@@ -186,12 +186,14 @@ module.exports = (env) ->
         options = _.clone(p.options)
         unless options.all? then options.all = no
         options.state = state if state?
+        _protocol = Board.getRfProtocol(p.name)
+        dimlevel = Math.round(level / ((100 / (_protocol.values.dimlevel.max - _protocol.values.dimlevel.min))+_protocol.values.dimlevel.min))
         message = 
           id: options.id
           all: options.all
           state: options.state
           unit: options.unit
-          dimlevel: level
+          dimlevel: dimlevel
         pending.push @board.rfControlSendMessage(
           @_pluginConfig.transmitterPin, 
           p.name, 
@@ -243,15 +245,16 @@ module.exports = (env) ->
         unless _protocol?
           throw new Error("Could not find a protocol with the name \"#{p.name}\".")
         unless _protocol.type is "dimmer"
-          throw new Error("\"#{p.name}\" is not a switch protocol.")
-      env.logger.debug("Dimmer loaded")
+          throw new Error("\"#{p.name}\" is not a dimmer protocol.")
 
       @board.on('rf', (event) =>
         for p in @config.protocols
           unless p.receive is false
             match = doesProtocolMatch(event, p)
             if match
-              @_setDimlevel(event.values.dimlevel)
+              _protocol = Board.getRfProtocol(p.name)
+              dimlevel = Math.round(event.values.dimlevel * ((100.0 / (_protocol.values.dimlevel.max - _protocol.values.dimlevel.min))+_protocol.values.dimlevel.min))
+              @_setDimlevel(dimlevel)
         )
       super()
 
@@ -260,11 +263,9 @@ module.exports = (env) ->
     changeDimlevelTo: (level) ->
       if @_dimlevel is level then return Promise.resolve true
       else
-        env.logger.debug("level: #{level}")
-        env.logger.debug("_state: #{@_state}")
         state = false
         if level > 0 then state = true
-        @_sendLevelToDimmers(@config.protocols, state, parseFloat(level)).then( =>
+        @_sendLevelToDimmers(@config.protocols, state, level).then( =>
           @_setDimlevel(level)
         )
   
