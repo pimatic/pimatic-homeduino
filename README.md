@@ -13,8 +13,8 @@ Drivers
 
 The plugin can be used with two differend hardware combinations:
 
-*  A. Computer with connected arduino (with homeduin sketch) and 433mhz transmitter and receiver (recommended)
-*  B. Raspberry Pi (or Banana Pi or Hummingboard) with [ATTiny45 / 85 Prefilter](https://github.com/pilight/pilight_firmware#pinout) and 433mhz transmitter and receiver
+*  A. Computer with connected arduino (with homeduino sketch) and 433mhz transmitter and receiver (recommended)
+*  B. Raspberry Pi (or Banana Pi or Hummingboard) with 433mhz transmitter and receiver
 
 
 ### A.Connected arduino (recommended)
