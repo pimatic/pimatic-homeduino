@@ -244,7 +244,6 @@ module.exports = (env) ->
           throw new Error("Could not find a protocol with the name \"#{p.name}\".")
         unless _protocol.type is "dimmer"
           throw new Error("\"#{p.name}\" is not a switch protocol.")
-      env.logger.debug("Dimmer loaded")
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -260,8 +259,6 @@ module.exports = (env) ->
     changeDimlevelTo: (level) ->
       if @_dimlevel is level then return Promise.resolve true
       else
-        env.logger.debug("level: #{level}")
-        env.logger.debug("_state: #{@_state}")
         state = false
         if level > 0 then state = true
         @_sendLevelToDimmers(@config.protocols, state, parseFloat(level)).then( =>
