@@ -85,6 +85,14 @@ module.exports = {
                   options:
                     description: "The protocol options"
                     type: "object"
+                  send:
+                    type: "boolean"
+                    description: "Toggle send with this protocol"
+                    default: true
+                  receive:
+                    type: "boolean"
+                    description: "Toggle receive with this protocol"
+                    default: true
             required: ["protocols"]
   }
   HomeduinoRFContactSensor: {
