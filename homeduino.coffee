@@ -58,6 +58,7 @@ module.exports = (env) ->
       deviceClasses = [
         HomeduinoDHTSensor
         HomeduinoRFSwitch
+        HomeduinoRFDimmer
         HomeduinoRFButtonsDevice
         HomeduinoRFTemperature
         HomeduinoRFPir
@@ -178,6 +179,26 @@ module.exports = (env) ->
         )
     return Promise.all(pending)
 
+  sendToDimmersMixin = (protocols, state = null, level = 0) ->
+    pending = []
+    for p in protocols
+      unless p.send is false
+        options = _.clone(p.options)
+        unless options.all? then options.all = no
+        options.state = state if state?
+        message = 
+          id: options.id
+          all: options.all
+          state: options.state
+          unit: options.unit
+          dimlevel: level
+        pending.push @board.rfControlSendMessage(
+          @_pluginConfig.transmitterPin, 
+          p.name, 
+          message
+        )
+    return Promise.all(pending)
+
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -207,6 +228,44 @@ module.exports = (env) ->
       else 
         @_sendStateToSwitches(@config.protocols, state).then( =>
           @_setState(state)
+        )
+
+  class HomeduinoRFDimmer extends env.devices.DimmerActuator
+
+    constructor: (@config, lastState, @board, @_pluginConfig) ->
+      @id = config.id
+      @name = config.name
+      @_dimlevel = lastState?.dimlevel?.value or 0
+      @_state = lastState?.state?.value or off
+      
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        unless _protocol.type is "dimmer"
+          throw new Error("\"#{p.name}\" is not a switch protocol.")
+      env.logger.debug("Dimmer loaded")
+
+      @board.on('rf', (event) =>
+        for p in @config.protocols
+          unless p.receive is false
+            match = doesProtocolMatch(event, p)
+            if match
+              @_setDimlevel(event.values.dimlevel)
+        )
+      super()
+
+    _sendLevelToDimmers: sendToDimmersMixin
+
+    changeDimlevelTo: (level) ->
+      if @_dimlevel is level then return Promise.resolve true
+      else
+        env.logger.debug("level: #{level}")
+        env.logger.debug("_state: #{@_state}")
+        state = false
+        if level > 0 then state = true
+        @_sendLevelToDimmers(@config.protocols, state, parseFloat(level)).then( =>
+          @_setDimlevel(level)
         )
   
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
