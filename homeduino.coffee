@@ -496,8 +496,14 @@ module.exports = (env) ->
         hasAvgAirspeed = true if _protocol.values.avgAirspeed?
         hasWindGust = true if _protocol.values.windGust?
 
-      if !hasRain and !hasHumidity and !hasTemperature and !hasWindGust and !hasAvgAirspeed and !hasWindDirection
-        throw new Error("No Values to show availabe. The config.protocols and the config.values dont match.")
+      hasNoAttributes = (
+        !hasRain and !hasHumidity and !hasTemperature and 
+        !hasWindGust and !hasAvgAirspeed and !hasWindDirection
+      )
+      if hasNoAttributes
+        throw new Error(
+          "No Values to show availabe. The config.protocols and the config.values dont match."
+        )
 
       @attributes = {}
 
@@ -511,7 +517,10 @@ module.exports = (env) ->
                   type: "number"
                   unit: 'mm'
                 }
-            else env.logger.warn("#{@id}: rain is defined but no protocol in config contains rain data!")
+            else 
+              env.logger.warn(
+                "#{@id}: rain is defined but no protocol in config contains rain data!"
+              )
           when "humidity"
             if hasHumidity
               if !@attributes.humidity?
@@ -520,7 +529,10 @@ module.exports = (env) ->
                   type: "number"
                   unit: '%'
                 }
-            else env.logger.warn("#{@id}: humidity is defined but no protocol in config contains humidity data!")
+            else 
+              env.logger.warn(
+                "#{@id}: humidity is defined but no protocol in config contains humidity data!"
+              )
           when "temperature"
             if hasTemperature
               if !@attributes.temperature?
@@ -529,7 +541,11 @@ module.exports = (env) ->
                   type: "number"
                   unit: '°C'
                 }
-            else env.logger.warn("#{@id}: temperature is defined but no protocol in config contains temperature data!")
+            else 
+              env.logger.warn(
+                "#{@id}: temperature is defined but no protocol in config contains " +
+                "temperature data!"
+              )
           when "windDirection"
             if hasWindDirection
               if !@attributes.windDirection?
@@ -538,7 +554,11 @@ module.exports = (env) ->
                   type: "number"
                   unit: '°'
                 }
-            else env.logger.warn("#{@id}: windDirection is defined but no protocol in config contains windDirection data!")
+            else 
+              env.logger.warn(
+                "#{@id}: windDirection is defined but no protocol in config contains " +
+                "windDirection data!"
+              )
           when "avgAirspeed"
             if hasAvgAirspeed
               if !@attributes.avgAirspeed?
@@ -547,7 +567,11 @@ module.exports = (env) ->
                   type: "number"
                   unit: 'm/s'
                 }
-            else env.logger.warn("#{@id}: avgAirspeed is defined but no protocol in config contains avgAirspeed data!") 
+            else 
+              env.logger.warn(
+                "#{@id}: avgAirspeed is defined but no protocol in config contains " + 
+                "avgAirspeed data!"
+              ) 
           when "windGust"
             if hasWindGust
               if !@attributes.windGust?
@@ -556,8 +580,15 @@ module.exports = (env) ->
                   type: "number"
                   unit: 'm/s'
                 }
-            else env.logger.warn("#{@id}: windGust is defined but no protocol in config contains windGust data!") 
-          else throw new Error("Values should be: rain, humidity, temperature, windDirection, avgAirspeed, windGust")
+            else 
+              env.logger.warn(
+                "#{@id}: windGust is defined but no protocol in config contains windGust data!"
+              ) 
+          else 
+            throw new Error(
+              "Values should be one of: " + 
+              "rain, humidity, temperature, windDirection, avgAirspeed, windGust"
+            )
 
       @board.on('rf', (event) =>
         for p in @config.protocols
