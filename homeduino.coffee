@@ -188,7 +188,9 @@ module.exports = (env) ->
         unless options.all? then options.all = no
         options.state = state if state?
         _protocol = Board.getRfProtocol(p.name)
-        dimlevel = Math.round(level / ((100 / (_protocol.values.dimlevel.max - _protocol.values.dimlevel.min))+_protocol.values.dimlevel.min))
+        min = _protocol.values.dimlevel.min
+        max = _protocol.values.dimlevel.max
+        dimlevel = Math.round(level / ((100 / (max - min)) + min))
         message = 
           id: options.id
           all: options.all
@@ -255,7 +257,9 @@ module.exports = (env) ->
             match = doesProtocolMatch(event, p)
             if match
               _protocol = Board.getRfProtocol(p.name)
-              dimlevel = Math.round(event.values.dimlevel * ((100.0 / (_protocol.values.dimlevel.max - _protocol.values.dimlevel.min))+_protocol.values.dimlevel.min))
+              min = _protocol.values.dimlevel.min
+              max = _protocol.values.dimlevel.max
+              dimlevel = Math.round(event.values.dimlevel * ((100.0 / (max - min))+min))
               @_setDimlevel(dimlevel)
         )
       super()
