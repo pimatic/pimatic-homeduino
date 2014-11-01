@@ -58,8 +58,10 @@ module.exports = (env) ->
       deviceClasses = [
         HomeduinoDHTSensor
         HomeduinoRFSwitch
+        HomeduinoRFDimmer
         HomeduinoRFButtonsDevice
         HomeduinoRFTemperature
+        HomeduinoRFWeatherStation
         HomeduinoRFPir
         HomeduinoRFContactSensor
         HomeduinoRFShutter
@@ -178,6 +180,28 @@ module.exports = (env) ->
         )
     return Promise.all(pending)
 
+  sendToDimmersMixin = (protocols, state = null, level = 0) ->
+    pending = []
+    for p in protocols
+      unless p.send is false
+        options = _.clone(p.options)
+        unless options.all? then options.all = no
+        options.state = state if state?
+        _protocol = Board.getRfProtocol(p.name)
+        dimlevel = Math.round(level / ((100 / (_protocol.values.dimlevel.max - _protocol.values.dimlevel.min))+_protocol.values.dimlevel.min))
+        message = 
+          id: options.id
+          all: options.all
+          state: options.state
+          unit: options.unit
+          dimlevel: dimlevel
+        pending.push @board.rfControlSendMessage(
+          @_pluginConfig.transmitterPin, 
+          p.name, 
+          message
+        )
+    return Promise.all(pending)
+
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -207,6 +231,44 @@ module.exports = (env) ->
       else 
         @_sendStateToSwitches(@config.protocols, state).then( =>
           @_setState(state)
+        )
+
+
+  class HomeduinoRFDimmer extends env.devices.DimmerActuator
+
+    constructor: (@config, lastState, @board, @_pluginConfig) ->
+      @id = config.id
+      @name = config.name
+      @_dimlevel = lastState?.dimlevel?.value or 0
+      @_state = lastState?.state?.value or off
+      
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        unless _protocol.type is "dimmer"
+          throw new Error("\"#{p.name}\" is not a dimmer protocol.")
+
+      @board.on('rf', (event) =>
+        for p in @config.protocols
+          unless p.receive is false
+            match = doesProtocolMatch(event, p)
+            if match
+              _protocol = Board.getRfProtocol(p.name)
+              dimlevel = Math.round(event.values.dimlevel * ((100.0 / (_protocol.values.dimlevel.max - _protocol.values.dimlevel.min))+_protocol.values.dimlevel.min))
+              @_setDimlevel(dimlevel)
+        )
+      super()
+
+    _sendLevelToDimmers: sendToDimmersMixin
+
+    changeDimlevelTo: (level) ->
+      if @_dimlevel is level then return Promise.resolve true
+      else
+        state = false
+        if level > 0 then state = true
+        @_sendLevelToDimmers(@config.protocols, state, level).then( =>
+          @_setDimlevel(level)
         )
   
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
@@ -397,6 +459,148 @@ module.exports = (env) ->
 
     getTemperature: -> Promise.resolve @_temperatue
     getHumidity: -> Promise.resolve @_humidity
+
+
+  class HomeduinoRFWeatherStation extends env.devices.Sensor
+
+    constructor: (@config, lastState, @board) ->
+      @id = config.id
+      @name = config.name
+      @_windGust = lastState?.windGust?.value or 0
+      @_avgAirspeed = lastState?.avgAirspeed?.value or 0
+      @_windDirection = lastState?.windDirection?.value or 0
+      @_temperatue = lastState?.temperature?.value or 0
+      @_humidity = lastState?.humidity?.value or 0
+      @_rain = lastState?.rain?.value or 0
+
+      hasWindGust = false
+      hasAvgAirspeed = false
+      fasWindDirection = false
+      hasTemperature = false
+      hasHumidity = false
+      hasRain = false
+      for p in config.protocols
+        _protocol = Board.getRfProtocol(p.name)
+        unless _protocol?
+          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        unless _protocol.type is "weather"
+          throw new Error("\"#{p.name}\" is not a weather protocol.")
+        hasRain = true if _protocol.values.rain?
+        hasHumidity = true if _protocol.values.humidity?
+        hasTemperature = true if _protocol.values.temperature?
+        hasWindDirection = true if _protocol.values.windDirection?
+        hasAvgAirspeed = true if _protocol.values.avgAirspeed?
+        hasWindGust = true if _protocol.values.windGust?
+
+      if !hasRain and !hasHumidity and !hasTemperature and !hasWindGust and !hasAvgAirspeed and !hasWindDirection
+        throw new Error("No Values to show availabe. The config.protocols and the config.values dont match.")
+
+      @attributes = {}
+
+      for s in config.values
+        switch s
+          when "rain" 
+            if hasRain
+              if !@attributes.rain?
+                @attributes.rain = {
+                  description: "the messured fall of rain"
+                  type: "number"
+                  unit: 'mm'
+                }
+            else env.logger.warn("#{@id}: rain is defined but no protocol in config contains rain data!")
+          when "humidity"
+            if hasHumidity
+              if !@attributes.humidity?
+                @attributes.humidity = {
+                  description: "the messured humidity"
+                  type: "number"
+                  unit: '%'
+                }
+            else env.logger.warn("#{@id}: humidity is defined but no protocol in config contains humidity data!")
+          when "temperature"
+            if hasTemperature
+              if !@attributes.temperature?
+                @attributes.temperature = {
+                  description: "the messured temperature"
+                  type: "number"
+                  unit: '°C'
+                }
+            else env.logger.warn("#{@id}: temperature is defined but no protocol in config contains temperature data!")
+          when "windDirection"
+            if hasWindDirection
+              if !@attributes.windDirection?
+                @attributes.windDirection = {
+                  description: "the messured wind direction"
+                  type: "number"
+                  unit: '°'
+                }
+            else env.logger.warn("#{@id}: windDirection is defined but no protocol in config contains windDirection data!")
+          when "avgAirspeed"
+            if hasAvgAirspeed
+              if !@attributes.avgAirspeed?
+                @attributes.avgAirspeed = {
+                  description: "the messured average airspeed"
+                  type: "number"
+                  unit: 'm/s'
+                }
+            else env.logger.warn("#{@id}: avgAirspeed is defined but no protocol in config contains avgAirspeed data!") 
+          when "windGust"
+            if hasWindGust
+              if !@attributes.windGust?
+                @attributes.windGust = {
+                  description: "the messured wind gust"
+                  type: "number"
+                  unit: 'm/s'
+                }
+            else env.logger.warn("#{@id}: windGust is defined but no protocol in config contains windGust data!") 
+          else throw new Error("Values should be: rain, humidity, temperature, windDirection, avgAirspeed, windGust")
+
+      @board.on('rf', (event) =>
+        for p in @config.protocols
+          match = doesProtocolMatch(event, p)
+          if match
+            now = (new Date()).getTime()
+            timeDelta = (
+              if @_lastReceiveTime? then (now - @_lastReceiveTime)
+              else 9999999
+            )
+            if timeDelta < 2000
+              return 
+            if event.values.windGust?
+              @_windGust = event.values.windGust
+              # discard value if it is the same and was received just under two second ago
+              @emit "windGust", @_windGust
+            if event.values.avgAirspeed?
+              @_avgAirspeed = event.values.avgAirspeed
+              # discard value if it is the same and was received just under two second ago
+              @emit "avgAirspeed", @_avgAirspeed
+            if event.values.windDirection?
+              @_windDirection = event.values.windDirection
+              # discard value if it is the same and was received just under two second ago
+              @emit "windDirection", @_windDirection
+            if event.values.temperature?
+              @_temperatue = event.values.temperature
+              # discard value if it is the same and was received just under two second ago
+              @emit "temperature", @_temperatue
+            if event.values.humidity?
+              @_humidity = event.values.humidity
+              # discard value if it is the same and was received just under two second ago
+              @emit "humidity", @_humidity
+            if event.values.rain?
+              @_windGust = event.values.rain
+              # discard value if it is the same and was received just under two second ago
+              @emit "rain", @_rain
+            @_lastReceiveTime = now
+      )
+      super()
+
+    getWindDirection: -> Promise.resolve @_windDirection
+    getAvgAirspeed: -> Promise.resolve @_avgAirspeed
+    getWindGust: -> Promise.resolve @_windGust
+    getRain: -> Promise.resolve @_rain
+    getTemperature: -> Promise.resolve @_temperatue
+    getHumidity: -> Promise.resolve @_humidity
+    
 
   class HomeduinoRFGenericSensor extends env.devices.Sensor
 
