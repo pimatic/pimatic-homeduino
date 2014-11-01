@@ -55,6 +55,34 @@ module.exports = {
             #required: ["protocol", "protocolOptions"]
     #required: ["protocols"]
   },
+  HomeduinoRFDimmer: {
+    title: "HomeduinoRFDimmer config options"
+    type: "object"
+    extensions: ["xConfirm"]
+    properties:
+      protocols:
+        description: "The dimmer protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
+            send:
+              type: "boolean"
+              description: "Toggle send with this protocol"
+              default: true
+            receive:
+              type: "boolean"
+              description: "Toggle receive with this protocol"
+              default: true
+    required: ["protocols"]
+  },
   HomeduinoRFButtonsDevice: {
     title: "HomeduinoRFButtonsDevice config options"
     type: "object"
@@ -140,6 +168,32 @@ module.exports = {
     type: "object"
     extensions: ["xLink"]
     properties:
+      protocols:
+        description: "The protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
+    required: ["protocols"]
+  }
+  HomeduinoRFWeatherStation: {
+    title: "HomeduinoRFWeatherStation config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      values:
+        type: "array"
+        default: ["temperature", "humidity"]
+        format: "table"
+        items:
+          type: "string"
       protocols:
         description: "The protocols to use."
         type: "array"
