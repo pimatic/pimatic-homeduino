@@ -72,6 +72,7 @@ A list with all supported protocols and protocol-options can be found [here](htt
 
 ### weather-station sensor example:
 
+This is the basic sensor with only temperature and humidity
 ```json
 {
   "id": "rftemperature",
@@ -86,6 +87,31 @@ A list with all supported protocols and protocol-options can be found [here](htt
   }]
 }
 ```
+For weather stations like the Alecto WS-4500 you should use the weatherstation device
+```json
+{
+  "id": "weatherstation",
+  "name": "Weather Data",
+  "class": "HomeduinoRFWeatherStation",
+  "protocols": [
+    {
+      "name": "weather5",
+      "options": {
+        "id": 120
+      }
+    }
+  ],
+  "values": [
+    "rain",
+    "temperature",
+    "humidity"
+  ]
+},
+```
+It supports different values to display
+rain, temperature, humidity, windGust, windDirection and avgAirspeed
+The order of the listed values define the order of the displayed values.
+
 
 For protocol options see: 
 
@@ -258,3 +284,22 @@ is used for sending or receiving. Default is `true` for both.
 }
 ```
 
+### Dimmer device example:
+```json
+{
+  "id": "dimmer",
+  "name": "Dimmer",
+  "class": "HomeduinoRFDimmer",
+  "protocols": [
+    {
+      "name": "dimmer1",
+      "options": {
+        "id": 7654321,
+        "unit": 0
+      },
+      "send": true,
+      "receive": true
+    }
+  ]
+},
+```
