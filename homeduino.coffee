@@ -269,8 +269,9 @@ module.exports = (env) ->
     changeDimlevelTo: (level) ->
       if @_dimlevel is level then return Promise.resolve true
       else
-        state = false
-        if level > 0 then state = true
+        if level > 0 and @_state is false 
+          @_sendLevelToDimmers(@config.protocols, true, 0) #send first a on command
+        else if level is 0 then state = false
         @_sendLevelToDimmers(@config.protocols, state, level).then( =>
           @_setDimlevel(level)
         )
