@@ -55,6 +55,35 @@ module.exports = {
             #required: ["protocol", "protocolOptions"]
     #required: ["protocols"]
   },
+  HomeduinoRFEvent: {
+    title: "HomeduinoRFEvent config options"
+    type: "object"
+    extensions: []
+    properties:
+      protocols:
+        description: "The switch protocols to use."
+        type: "array"
+        default: []
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            options:
+              description: "The protocol options"
+              type: "object"
+            send:
+              type: "boolean"
+              description: "Toggle send with this protocol"
+              default: false
+            receive:
+              type: "boolean"
+              description: "Toggle receive with this protocol"
+              default: true
+            #required: ["protocol", "protocolOptions"]
+    #required: ["protocols"]
+  },
   HomeduinoRFDimmer: {
     title: "HomeduinoRFDimmer config options"
     type: "object"
