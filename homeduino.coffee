@@ -590,7 +590,7 @@ module.exports = (env) ->
 
       hasWindGust = false
       hasAvgAirspeed = false
-      fasWindDirection = false
+      hasWindDirection = false
       hasTemperature = false
       hasHumidity = false
       hasRain = false
