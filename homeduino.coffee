@@ -14,9 +14,6 @@ module.exports = (env) ->
   class HomeduinoPlugin extends env.plugins.Plugin
 
     init: (app, @framework, @config) =>
-      #check transmitterPin and receiverPin
-      @framework.ruleManager.addPredicateProvider(new EventPredicateProvider(@framework))
-
       if @config.driver is "serialport"
         unless @config.receiverPin in [0, 1]
           throw new Error("receiverPin must be 0 or 1")
@@ -43,7 +40,7 @@ module.exports = (env) ->
 
       @pendingConnect = @board.connect(@config.connectionTimeout).then( =>
         env.logger.info("Connected to homeduino device.")
-        if @config.enableReceiving?
+        if @config.enableReceiving
           @board.rfControlStartReceiving(@config.receiverPin).then( =>
             env.logger.debug("Receiving on pin #{@config.receiverPin}")
           ).catch( (err) =>
@@ -65,7 +62,6 @@ module.exports = (env) ->
         HomeduinoRFButtonsDevice
         HomeduinoRFTemperature
         HomeduinoRFWeatherStation
-        HomeduinoRFEvent
         HomeduinoRFPir
         HomeduinoRFContactSensor
         HomeduinoRFShutter
@@ -96,6 +92,8 @@ module.exports = (env) ->
               device = new Cl(deviceConfig, lastState, @board, @config)
               return device
           })
+
+      @framework.ruleManager.addPredicateProvider(new RFEventPredicateProvider(@framework))
 
   # Homed controls FS20 devices
   class HomeduinoDHTSensor extends env.devices.TemperatureSensor
@@ -208,112 +206,6 @@ module.exports = (env) ->
         )
     return Promise.all(pending)
 
-
-  class HomeduinoRFEvent extends env.devices.Device
-    _state: null
-        
-    attributes:
-      lastState:
-        description: "the last state of the event"
-        type: "boolean"
-        labels: ['on', 'off']
-
-    constructor: (@config, lastState, @board, @_pluginConfig) ->
-      @id = config.id
-      @name = config.name
-      @_lastState = lastState?.state?.value
-      
-      for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "switch"
-          throw new Error("\"#{p.name}\" is not a switch protocol.")
-
-      @board.on('rf', (event) =>
-        for p in @config.protocols
-          unless p.receive is false
-            match = doesProtocolMatch(event, p)
-            @_setLastState(event.values.state) if match
-        )
-      super()
-
-    # Returns a promise that will be fulfilled with the state
-    getLastState: -> Promise.resolve(@_lastState)
-
-    _setLastState: (state) ->
-      @_lastState = state
-      @emit "lastState", state
-      
-
-  ###
-  The Event Predicate Provider
-  ----------------
-  Provides predicates for the state of switch devices like:
-
-  * _device_ receive on/off
-
-  ####
-  class EventPredicateProvider extends env.predicates.PredicateProvider
-
-    constructor: (@framework) ->
-
-    # ### parsePredicate()
-    parsePredicate: (input, context) ->  
-
-      eventDevices = _(@framework.deviceManager.devices).values()
-        .filter((device) => device.hasAttribute( 'lastState')).value()
-
-      device = null
-      state = null
-      match = null
-
-      stateAcFilter = (v) => v.trim() isnt 'is receive' 
-
-      M(input, context)
-        .matchDevice(eventDevices, (next, d) =>
-          next.match([' receive'], acFilter: stateAcFilter)
-            .match([' on', ' off'], (next, s) =>
-              # Already had a match with another device?
-              if device? and device.id isnt d.id
-                context?.addError(""""#{input.trim()}" is ambiguous.""")
-                return
-              assert d?
-              assert s in [' on', ' off']
-              device = d
-              state = s.trim() is 'on'
-              match = next.getFullMatch()
-          )
-        )
- 
-      # If we have a match
-      if match?
-        assert device?
-        assert state?
-        assert typeof match is "string"
-        # and state as boolean.
-        return {
-          token: match
-          nextInput: input.substring(match.length)
-          predicateHandler: new EventPredicateHandler(device, state)
-        }
-      else
-        return null
-
-  class EventPredicateHandler extends env.predicates.PredicateHandler
-
-    constructor: (@device, @state) ->
-    setup: ->
-      @stateListener = (s) => @emit 'change', (s is @state)
-      @device.on 'lastState', @stateListener
-      super()
-    getValue: -> @device.getUpdatedAttributeValue('lastState').then( (s) => (s is @state) )
-    destroy: -> 
-      @device.removeListener "lastState", @stateListener
-      super()
-    getType: -> 'lastState'
-
-
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -332,7 +224,9 @@ module.exports = (env) ->
         for p in @config.protocols
           unless p.receive is false
             match = doesProtocolMatch(event, p)
-            @_setState(event.values.state) if match
+            if match
+              @emit('rf', event) # used by the RFEventPredicateHandler
+              @_setState(event.values.state) 
         )
       super()
 
@@ -821,6 +715,81 @@ module.exports = (env) ->
       value += baseValue
       @emit name, value
       @_lastReceiveTimes[name] = now
+
+  ###
+  The RF-Event Predicate Provider
+  ----------------
+  Provides predicates for the state of switch devices like:
+
+  * _device_ receives on|off
+
+  ####
+  class RFEventPredicateProvider extends env.predicates.PredicateProvider
+
+    constructor: (@framework) ->
+
+    # ### parsePredicate()
+    parsePredicate: (input, context) ->  
+
+      rfSwitchDevices = _(@framework.deviceManager.devices)
+        .filter( (device) => device instanceof HomeduinoRFSwitch ).value()
+
+      device = null
+      state = null
+      match = null
+
+      M(input, context)
+        .matchDevice(rfSwitchDevices, (next, d) =>
+          next.match([' receives'])
+            .match([' on', ' off'], (next, s) =>
+              # Already had a match with another device?
+              if device? and device.id isnt d.id
+                context?.addError(""""#{input.trim()}" is ambiguous.""")
+                return
+              assert d?
+              assert s in [' on', ' off']
+              device = d
+              state = s.trim() is 'on'
+              match = next.getFullMatch()
+          )
+        )
+ 
+      # If we have a match
+      if match?
+        assert device?
+        assert state?
+        assert typeof match is "string"
+        # and state as boolean.
+        return {
+          token: match
+          nextInput: input.substring(match.length)
+          predicateHandler: new RFEventPredicateHandler(device, state)
+        }
+      else
+        return null
+
+  class RFEventPredicateHandler extends env.predicates.PredicateHandler
+
+    constructor: (@device, @state) ->
+    setup: ->
+      lastTime = 0
+      lastState = null
+      @rfListener = (event) => 
+        if lastState is event.values.state
+          now = new Date().getTime()
+          # suppress same values within 200ms
+          if now - lastTime <= 200
+            return
+        lastTime = now
+        lastState = event.values.state
+        @emit 'change', 'event' 
+      @device.on 'rf', @rfListener
+      super()
+    getValue: -> Promise.resolve(false)
+    destroy: -> 
+      @device.removeListener "rf", @rfListener
+      super()
+    getType: -> 'event'
 
   hdPlugin = new HomeduinoPlugin()
   return hdPlugin
