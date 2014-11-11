@@ -782,7 +782,7 @@ module.exports = (env) ->
             return
         lastTime = now
         lastState = event.values.state
-        @emit 'change', 'event' 
+        @emit 'change', (lastState is @state) 
       @device.on 'rf', @rfListener
       super()
     getValue: -> Promise.resolve(false)
