@@ -773,16 +773,14 @@ module.exports = (env) ->
     constructor: (@device, @state) ->
     setup: ->
       lastTime = 0
-      lastState = null
       @rfListener = (event) => 
-        if lastState is event.values.state
+        if @state is event.values.state
           now = new Date().getTime()
           # suppress same values within 200ms
           if now - lastTime <= 200
             return
-        lastTime = now
-        lastState = event.values.state
-        @emit 'change', 'event' 
+          lastTime = now
+          @emit 'change', 'event' 
       @device.on 'rf', @rfListener
       super()
     getValue: -> Promise.resolve(false)
