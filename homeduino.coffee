@@ -66,6 +66,7 @@ module.exports = (env) ->
         HomeduinoRFContactSensor
         HomeduinoRFShutter
         HomeduinoRFGenericSensor
+        HomeduinoSwitch
       ]
 
       for Cl in deviceClasses
@@ -94,6 +95,8 @@ module.exports = (env) ->
           })
 
       @framework.ruleManager.addPredicateProvider(new RFEventPredicateProvider(@framework))
+
+  hdPlugin = new HomeduinoPlugin()
 
   # Homed controls FS20 devices
   class HomeduinoDHTSensor extends env.devices.TemperatureSensor
@@ -716,6 +719,37 @@ module.exports = (env) ->
       @emit name, value
       @_lastReceiveTimes[name] = now
 
+  class HomeduinoSwitch extends env.devices.PowerSwitch
+
+    constructor: (@config, lastState, @board) ->
+      @id = config.id
+      @name = config.name
+      @_state = lastState?.state?.value or off
+      hdPlugin.pendingConnect.then( =>
+        return @board.pinMode(@config.pin, Board.OUTPUT)
+      ).then( => 
+        return @_writeState(@_state)
+      ).catch( (error) =>
+        env.logger.error error
+        env.logger.debug error.stack
+      )
+      super()
+
+    getState: () -> Promise.resolve @_state
+
+    _writeState: (state) ->
+      if @config.inverted then _state = not state
+      else _state = state
+      return hdPlugin.pendingConnect.then( =>
+        return @board.digitalWrite(@config.pin, if _state then Board.HIGH else Board.LOW)
+      )
+        
+    changeStateTo: (state) ->
+      assert state is on or state is off
+      return @_writeState(state).then( =>
+        @_setState(state)
+      )
+
   ###
   The RF-Event Predicate Provider
   ----------------
@@ -789,5 +823,4 @@ module.exports = (env) ->
       super()
     getType: -> 'event'
 
-  hdPlugin = new HomeduinoPlugin()
   return hdPlugin

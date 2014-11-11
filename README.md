@@ -303,3 +303,16 @@ is used for sending or receiving. Default is `true` for both.
   ]
 },
 ```
+### pin switch example:
+
+Only works with an arduino. pin: 13 = digital pin 13 (LED on arduino nano).
+
+```json
+{
+  "id": "pin-switch",
+  "name": "Pin Switch",
+  "class": "HomeduinoSwitch",
+  "inverted": false,
+  "pin": 13
+}
+```

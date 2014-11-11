@@ -300,4 +300,17 @@ module.exports = {
         default: 10
     required: ["protocols"]
   }
+  HomeduinoSwitch: {
+    title: "HomeduinoSwitch config options"
+    type: "object"
+    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
+    properties:
+      pin:
+        description: "The pin"
+        type: "number"
+      inverted:
+        description: "active low?"
+        type: "boolean"
+        default: false
+  }
 }
