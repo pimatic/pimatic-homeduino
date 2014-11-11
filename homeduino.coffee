@@ -264,7 +264,13 @@ module.exports = (env) ->
               min = _protocol.values.dimlevel.min
               max = _protocol.values.dimlevel.max
               dimlevel = Math.round(event.values.dimlevel * ((100.0 / (max - min))+min))
-              @_setDimlevel(dimlevel)
+              if event.values.state?
+                if event.values.state is false
+                  @_setDimlevel(0)
+                else
+                  @_setDimlevel(dimlevel) #it is possible that this must be 100
+              else
+                @_setDimlevel(dimlevel)
         )
       super()
 
@@ -782,7 +788,7 @@ module.exports = (env) ->
             return
         lastTime = now
         lastState = event.values.state
-        @emit 'change', 'event' 
+        @emit 'change', (lastState is @state) 
       @device.on 'rf', @rfListener
       super()
     getValue: -> Promise.resolve(false)
