@@ -267,7 +267,13 @@ module.exports = (env) ->
               min = _protocol.values.dimlevel.min
               max = _protocol.values.dimlevel.max
               dimlevel = Math.round(event.values.dimlevel * ((100.0 / (max - min))+min))
-              @_setDimlevel(dimlevel)
+              if event.values.state?
+                if event.values.state is false
+                  @_setDimlevel(0)
+                else
+                  @_setDimlevel(dimlevel) #it is possible that this must be 100
+              else
+                @_setDimlevel(dimlevel)
         )
       super()
 
@@ -630,7 +636,7 @@ module.exports = (env) ->
               # discard value if it is the same and was received just under two second ago
               @emit "humidity", @_humidity
             if event.values.rain?
-              @_windGust = event.values.rain
+              @_rain = event.values.rain
               # discard value if it is the same and was received just under two second ago
               @emit "rain", @_rain
             @_lastReceiveTime = now
