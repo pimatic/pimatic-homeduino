@@ -630,7 +630,7 @@ module.exports = (env) ->
               # discard value if it is the same and was received just under two second ago
               @emit "humidity", @_humidity
             if event.values.rain?
-              @_windGust = event.values.rain
+              @_rain = event.values.rain
               # discard value if it is the same and was received just under two second ago
               @emit "rain", @_rain
             @_lastReceiveTime = now
