@@ -193,9 +193,10 @@ module.exports = (env) ->
         unless options.all? then options.all = no
         options.state = state if state?
         _protocol = Board.getRfProtocol(p.name)
-        min = _protocol.values.dimlevel.min
-        max = _protocol.values.dimlevel.max
-        dimlevel = Math.round(level / ((100 / (max - min)) + min))
+        if _protocol.values.dimlevel?
+          min = _protocol.values.dimlevel.min
+          max = _protocol.values.dimlevel.max
+          dimlevel = Math.round(level / ((100 / (max - min)) + min))
         message = 
           id: options.id
           all: options.all
@@ -244,47 +245,56 @@ module.exports = (env) ->
 
 
   class HomeduinoRFDimmer extends env.devices.DimmerActuator
+    _lastdimlevel: null
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
       @id = config.id
       @name = config.name
       @_dimlevel = lastState?.dimlevel?.value or 0
+      @_lastdimlevel = lastState?.lastdimlevel?.value or 100
       @_state = lastState?.state?.value or off
       
       for p in config.protocols
         _protocol = Board.getRfProtocol(p.name)
         unless _protocol?
           throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "dimmer"
-          throw new Error("\"#{p.name}\" is not a dimmer protocol.")
+        unless _protocol.type is "dimmer" or "switch"
+          throw new Error("\"#{p.name}\" is not a dimmer or a switch protocol.")
 
       @board.on('rf', (event) =>
         for p in @config.protocols
           unless p.receive is false
             match = doesProtocolMatch(event, p)
             if match
-              _protocol = Board.getRfProtocol(p.name)
-              min = _protocol.values.dimlevel.min
-              max = _protocol.values.dimlevel.max
-              dimlevel = Math.round(event.values.dimlevel * ((100.0 / (max - min))+min))
               if event.values.state?
                 if event.values.state is false
+                  unless @_dimlevel is 0
+                    @_lastdimlevel = @_dimlevel
                   @_setDimlevel(0)
                 else
-                  @_setDimlevel(dimlevel) #it is possible that this must be 100
+                  @_setDimlevel(@_lastdimlevel)
               else
-                @_setDimlevel(dimlevel)
+                _protocol = Board.getRfProtocol(p.name)
+                if _protocol.values.dimlevel?
+                  min = _protocol.values.dimlevel.min
+                  max = _protocol.values.dimlevel.max
+                  dimlevel = Math.round(event.values.dimlevel * ((100.0 / (max - min))+min))
+                  @_setDimlevel(dimlevel)
         )
       super()
 
-    _sendLevelToDimmers: sendToDimmersMixin
+    _sendLevelToDimmers: sendToDimmersMixin   
+
+    turnOn: -> @changeDimlevelTo(@_lastdimlevel)
 
     changeDimlevelTo: (level) ->
       if @_dimlevel is level then return Promise.resolve true
       else
-        if level > 0 and @_state is false 
-          @_sendLevelToDimmers(@config.protocols, true, 0) #send first a on command
-        else if level is 0 then state = false
+        if level is 0
+         state = false
+        unless @_dimlevel is 0
+          @_lastdimlevel = @_dimlevel
+
         @_sendLevelToDimmers(@config.protocols, state, level).then( =>
           @_setDimlevel(level)
         )
