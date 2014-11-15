@@ -636,7 +636,7 @@ module.exports = (env) ->
               @_windDirection = event.values.windDirection
               # discard value if it is the same and was received just under two second ago
               dir = @_directionToString(@_windDirection)
-              @emit "windDirection", "#{@_windDirection}° (#{dir})"
+              @emit "windDirection", "#{@_windDirection}°(#{dir})"
             if event.values.temperature?
               @_temperatue = event.values.temperature
               # discard value if it is the same and was received just under two second ago
