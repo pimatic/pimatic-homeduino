@@ -575,8 +575,7 @@ module.exports = (env) ->
               if !@attributes.windDirection?
                 @attributes.windDirection = {
                   description: "the messured wind direction"
-                  type: "number"
-                  unit: '°'
+                  type: "string"
                 }
             else 
               env.logger.warn(
@@ -636,7 +635,8 @@ module.exports = (env) ->
             if event.values.windDirection?
               @_windDirection = event.values.windDirection
               # discard value if it is the same and was received just under two second ago
-              @emit "windDirection", @_windDirection
+              dir = @_directionToString(@_windDirection)
+              @emit "windDirection", "#{@_windDirection}° (#{dir})"
             if event.values.temperature?
               @_temperatue = event.values.temperature
               # discard value if it is the same and was received just under two second ago
@@ -652,6 +652,12 @@ module.exports = (env) ->
             @_lastReceiveTime = now
       )
       super()
+
+    _directionToString: (direction)->
+      if direction<=360 and direction>=0
+        direction = Math.round(direction / 45)
+        labels = ["N","NE","E","SE","S","SW","W","NW","N"]
+      return labels[direction]
 
     getWindDirection: -> Promise.resolve @_windDirection
     getAvgAirspeed: -> Promise.resolve @_avgAirspeed
