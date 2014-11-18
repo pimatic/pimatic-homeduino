@@ -178,10 +178,12 @@ module.exports = (env) ->
         options = _.clone(p.options)
         unless options.all? then options.all = no
         options.state = state if state?
-        pending.push @board.rfControlSendMessage(
-          @_pluginConfig.transmitterPin, 
-          p.name, 
-          options
+        pending.push @board.whenReady().then( =>
+          return @board.rfControlSendMessage(
+            @_pluginConfig.transmitterPin, 
+            p.name, 
+            options
+          )
         )
     return Promise.all(pending)
 
@@ -203,10 +205,12 @@ module.exports = (env) ->
           state: options.state
           unit: options.unit
           dimlevel: dimlevel
-        pending.push @board.rfControlSendMessage(
-          @_pluginConfig.transmitterPin, 
-          p.name, 
-          message
+        pending.push @board.whenReady().then( =>
+          return @board.rfControlSendMessage(
+            @_pluginConfig.transmitterPin, 
+            p.name, 
+            message
+          )
         )
     return Promise.all(pending)
 
