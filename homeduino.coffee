@@ -198,21 +198,20 @@ module.exports = (env) ->
         if _protocol.values.dimlevel?
           min = _protocol.values.dimlevel.min
           max = _protocol.values.dimlevel.max
-          dimlevel = Math.round(level / ((100 / (max - min)) + min))
-        message = 
-          id: options.id
-          all: options.all
-          state: options.state
-          unit: options.unit
-          dimlevel: dimlevel
+          level = Math.round(level / ((100 / (max - min)) + min))
+        extend options, {dimlevel: level}
         pending.push @board.whenReady().then( =>
           return @board.rfControlSendMessage(
             @_pluginConfig.transmitterPin, 
             p.name, 
-            message
+            options
           )
         )
     return Promise.all(pending)
+
+  extend = (obj, mixin) ->
+    obj[name] = method for name, method of mixin        
+    obj
 
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
@@ -231,7 +230,17 @@ module.exports = (env) ->
       @board.on('rf', (event) =>
         for p in @config.protocols
           unless p.receive is false
-            match = doesProtocolMatch(event, p)
+            if p.name is "rolling1"
+              if event.values.code in p.options.codeOn
+                match = yes
+                extend event.values, {state: on}
+              else if event.values.code in p.options.codeOff
+                match = yes
+                extend event.values, {state: off}
+              else match = no
+            else
+              match = doesProtocolMatch(event, p)
+
             if match
               @emit('rf', event) # used by the RFEventPredicateHandler
               @_setState(event.values.state) 
