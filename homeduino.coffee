@@ -304,7 +304,7 @@ module.exports = (env) ->
       if @_dimlevel is level then return Promise.resolve true
       else
         if level is 0
-         state = false
+          state = false
         unless @_dimlevel is 0
           @_lastdimlevel = @_dimlevel
 
