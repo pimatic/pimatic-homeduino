@@ -213,6 +213,20 @@ is used for sending or receiving. Default is `true` for both.
 }
 ```
 
+```json
+{
+  "id": "homeduino-contact2",
+  "name": "Contact2",
+  "class": "HomeduinoRFPir",
+  "protocols": [{
+    "name": "contact2",
+    "options": {
+      "id": 421983
+    }
+  }],
+  "resetTime": 6000
+}
+```
 
 ### Shutter sensor example:
 
