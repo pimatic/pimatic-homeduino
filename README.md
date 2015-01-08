@@ -213,6 +213,25 @@ is used for sending or receiving. Default is `true` for both.
 }
 ```
 
+Some contact only emit an event on open, For this you can set autorReset to true:
+
+```json
+{
+  "id": "door-contact",
+  "name": "door-Contact",
+  "class": "HomeduinoRFContactSensor",
+  "protocols": [
+    {
+      "name": "contact2",
+      "options": {
+        "id": 43690
+      }
+    }
+  ],
+  "autoReset": true,
+  "resetTime": 3000
+}
+```
 
 ### Shutter sensor example:
 
