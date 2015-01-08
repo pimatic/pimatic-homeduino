@@ -356,7 +356,17 @@ module.exports = (env) ->
       @board.on('rf', (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
-          @_setContact(not event.values.state) if match
+          if match
+            hasContact = (
+              if event.values.contact? then event.values.contact 
+              else (not event.values.state)
+            )
+            @_setContact(hasContact)
+            if @config.autoReset is true
+              clearTimeout(@_resetContactTimeout)
+              @_resetContactTimeout = setTimeout(( =>
+                @_setContact(!hasContact)
+              ), @config.resetTime)
       )
       super()
 

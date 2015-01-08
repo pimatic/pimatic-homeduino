@@ -141,6 +141,15 @@ module.exports = {
             options:
               description: "The protocol options"
               type: "object"
+      autoReset:
+        description: """Reset the state after resetTime. Usefull for contact sensors, 
+                      that only emit open or close events"""
+        type: "boolean"
+        default: false  
+      resetTime:
+        description: """Time after that the contact state is reseted."""
+        type: "integer"
+        default: 10000
     required: ["protocols"]
   }
   HomeduinoRFShutter: {
@@ -297,7 +306,7 @@ module.exports = {
       resetTime:
         description: "Time after that the presence value is resettet to absent."
         type: "integer"
-        default: 10
+        default: 10000
     required: ["protocols"]
   }
   HomeduinoSwitch: {
