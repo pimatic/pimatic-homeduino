@@ -174,39 +174,41 @@ module.exports = (env) ->
   sendToSwitchesMixin = (protocols, state = null) ->
     pending = []
     for p in protocols
-      unless p.send is false
-        options = _.clone(p.options)
-        unless options.all? then options.all = no
-        options.state = state if state?
-        pending.push @board.whenReady().then( =>
-          return @board.rfControlSendMessage(
-            @_pluginConfig.transmitterPin, 
-            p.name, 
-            options
+      (p) =>
+        unless p.send is false
+          options = _.clone(p.options)
+          unless options.all? then options.all = no
+          options.state = state if state?
+          pending.push @board.whenReady().then( =>
+            return @board.rfControlSendMessage(
+              @_pluginConfig.transmitterPin, 
+              p.name, 
+              options
+            )
           )
-        )
     return Promise.all(pending)
 
   sendToDimmersMixin = (protocols, state = null, level = 0) ->
     pending = []
     for p in protocols
-      unless p.send is false
-        options = _.clone(p.options)
-        unless options.all? then options.all = no
-        options.state = state if state?
-        _protocol = Board.getRfProtocol(p.name)
-        if _protocol.values.dimlevel?
-          min = _protocol.values.dimlevel.min
-          max = _protocol.values.dimlevel.max
-          level = Math.round(level / ((100 / (max - min)) + min))
-        extend options, {dimlevel: level}
-        pending.push @board.whenReady().then( =>
-          return @board.rfControlSendMessage(
-            @_pluginConfig.transmitterPin, 
-            p.name, 
-            options
+      (p) =>
+        unless p.send is false
+          options = _.clone(p.options)
+          unless options.all? then options.all = no
+          options.state = state if state?
+          _protocol = Board.getRfProtocol(p.name)
+          if _protocol.values.dimlevel?
+            min = _protocol.values.dimlevel.min
+            max = _protocol.values.dimlevel.max
+            level = Math.round(level / ((100 / (max - min)) + min))
+          extend options, {dimlevel: level}
+          pending.push @board.whenReady().then( =>
+            return @board.rfControlSendMessage(
+              @_pluginConfig.transmitterPin, 
+              p.name, 
+              options
+            )
           )
-        )
     return Promise.all(pending)
 
   extend = (obj, mixin) ->
