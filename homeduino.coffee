@@ -174,7 +174,7 @@ module.exports = (env) ->
   sendToSwitchesMixin = (protocols, state = null) ->
     pending = []
     for p in protocols
-      (p) =>
+      do (p) =>
         unless p.send is false
           options = _.clone(p.options)
           unless options.all? then options.all = no
@@ -191,7 +191,7 @@ module.exports = (env) ->
   sendToDimmersMixin = (protocols, state = null, level = 0) ->
     pending = []
     for p in protocols
-      (p) =>
+      do (p) =>
         unless p.send is false
           options = _.clone(p.options)
           unless options.all? then options.all = no
