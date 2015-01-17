@@ -52,8 +52,11 @@ module.exports = {
               type: "boolean"
               description: "Toggle receive with this protocol"
               default: true
-            #required: ["protocol", "protocolOptions"]
-    #required: ["protocols"]
+      forceSend: 
+        type: "boolean"
+        description: "Resend signal even if switch has the requested state already"
+        default: true
+    required: ["protocols"]
   },
   HomeduinoRFDimmer: {
     title: "HomeduinoRFDimmer config options"
@@ -81,6 +84,10 @@ module.exports = {
               type: "boolean"
               description: "Toggle receive with this protocol"
               default: true
+      forceSend: 
+        type: "boolean"
+        description: "Resend signal even if switch has the requested state already"
+        default: true
     required: ["protocols"]
   },
   HomeduinoRFButtonsDevice: {
@@ -170,6 +177,10 @@ module.exports = {
             options:
               description: "The protocol options"
               type: "object"
+      forceSend: 
+        type: "boolean"
+        description: "Resend signal even if switch has the requested state already"
+        default: true
     required: ["protocols"]
   }
   HomeduinoRFTemperature: {

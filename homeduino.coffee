@@ -252,11 +252,11 @@ module.exports = (env) ->
     _sendStateToSwitches: sendToSwitchesMixin
 
     changeStateTo: (state) ->
-      if @_state is state then return Promise.resolve true
-      else 
-        @_sendStateToSwitches(@config.protocols, state).then( =>
-          @_setState(state)
-        )
+      unless @config.forceSend
+        if @_state is state then return Promise.resolve true
+      @_sendStateToSwitches(@config.protocols, state).then( =>
+        @_setState(state)
+      )
 
 
   class HomeduinoRFDimmer extends env.devices.DimmerActuator
@@ -303,16 +303,16 @@ module.exports = (env) ->
     turnOn: -> @changeDimlevelTo(@_lastdimlevel)
 
     changeDimlevelTo: (level) ->
-      if @_dimlevel is level then return Promise.resolve true
-      else
-        if level is 0
-          state = false
-        unless @_dimlevel is 0
-          @_lastdimlevel = @_dimlevel
+      unless @config.forceSend
+        if @_dimlevel is level then return Promise.resolve true
+      if level is 0
+        state = false
+      unless @_dimlevel is 0
+        @_lastdimlevel = @_dimlevel
 
-        @_sendLevelToDimmers(@config.protocols, state, level).then( =>
-          @_setDimlevel(level)
-        )
+      @_sendLevelToDimmers(@config.protocols, state, level).then( =>
+        @_setDimlevel(level)
+      )
   
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
@@ -403,7 +403,8 @@ module.exports = (env) ->
     _sendStateToSwitches: sendToSwitchesMixin
 
     stop: ->
-      if @_position is 'stopped' then return Promise.resolve()
+      unless @config.forceSend
+        if @_position is 'stopped' then return Promise.resolve()
       @_sendStateToSwitches(@config.protocols, @_position is 'up').then( =>
         @_setPosition('stopped')
       )
@@ -412,13 +413,13 @@ module.exports = (env) ->
 
     # Retuns a promise that is fulfilled when done.
     moveToPosition: (position) ->
-      if position is @_position then return Promise.resolve()
+      unless @config.forceSend
+        if position is @_position then return Promise.resolve()
       if position is 'stopped' then return @stop()
       else return @_sendStateToSwitches(@config.protocols, position is 'up').then( =>
         @_lastSendTime = new Date().getTime()
         @_setPosition(position)
       )
-
 
 
   class HomeduinoRFPir extends env.devices.PresenceSensor
