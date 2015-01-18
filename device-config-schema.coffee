@@ -133,7 +133,7 @@ module.exports = {
   HomeduinoRFContactSensor: {
     title: "HomeduinoRFContactSensor config options"
     type: "object"
-    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
+    extensions: ["xConfirm", "xLink", "xClosedLabel", "xOpenedLabel"]
     properties:
       protocols:
         description: "The protocols to use."
