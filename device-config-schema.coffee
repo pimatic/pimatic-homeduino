@@ -278,6 +278,44 @@ module.exports = {
               default: ""
 
   }
+  HomeduinoAnalogSensor: {
+    title: "HomeduinoAnalogSensor config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      attributes:
+        description: "The attributes (sensor values) of the sensor"
+        type: "array"
+        format: "table"
+        items:
+          type: "object"
+          properties:
+            name:
+              description: "Name for the attribute."
+              type: "string"
+            unit:
+              description: "The unit of the attribute"
+              type: "string"
+              default: ""
+            label:
+              description: "A custom label to use in the frontend."
+              type: "string"
+              default: ""
+            pin: 
+              description: "Arduino analog pin to read"
+              type: "integer"
+            interval:
+              description: "The interval in whicht the analog pin should be read in ms"
+              type: "integer"
+              default: 5000
+            processing: 
+              description: "
+                expression that can preprocess the value, $value is a placeholder for the analog 
+                value itself."
+              type: "string"
+              default: "$value"
+
+  }
   HomeduinoKeypad: {
     title: "HomeduinoKeypad config options"
     type: "object"

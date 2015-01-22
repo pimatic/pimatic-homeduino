@@ -67,6 +67,7 @@ module.exports = (env) ->
         HomeduinoRFShutter
         HomeduinoRFGenericSensor
         HomeduinoSwitch
+        HomeduinoAnalogSensor
       ]
 
       for Cl in deviceClasses
@@ -710,8 +711,6 @@ module.exports = (env) ->
       for attributeConfig in @config.attributes
         @_createAttribute(attributeConfig)
 
-      super()
-
       @_lastReceiveTimes = {}
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -796,6 +795,62 @@ module.exports = (env) ->
       assert state is on or state is off
       return @_writeState(state).then( =>
         @_setState(state)
+      )
+
+  class HomeduinoAnalogSensor extends env.devices.Sensor
+
+    constructor: (@config, lastState, @board) ->
+      @id = config.id
+      @name = config.name
+
+      @attributes = {}
+      for attributeConfig in @config.attributes
+        @_createAttribute(attributeConfig)
+      super()
+
+    _createAttribute: (attributeConfig) ->
+      name = attributeConfig.name
+      if @attributes[name]?
+        throw new Error(
+          "Two attributes with the same name in HomeduinoAnalogSensor config \"#{name}\""
+        )
+      # Set description and label
+      @attributes[name] = {
+        description: name
+        label: (
+          if attributeConfig.label? and attributeConfig.label.length > 0 then attributeConfig.label 
+          else name
+        )
+        type: "number"
+      }
+      # Set unit
+      if attributeConfig.unit? and attributeConfig.unit.length > 0
+        @attributes[name].unit = attributeConfig.unit
+      # gnerate getter:
+      @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
+
+      # setup polling
+      hdPlugin.pendingConnect.then( => 
+        return @board.pinMode(attributeConfig.pin, Board.INPUT) 
+      ).then( => 
+        variableManager = hdPlugin.framework.variableManager
+        processing = attributeConfig.processing or "$value"
+        requestAttributeValue = =>
+          @board.analogRead(attributeConfig.pin).then( (value) =>
+            info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, value)) 
+            variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+              @_attributesMeta[name].value = value
+              @emit name, value
+            )
+          ).catch( (error) =>
+            env.logger.error error
+            env.logger.debug error.stack
+          )
+          setTimeout(requestAttributeValue, attributeConfig.interval or 5000)
+        requestAttributeValue()
+      ).catch( (error) =>
+        env.logger.error error
+        env.logger.debug error.stack
       )
 
   ###

@@ -335,3 +335,30 @@ Only works with an arduino. pin: 13 = digital pin 13 (LED on arduino nano).
   "pin": 13
 }
 ```
+
+### AnalogSensor example:
+
+A AnalogSensor can read analog pins of the arduino and display there value. 
+An optional preprocessing can be applied. Pin numbering starts at 14 (`A0`) 
+for the first analog pin.
+
+```json
+{
+  "id": "homeduino-analog-sensor",
+  "name": "AnalogSensor",
+  "class": "HomeduinoAnalogSensor",
+  "attributes": [
+    {
+      "name": "voltage",
+      "unit": "V",
+      "label": "Voltage",
+      "pin": 14,
+      "interval": 5000,
+      "processing": "($value / 1023) * 5"
+    }
+  ]
+}
+```
+
+The analog value is between 0 and 1023 and can be preprocessed by an expression. In this example
+the value is scale to a value between 0 and 5.
