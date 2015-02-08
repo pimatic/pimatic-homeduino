@@ -47,5 +47,5 @@ module.exports = {
     connectionTimeout: 
       description: "Time to wait for ready package on connection"
       type: "integer"
-      default: 20000
+      default: 5*60*1000 # 5min
 }
