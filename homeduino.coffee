@@ -38,19 +38,24 @@ module.exports = (env) ->
         env.logger.debug "Couldn't connect (#{err.message}), retrying..."
       )
 
-      @pendingConnect = @board.connect(@config.connectionTimeout).then( =>
-        env.logger.info("Connected to homeduino device.")
-        if @config.enableReceiving
-          @board.rfControlStartReceiving(@config.receiverPin).then( =>
-            env.logger.debug("Receiving on pin #{@config.receiverPin}")
-          ).catch( (err) =>
-            env.logger.error("Couldn't start receiving: #{err.message}.")
-            env.logger.debug(err.stack)
+      @pendingConnect = new Promise( (resolve, reject) =>
+        @framework.on "after init", ( =>
+          @board.connect(@config.connectionTimeout).then( =>
+            env.logger.info("Connected to homeduino device.")
+            if @config.enableReceiving
+              @board.rfControlStartReceiving(@config.receiverPin).then( =>
+                env.logger.debug("Receiving on pin #{@config.receiverPin}")
+              ).catch( (err) =>
+                env.logger.error("Couldn't start receiving: #{err.message}.")
+                env.logger.debug(err.stack)
+              )
+            return
+          ).then(resolve).catch( (err) =>
+            env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
+            env.logger.error(err.stack)
+            reject(err)
           )
-        return
-      ).catch( (err) =>
-        env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
-        env.logger.error(err.stack)
+        )
       )
 
       deviceConfigDef = require("./device-config-schema")
