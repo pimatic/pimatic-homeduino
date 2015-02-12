@@ -17,7 +17,7 @@
   },
   "configSchema": "homeduino-config-schema.coffee",
   "dependencies": {
-    "homeduino": "~0.0.29"
+    "homeduino": "~0.0.30"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"
