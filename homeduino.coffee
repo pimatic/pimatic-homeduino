@@ -27,12 +27,12 @@ module.exports = (env) ->
           env.logger.debug("data: \"#{data}\"")
       )
 
-      @board.on("rfReceive", (event) -> 
+      @board.on("rfReceive", (event) => 
         if @config.debug
           env.logger.debug 'received:', event.pulseLengths, event.pulses
       )
 
-      @board.on("rf", (event) -> 
+      @board.on("rf", (event) =>  
         if @config.debug
           env.logger.debug "#{event.protocol}: ", event.values
       )
@@ -135,7 +135,7 @@ module.exports = (env) ->
           @emit 'humidity', result.humidity
         ).catch( (err) =>
           if lastError is err.message
-            if @config.debug
+            if hdPlugin.config.debug
               env.logger.debug("Suppressing repeated error message from dht read: #{err.message}")
             return
           env.logger.error("Error reading DHT Sensor: #{err.message}.")
@@ -161,7 +161,7 @@ module.exports = (env) ->
       ).catch( (err) =>
         @_pendingRead = null
         if (err.message is "checksum_error" or err.message is "timeout_error") and attempt < 5
-          if @config.debug
+          if hdPlugin.config.debug
             env.logger.debug(
               "got #{err.message} while reading dht sensor, retrying: #{attempt} of 5"
             )
