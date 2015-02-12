@@ -151,7 +151,7 @@ module.exports = (env) ->
         now = new Date().getTime()
         if (now - @_lastReadTime) < 2000
           return Promise.resolve @_lastReadResult
-      @_pendingRead = @board.whenReady().then( =>
+      @_pendingRead = hdPlugin.pendingConnect.then( =>
         return @board.readDHT(@config.type, @config.pin).then( (result) =>
           @_lastReadResult = result
           @_lastReadTime = (new Date()).getTime()
@@ -193,7 +193,7 @@ module.exports = (env) ->
           options = _.clone(p.options)
           unless options.all? then options.all = no
           options.state = state if state?
-          pending.push @board.whenReady().then( =>
+          pending.push hdPlugin.pendingConnect.then( =>
             return @board.rfControlSendMessage(
               @_pluginConfig.transmitterPin, 
               p.name, 
@@ -216,7 +216,7 @@ module.exports = (env) ->
             max = _protocol.values.dimlevel.max
             level = Math.round(level / ((100 / (max - min)) + min))
           extend options, {dimlevel: level}
-          pending.push @board.whenReady().then( =>
+          pending.push hdPlugin.pendingConnect.then( =>
             return @board.rfControlSendMessage(
               @_pluginConfig.transmitterPin, 
               p.name, 
