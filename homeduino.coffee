@@ -22,20 +22,23 @@ module.exports = (env) ->
 
       @board = new Board(@config.driver, @config.driverOptions)
 
-      @board.on("data", (data) ->
-        env.logger.debug("data: \"#{data}\"")
+      @board.on("data", (data) =>
+        if @config.debug
+          env.logger.debug("data: \"#{data}\"")
       )
 
       @board.on("rfReceive", (event) -> 
-        env.logger.debug 'received:', event.pulseLengths, event.pulses
+        if @config.debug
+          env.logger.debug 'received:', event.pulseLengths, event.pulses
       )
 
       @board.on("rf", (event) -> 
-        env.logger.debug "#{event.protocol}: ", event.values
+        if @config.debug
+          env.logger.debug "#{event.protocol}: ", event.values
       )
 
       @board.on("reconnect", (err) ->
-        env.logger.debug "Couldn't connect (#{err.message}), retrying..."
+        env.logger.warn "Couldn't connect (#{err.message}), retrying..."
       )
 
       @pendingConnect = new Promise( (resolve, reject) =>
@@ -44,7 +47,8 @@ module.exports = (env) ->
             env.logger.info("Connected to homeduino device.")
             if @config.enableReceiving
               @board.rfControlStartReceiving(@config.receiverPin).then( =>
-                env.logger.debug("Receiving on pin #{@config.receiverPin}")
+                if @config.debug
+                  env.logger.debug("Receiving on pin #{@config.receiverPin}")
               ).catch( (err) =>
                 env.logger.error("Couldn't start receiving: #{err.message}.")
                 env.logger.debug(err.stack)
@@ -131,7 +135,8 @@ module.exports = (env) ->
           @emit 'humidity', result.humidity
         ).catch( (err) =>
           if lastError is err.message
-            env.logger.debug("Suppressing repeated error message from dht read: #{err.message}")
+            if @config.debug
+              env.logger.debug("Suppressing repeated error message from dht read: #{err.message}")
             return
           env.logger.error("Error reading DHT Sensor: #{err.message}.")
           lastError = err.message
@@ -156,7 +161,10 @@ module.exports = (env) ->
       ).catch( (err) =>
         @_pendingRead = null
         if (err.message is "checksum_error" or err.message is "timeout_error") and attempt < 5
-          env.logger.debug "got #{err.message} while reading dht sensor, retrying: #{attempt} of 5"
+          if @config.debug
+            env.logger.debug(
+              "got #{err.message} while reading dht sensor, retrying: #{attempt} of 5"
+            )
           return Promise.delay(2500).then( => @_readSensor(attempt+1) )
         else
           throw err

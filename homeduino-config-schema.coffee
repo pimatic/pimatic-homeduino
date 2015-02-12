@@ -48,4 +48,8 @@ module.exports = {
       description: "Time to wait for ready package on connection"
       type: "integer"
       default: 5*60*1000 # 5min
+    debug:
+      description: "log information for debugging including received messages"
+      type: "boolean"
+      default: true
 }
