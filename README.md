@@ -1,3 +1,8 @@
+pimatic-homeduino-dst
+=======================
+
+Fork of pimatic-homeduino to include using Dallas Temperature sensors like ds18b20 over a OneWire bus.
+
 pimatic-homeduino
 =======================
 
