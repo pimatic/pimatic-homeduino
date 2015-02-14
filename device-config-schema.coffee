@@ -18,6 +18,20 @@ module.exports = {
         default: 10000
     required: ["pin"]
   },
+  HomeduinoDSTSensor: {
+    title: "HomeduinoDSTSensor config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      pin: 
+        description: "The digital pin, the DHT sensor is connected to."
+        type: "integer"
+      interval:
+        description: "Polling interval for the readings, should be greater then 2"
+        type: "integer"
+        default: 10000
+    required: ["pin"]
+  },
   HomeduinoRFSwitch: {
     title: "HomeduinoRFSwitch config options"
     type: "object"
