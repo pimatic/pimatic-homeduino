@@ -1,8 +1,3 @@
-pimatic-homeduino-dst
-=======================
-
-Fork of pimatic-homeduino to include using Dallas Temperature sensors like ds18b20 over a OneWire bus.
-
 pimatic-homeduino
 =======================
 
@@ -180,6 +175,16 @@ is used for sending or receiving. Default is `true` for both.
   "class": "HomeduinoDHTSensor",
   "type": 22,
   "pin": 13
+}
+```
+
+### DST Dallas DS18B20 sensor example:
+
+```json
+{
+  "id": "homeduino-temperature-dst",
+  "name": "DST",
+  "class": "HomeduinoDSTSensor"
 }
 ```
 
