@@ -109,16 +109,7 @@ module.exports = (env) ->
 
   hdPlugin = new HomeduinoPlugin()
 
-  # Homed controls FS20 devices
-  #Adjusted DHT to DST implementation. Removed humidity, changed command to DST.
   class HomeduinoDSTSensor extends env.devices.TemperatureSensor
-
-    attributes:
-      temperature:
-        description: "the meassured temperature"
-        type: "number"
-        unit: '°C'
-
 
     constructor: (@config, lastState, @board) ->
       @id = config.id
@@ -140,7 +131,7 @@ module.exports = (env) ->
         )
       ), @config.interval)
     
-    _readSensor: (attempt = 0)-> 
+    _readSensor: ()-> 
       # Already reading? return the reading promise
       if @_pendingRead? then return @_pendingRead
       # Don't read the sensor to frequently, the minimal reading interal should be 2.5 seconds
@@ -153,23 +144,11 @@ module.exports = (env) ->
           @_lastReadResult = result
           @_lastReadTime = (new Date()).getTime()
           @_pendingRead = null
-
-          env.logger.debug(
-              "received temperature reading: #{result.temperature}."
-          )
-
           return result
         )
       ).catch( (err) =>
         @_pendingRead = null
-        if (err.message is "checksum_error" or err.message is "timeout_error") and attempt < 5
-          if hdPlugin.config.debug
-            env.logger.debug(
-              "got #{err.message} while reading dht sensor, retrying: #{attempt} of 5"
-            )
-          return Promise.delay(2500).then( => @_readSensor(attempt+1) )
-        else
-          throw err
+        throw err
       )
       
     getTemperature: -> @_readSensor().then( (result) -> result.temperature )
