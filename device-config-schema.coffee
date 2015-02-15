@@ -18,6 +18,16 @@ module.exports = {
         default: 10000
     required: ["pin"]
   },
+  HomeduinoDSTSensor: {
+    title: "HomeduinoDSTSensor config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      interval:
+        description: "Polling interval for the readings, should be greater then 2"
+        type: "integer"
+        default: 10000
+  },
   HomeduinoRFSwitch: {
     title: "HomeduinoRFSwitch config options"
     type: "object"

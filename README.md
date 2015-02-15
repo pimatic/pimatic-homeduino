@@ -178,6 +178,16 @@ is used for sending or receiving. Default is `true` for both.
 }
 ```
 
+### DST Dallas DS18B20 sensor example:
+
+```json
+{
+  "id": "homeduino-temperature-dst",
+  "name": "DST",
+  "class": "HomeduinoDSTSensor"
+}
+```
+
 ### PIR sensor example:
 
 ```json

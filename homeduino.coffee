@@ -66,6 +66,7 @@ module.exports = (env) ->
 
       deviceClasses = [
         HomeduinoDHTSensor
+        HomeduinoDSTSensor
         HomeduinoRFSwitch
         HomeduinoRFDimmer
         HomeduinoRFButtonsDevice
@@ -109,6 +110,71 @@ module.exports = (env) ->
   hdPlugin = new HomeduinoPlugin()
 
   # Homed controls FS20 devices
+  #Adjusted DHT to DST implementation. Removed humidity, changed command to DST.
+  class HomeduinoDSTSensor extends env.devices.TemperatureSensor
+
+    attributes:
+      temperature:
+        description: "the meassured temperature"
+        type: "number"
+        unit: '°C'
+
+
+    constructor: (@config, lastState, @board) ->
+      @id = config.id
+      @name = config.name
+      super()
+
+      lastError = null
+      setInterval(( => 
+        @_readSensor().then( (result) =>
+          lastError = null
+          @emit 'temperature', result.temperature
+        ).catch( (err) =>
+          if lastError is err.message
+            if hdPlugin.config.debug
+              env.logger.debug("Suppressing repeated error message from dht read: #{err.message}")
+            return
+          env.logger.error("Error reading DST Sensor: #{err.message}.")
+          lastError = err.message
+        )
+      ), @config.interval)
+    
+    _readSensor: (attempt = 0)-> 
+      # Already reading? return the reading promise
+      if @_pendingRead? then return @_pendingRead
+      # Don't read the sensor to frequently, the minimal reading interal should be 2.5 seconds
+      if @_lastReadResult?
+        now = new Date().getTime()
+        if (now - @_lastReadTime) < 2000
+          return Promise.resolve @_lastReadResult
+      @_pendingRead = hdPlugin.pendingConnect.then( =>
+        return @board.readDST().then( (result) =>
+          @_lastReadResult = result
+          @_lastReadTime = (new Date()).getTime()
+          @_pendingRead = null
+
+          env.logger.debug(
+              "received temperature reading: #{result.temperature}."
+          )
+
+          return result
+        )
+      ).catch( (err) =>
+        @_pendingRead = null
+        if (err.message is "checksum_error" or err.message is "timeout_error") and attempt < 5
+          if hdPlugin.config.debug
+            env.logger.debug(
+              "got #{err.message} while reading dht sensor, retrying: #{attempt} of 5"
+            )
+          return Promise.delay(2500).then( => @_readSensor(attempt+1) )
+        else
+          throw err
+      )
+      
+    getTemperature: -> @_readSensor().then( (result) -> result.temperature )
+
+  #Original DHT implementation
   class HomeduinoDHTSensor extends env.devices.TemperatureSensor
 
     attributes:
