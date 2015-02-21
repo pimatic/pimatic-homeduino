@@ -1,7 +1,7 @@
 {
-  "name": "pimatic-homeduino",
+  "name": "pimatic-homeduino-dst-dev",
   "description": "pimatic plugin to use various 433mhz devices, sensors and more with an arduino.",
-  "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://www.sweetpi.de)",
+  "author": "Ronald Steen <ronald.steen@gmail.com>, Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://www.sweetpi.de)",
   "main": "homeduino",
   "files": [
     "homeduino.coffee",
@@ -9,7 +9,7 @@
     "homeduino-config-schema.coffee",
     "device-config-schema.coffee"
   ],
-  "version": "0.8.40",
+  "version": "0.8.40-beta-2",
   "homepage": "http://pimatic.org",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   },
   "configSchema": "homeduino-config-schema.coffee",
   "dependencies": {
-    "homeduino": "~0.0.30"
+    "homeduino-dst-dev": "~0.0.32-beta-1"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"

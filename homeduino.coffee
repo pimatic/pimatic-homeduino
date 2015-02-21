@@ -115,9 +115,10 @@ module.exports = (env) ->
 
     attributes:
       temperature:
-        description: "the meassured temperature"
-        type: "number"
+        description: "the meassured temperature"        
         unit: '°C'
+        pin: "number"
+        address: "string"
 
 
     constructor: (@config, lastState, @board) ->
