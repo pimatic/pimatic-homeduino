@@ -45,6 +45,11 @@ module.exports = (env) ->
         @framework.on "after init", ( =>
           @board.connect(@config.connectionTimeout).then( =>
             env.logger.info("Connected to homeduino device.")
+
+            @board.readDstSensors(12).then( (ret) -> 
+              env.logger.info("Sensors: #{ret.sensors}")
+            )
+
             if @config.enableReceiving
               @board.rfControlStartReceiving(@config.receiverPin).then( =>
                 if @config.debug
@@ -115,7 +120,8 @@ module.exports = (env) ->
 
     attributes:
       temperature:
-        description: "the meassured temperature"        
+        description: "the meassured temperature"    
+        type: "string"    
         unit: '°C'
         pin: "number"
         address: "string"
@@ -150,7 +156,9 @@ module.exports = (env) ->
         if (now - @_lastReadTime) < 2000
           return Promise.resolve @_lastReadResult
       @_pendingRead = hdPlugin.pendingConnect.then( =>
-        return @board.readDST().then( (result) =>
+        env.logger.debug("pin #{@config.pin}, address #{@config.address}")
+
+        return @board.readDstSensor(@config.pin, @config.address).then( (result) =>
           @_lastReadResult = result
           @_lastReadTime = (new Date()).getTime()
           @_pendingRead = null
