@@ -6,7 +6,7 @@ module.exports = (env) ->
   # Require the [cassert library](https://github.com/rhoot/cassert).
   assert = env.require 'cassert'
   _ = env.require('lodash')
-  homeduino = require('homeduino')
+  homeduino = require('homeduino-dst-dev')
   M = env.matcher
 
   Board = homeduino.Board
