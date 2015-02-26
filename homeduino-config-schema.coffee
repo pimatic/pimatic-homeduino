@@ -44,6 +44,10 @@ module.exports = {
       description: "The arduino digital pin, the 433mhz transmitter is connected to."
       type: "integer"
       default: 4
+    dstSearchAddressPin:
+      description: "The arduino digital pin to search for DS18B20 sensors on."
+      type: "integer"
+      default: 12
     connectionTimeout: 
       description: "Time to wait for ready package on connection"
       type: "integer"
