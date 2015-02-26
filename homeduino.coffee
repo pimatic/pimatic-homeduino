@@ -6,7 +6,7 @@ module.exports = (env) ->
   # Require the [cassert library](https://github.com/rhoot/cassert).
   assert = env.require 'cassert'
   _ = env.require('lodash')
-  homeduino = require('homeduino-dst-dev')
+  homeduino = require('homeduino')
   M = env.matcher
 
   Board = homeduino.Board
@@ -46,7 +46,7 @@ module.exports = (env) ->
           @board.connect(@config.connectionTimeout).then( =>
             env.logger.info("Connected to homeduino device.")
 
-            @board.readDstSensors(12).then( (ret) -> 
+            @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) -> 
               env.logger.info("Sensors: #{ret.sensors}")
             )
 
