@@ -33,7 +33,8 @@ You can load the plugin by editing your `config.json` to include:
     "baudrate": 115200
   },
   "receiverPin": 0,
-  "transmitterPin": 4
+  "transmitterPin": 4,
+  "dstSearchAddressPin": 12
 }
 ```
 
@@ -184,7 +185,10 @@ is used for sending or receiving. Default is `true` for both.
 {
   "id": "homeduino-temperature-dst",
   "name": "DST",
-  "class": "HomeduinoDSTSensor"
+  "class": "HomeduinoDSTSensor",
+  "pin": 12,
+  "address" : "104AE9B50008000E",
+  "interval" : 10000
 }
 ```
 
