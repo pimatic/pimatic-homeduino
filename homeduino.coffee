@@ -123,8 +123,13 @@ module.exports = (env) ->
         description: "the meassured temperature"    
         type: "string"    
         unit: '°C'
-        pin: "number"
-        address: "string"
+      pin:
+        description: "The pin that the sensor is connected to."
+        type: "number"
+      address:
+        description: "The address of the sensor."
+        type: "string"
+
 
 
     constructor: (@config, lastState, @board) ->
