@@ -27,6 +27,12 @@ module.exports = {
         description: "Polling interval for the readings, should be greater then 2"
         type: "integer"
         default: 10000
+      pin:
+        description: "The digital pin the DST sensor is connected to."
+        type : "integer"
+      address:  
+        description: "The address of the sensor"
+        type: "string"
   },
   HomeduinoRFSwitch: {
     title: "HomeduinoRFSwitch config options"
