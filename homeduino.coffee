@@ -121,7 +121,7 @@ module.exports = (env) ->
     attributes:
       temperature:
         description: "the meassured temperature"    
-        type: "string"    
+        type: "number"    
         unit: '°C'
       pin:
         description: "The pin that the sensor is connected to."
