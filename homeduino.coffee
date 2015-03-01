@@ -46,9 +46,13 @@ module.exports = (env) ->
           @board.connect(@config.connectionTimeout).then( =>
             env.logger.info("Connected to homeduino device.")
 
-            @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) -> 
-              env.logger.info("Sensors: #{ret.sensors}")
-            )
+            if @config.enableDSTSensors
+              @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) -> 
+                env.logger.info("DST sensors: #{ret.sensors}")
+              ).catch( (err) =>
+                env.logger.error("Couldn't scan for DST sensors: #{err.message}.")
+                env.logger.debug(err.stack)
+              )
 
             if @config.enableReceiving
               @board.rfControlStartReceiving(@config.receiverPin).then( =>

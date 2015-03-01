@@ -44,6 +44,10 @@ module.exports = {
       description: "The arduino digital pin, the 433mhz transmitter is connected to."
       type: "integer"
       default: 4
+    enableDSTSensors:
+      description: "Enable support for DS18B20 sensors, appropriate homeduino version must be used."
+      type: "boolean"
+      default: false
     dstSearchAddressPin:
       description: "The arduino digital pin to search for DS18B20 sensors on."
       type: "integer"
