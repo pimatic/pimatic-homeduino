@@ -1,19 +1,19 @@
 module.exports = {
-  title: "homeduino device config schemes"
+  title: "Homeduino device config schemes"
   HomeduinoDHTSensor: {
     title: "HomeduinoDHTSensor config options"
     type: "object"
     extensions: ["xLink"]
     properties:
       type:
-        description: "The type of the dht sensor (22, 33, 44 or 55)"
+        description: "The type of the DHT sensor (22, 33, 44 or 55)"
         type: "integer"
         default: 22
       pin: 
         description: "The digital pin, the DHT sensor is connected to."
         type: "integer"
       interval:
-        description: "Polling interval for the readings, should be greater then 2"
+        description: "Polling interval for the readings, should be greater than 2"
         type: "integer"
         default: 10000
     required: ["pin"]
@@ -24,7 +24,7 @@ module.exports = {
     extensions: ["xLink"]
     properties:
       interval:
-        description: "Polling interval for the readings, should be greater then 2"
+        description: "Polling interval for the readings, should be greater than 2"
         type: "integer"
         default: 10000
       pin:
@@ -321,7 +321,7 @@ module.exports = {
               description: "Arduino analog pin to read"
               type: "integer"
             interval:
-              description: "The interval in whicht the analog pin should be read in ms"
+              description: "The interval in which the analog pin should be read in ms"
               type: "integer"
               default: 5000
             processing: 
@@ -369,7 +369,7 @@ module.exports = {
               description: "The protocol options"
               type: "object"
       resetTime:
-        description: "Time after that the presence value is resettet to absent."
+        description: "Time after that the presence value is reseted to absent."
         type: "integer"
         default: 10000
     required: ["protocols"]
