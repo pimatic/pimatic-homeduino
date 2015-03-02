@@ -633,7 +633,7 @@ module.exports = (env) ->
             if hasRain
               if !@attributes.rain?
                 @attributes.rain = {
-                  description: "the meassured fall of rain"
+                  description: "the measured fall of rain"
                   type: "number"
                   unit: 'mm'
                 }
