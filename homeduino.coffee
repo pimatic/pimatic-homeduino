@@ -172,11 +172,12 @@ module.exports = (env) ->
         description: "the messured temperature"
         type: "number"
         unit: '°C'
+        acronym: 'T'
       humidity:
         description: "the messured humidity"
         type: "number"
         unit: '%'
-
+        acronym: 'RH'
 
     constructor: (@config, lastState, @board) ->
       @id = config.id
@@ -550,12 +551,14 @@ module.exports = (env) ->
           description: "the messured temperature"
           type: "number"
           unit: '°C'
+          acronym: 'T'
         }
       if hasHumidity
         @attributes.humidity = {
           description: "the messured humidity"
           type: "number"
           unit: '%'
+          acronym: 'RH'
         }
 
       @board.on('rf', (event) =>
@@ -636,6 +639,7 @@ module.exports = (env) ->
                   description: "the messured fall of rain"
                   type: "number"
                   unit: 'mm'
+                  acronym: 'RAIN'
                 }
             else 
               env.logger.warn(
@@ -648,6 +652,7 @@ module.exports = (env) ->
                   description: "the messured humidity"
                   type: "number"
                   unit: '%'
+                  acronym: 'RH'
                 }
             else 
               env.logger.warn(
@@ -660,6 +665,7 @@ module.exports = (env) ->
                   description: "the messured temperature"
                   type: "number"
                   unit: '°C'
+                  acronym: 'T'
                 }
             else 
               env.logger.warn(
@@ -672,6 +678,7 @@ module.exports = (env) ->
                 @attributes.windDirection = {
                   description: "the messured wind direction"
                   type: "string"
+                  acronym: 'WIND'
                 }
             else 
               env.logger.warn(
@@ -685,6 +692,7 @@ module.exports = (env) ->
                   description: "the messured average airspeed"
                   type: "number"
                   unit: 'm/s'
+                  acronym: 'SPEED'
                 }
             else 
               env.logger.warn(
@@ -698,6 +706,7 @@ module.exports = (env) ->
                   description: "the messured wind gust"
                   type: "number"
                   unit: 'm/s'
+                  acronym: 'GUST'
                 }
             else 
               env.logger.warn(
@@ -808,6 +817,13 @@ module.exports = (env) ->
       # Set unit
       if attributeConfig.unit? and attributeConfig.unit.length > 0
         @attributes[name].unit = attributeConfig.unit
+        
+      if attributeConfig.discrete?
+        @attributes[name].discrete = attributeConfig.discrete
+
+      if attributeConfig.acronym?
+        @attributes[name].acronym = attributeConfig.acronym
+
       # gnerate getter:
       @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
 
@@ -895,6 +911,13 @@ module.exports = (env) ->
       # Set unit
       if attributeConfig.unit? and attributeConfig.unit.length > 0
         @attributes[name].unit = attributeConfig.unit
+
+      if attributeConfig.discrete?
+        @attributes[name].discrete = attributeConfig.discrete
+
+      if attributeConfig.acronym?
+        @attributes[name].acronym = attributeConfig.acronym
+                 
       # gnerate getter:
       @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
 

@@ -288,11 +288,22 @@ module.exports = {
               description: "The unit of the attribute"
               type: "string"
               default: ""
+              required: false
             label:
               description: "A custom label to use in the frontend."
               type: "string"
               default: ""
-
+              required: false
+            discrete:
+              description: "
+                Should be set to true if the value does not change continuously over time.
+              "
+              type: "boolean"
+              required: false
+            acronym:
+              description: "Acronym to show as value label in the frontend"
+              type: "string"
+              required: false
   }
   HomeduinoAnalogSensor: {
     title: "HomeduinoAnalogSensor config options"
@@ -330,6 +341,16 @@ module.exports = {
                 value itself."
               type: "string"
               default: "$value"
+            discrete:
+              description: "
+                Should be set to true if the value does not change continuously over time.
+              "
+              type: "boolean"
+              required: false
+            acronym:
+              description: "Acronym to show as value label in the frontend"
+              type: "string"
+              required: false
 
   }
   HomeduinoKeypad: {
