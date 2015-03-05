@@ -1,10 +1,10 @@
 # #homeduino configuration options
 module.exports = {
-  title: "homeduino config"
+  title: "Homeduino config"
   type: "object"
   properties:
     driver:
-      description: "The diver to connect to the arduino or virtualarduino"
+      description: "The driver to connect to the Arduino or 'virtualarduino'"
       type: "string"
       enum: ["serialport", "gpio"]
       default: "serialport"
@@ -37,11 +37,11 @@ module.exports = {
       type: "boolean"
       default: true
     receiverPin:
-      description: "The arduino interrupt pin, the 433mhz receiver is connected to."
+      description: "The Arduino interrupt pin, the 433 MHz receiver is connected to."
       type: "integer"
       default: 0
     transmitterPin:
-      description: "The arduino digital pin, the 433mhz transmitter is connected to."
+      description: "The Arduino digital pin, the 433 MHz transmitter is connected to."
       type: "integer"
       default: 4
     enableDSTSensors:
@@ -49,7 +49,7 @@ module.exports = {
       type: "boolean"
       default: false
     dstSearchAddressPin:
-      description: "The arduino digital pin to search for DS18B20 sensors on."
+      description: "The Arduino digital pin to search for DS18B20 sensors on."
       type: "integer"
       default: 12
     connectionTimeout: 
@@ -57,7 +57,7 @@ module.exports = {
       type: "integer"
       default: 5*60*1000 # 5min
     debug:
-      description: "log information for debugging including received messages"
+      description: "Log information for debugging, including received messages"
       type: "boolean"
       default: true
 }

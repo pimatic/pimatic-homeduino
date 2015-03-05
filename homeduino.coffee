@@ -133,7 +133,7 @@ module.exports = (env) ->
         ).catch( (err) =>
           if lastError is err.message
             if hdPlugin.config.debug
-              env.logger.debug("Suppressing repeated error message from dht read: #{err.message}")
+              env.logger.debug("Suppressing repeated error message from DST read: #{err.message}")
             return
           env.logger.error("Error reading DST Sensor: #{err.message}.")
           lastError = err.message
@@ -193,7 +193,7 @@ module.exports = (env) ->
         ).catch( (err) =>
           if lastError is err.message
             if hdPlugin.config.debug
-              env.logger.debug("Suppressing repeated error message from dht read: #{err.message}")
+              env.logger.debug("Suppressing repeated error message from DHT read: #{err.message}")
             return
           env.logger.error("Error reading DHT Sensor: #{err.message}.")
           lastError = err.message
@@ -220,7 +220,7 @@ module.exports = (env) ->
         if (err.message is "checksum_error" or err.message is "timeout_error") and attempt < 5
           if hdPlugin.config.debug
             env.logger.debug(
-              "got #{err.message} while reading dht sensor, retrying: #{attempt} of 5"
+              "got #{err.message} while reading DHT sensor, retrying: #{attempt} of 5"
             )
           return Promise.delay(2500).then( => @_readSensor(attempt+1) )
         else
@@ -505,7 +505,7 @@ module.exports = (env) ->
         unless _protocol?
           throw new Error("Could not find a protocol with the name \"#{p.name}\".")
         unless _protocol.type is "pir"
-          throw new Error("\"#{p.name}\" is not a pir protocol.")
+          throw new Error("\"#{p.name}\" is not a PIR protocol.")
 
       resetPresence = ( =>
         @_setPresence(no)
@@ -625,7 +625,7 @@ module.exports = (env) ->
       )
       if hasNoAttributes
         throw new Error(
-          "No Values to show availabe. The config.protocols and the config.values dont match."
+          "No values to show available. The config.protocols and the config.values doesn't match."
         )
 
       @attributes = {}
@@ -636,7 +636,7 @@ module.exports = (env) ->
             if hasRain
               if !@attributes.rain?
                 @attributes.rain = {
-                  description: "the messured fall of rain"
+                  description: "the measured fall of rain"
                   type: "number"
                   unit: 'mm'
                   acronym: 'RAIN'
@@ -689,7 +689,7 @@ module.exports = (env) ->
             if hasAvgAirspeed
               if !@attributes.avgAirspeed?
                 @attributes.avgAirspeed = {
-                  description: "the messured average airspeed"
+                  description: "the measured average airspeed"
                   type: "number"
                   unit: 'm/s'
                   acronym: 'SPEED'
@@ -703,7 +703,7 @@ module.exports = (env) ->
             if hasWindGust
               if !@attributes.windGust?
                 @attributes.windGust = {
-                  description: "the messured wind gust"
+                  description: "the measured wind gust"
                   type: "number"
                   unit: 'm/s'
                   acronym: 'GUST'
