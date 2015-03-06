@@ -399,9 +399,9 @@ module.exports = (env) ->
               "Could not find a protocol with the name \"#{p.name}\" in config" +
               " of button \"#{b.id}\"."
             )
-          unless _protocol.type is "switch"
+          unless _protocol.type is "switch" or "command"
             throw new Error(
-              "\"#{p.name}\" in config of button \"#{b.id}\" is not a switch protocol."
+              "\"#{p.name}\" in config of button \"#{b.id}\" is not a switch or a command protocol."
             )
       super(config)
 
