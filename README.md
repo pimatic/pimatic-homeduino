@@ -19,7 +19,7 @@ The plugin can be used with two differend hardware combinations:
 
 ### A.Connected arduino (recommended)
 
-![Hardware](hardware.jpg)  
+![Hardware](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/hardware.jpg)  
 
 -------------
 You can load the plugin by editing your `config.json` to include:
@@ -43,7 +43,7 @@ in the `plugins` section. For all configuration options see [homeduino-config-sc
 The pin numbers are arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
 The `transmitterPin` can must bq a digitial pin between `2` (D2) and `13` (D13) .
 
-![nano-pins](pins-nano.png)
+![nano-pins](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/pins-nano.png)
 
 
 ### B. Raspberry Pi with ATTiny45 / 85 Prefilter
