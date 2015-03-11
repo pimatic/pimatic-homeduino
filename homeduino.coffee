@@ -251,8 +251,14 @@ module.exports = (env) ->
           unless options.all? then options.all = no
           options.state = state if state?
           pending.push hdPlugin.pendingConnect.then( =>
+            if @_pluginConfig.debug
+              env.logger.debug("Sending
+                 Pin:#{@_pluginConfig.transmitterPin}
+                 Repeats: #{@_pluginConfig.rfrepeats}
+                 Protocol: #{p.name}")
             return @board.rfControlSendMessage(
               @_pluginConfig.transmitterPin, 
+              @_pluginConfig.rfrepeats,
               p.name, 
               options
             )
@@ -275,7 +281,8 @@ module.exports = (env) ->
           extend options, {dimlevel: level}
           pending.push hdPlugin.pendingConnect.then( =>
             return @board.rfControlSendMessage(
-              @_pluginConfig.transmitterPin, 
+              @_pluginConfig.transmitterPin,
+              @_pluginConfig.rfrepeats,
               p.name, 
               options
             )

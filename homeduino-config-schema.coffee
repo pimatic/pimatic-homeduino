@@ -60,4 +60,7 @@ module.exports = {
       description: "Log information for debugging, including received messages"
       type: "boolean"
       default: true
+    rfrepeats:
+      description: "Amount of RF repeats"
+      default: 7
 }
