@@ -389,6 +389,11 @@ module.exports = {
             options:
               description: "The protocol options"
               type: "object"
+      autoReset:
+        description: """Reset the state after resetTime. Usefull for pir sensors, 
+                      that emit present and absent events"""
+        type: "boolean"
+        default: true
       resetTime:
         description: "Time after that the presence value is reseted to absent."
         type: "integer"
