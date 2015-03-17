@@ -1,23 +1,23 @@
 pimatic-homeduino
 =======================
 
-Plugin for using various 433mhz devices and sensors with a connected arduino with 
+Plugin for using various 433 Mhz devices and sensors with a connected Arduino with 
 [homeduino](https://github.com/pimatic/homeduino) sketch or directly with capable hardware like the Raspberry Pi.
 
-This plugins supports all 433mhz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs) 
+This plugins supports all 433 MHz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs) 
 [protocol implementations](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
 
 Drivers
 ------
 
-The plugin can be used with two differend hardware combinations:
+The plugin can be used with two different hardware combinations:
 
-*  A. Computer with connected arduino (with homeduino sketch) and 433mhz transmitter and receiver (recommended)
-*  B. Raspberry Pi (or Banana Pi or Hummingboard) with 433mhz transmitter and receiver
+*  A. Computer with connected Arduino (with homeduino sketch) and 433 MHz transmitter and receiver (recommended)
+*  B. Raspberry Pi (or Banana Pi or Hummingboard) with 433 MHz transmitter and receiver
 
 
-### A.Connected arduino (recommended)
+### A.Connected Arduino (recommended)
 
 ![Hardware](hardware.jpg)  
 
@@ -40,8 +40,8 @@ You can load the plugin by editing your `config.json` to include:
 
 in the `plugins` section. For all configuration options see [homeduino-config-schema](homeduino-config-schema.coffee)
 
-The pin numbers are arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
-The `transmitterPin` can must bq a digitial pin between `2` (D2) and `13` (D13) .
+The pin numbers are Arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
+The `transmitterPin` must be a digitial pin between `2` (D2) and `13` (D13).
 
 ![nano-pins](pins-nano.png)
 
@@ -71,7 +71,7 @@ Devices must be added manually to the device section of your pimatic config.
 
 A list with all supported protocols and protocol-options can be found [here](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
-### weather-station sensor example:
+### Weather station sensor example:
 
 This is the basic sensor with only temperature and humidity
 ```json
@@ -88,7 +88,7 @@ This is the basic sensor with only temperature and humidity
   }]
 }
 ```
-For weather stations like the Alecto WS-4500 you should use the weatherstation device
+For weather stations like the Alecto WS-4500 you should use the weather station device
 ```json
 {
   "id": "weatherstation",
@@ -113,10 +113,9 @@ It supports different values to display
 rain, temperature, humidity, windGust, windDirection and avgAirspeed
 The order of the listed values define the order of the displayed values.
 
+ 
 
-For protocol options see: 
-
-### switch example:
+### Switch example:
 
 ```json
 {
@@ -133,8 +132,8 @@ For protocol options see:
 }
 ```
 
-A switch (and other devcies) can be controled or send to outlets with multiple protocols. Just
-add more protocols to the `protocols` array. You can also set if a protocols
+A switch (and other devices) can be controlled or send to outlets with multiple protocols. Just
+add more protocols to the `protocols` array. You can also set if a protocol
 is used for sending or receiving. Default is `true` for both.
 
 ### Multi protocol switch example:
@@ -227,7 +226,7 @@ is used for sending or receiving. Default is `true` for both.
 }
 ```
 
-Some contact only emit an event on open, For this you can set autorReset to true:
+Some contacts only emit an event on open. For this you can set autoReset to true:
 
 ```json
 {
@@ -267,7 +266,7 @@ Some contact only emit an event on open, For this you can set autorReset to true
 ```
 
 
-### Generic RF Sensor with arduino sender
+### Generic RF Sensor with Arduino sender
 
 ```json
 {
@@ -336,9 +335,9 @@ Some contact only emit an event on open, For this you can set autorReset to true
   ]
 },
 ```
-### pin switch example:
+### Pin switch example:
 
-Only works with an arduino. pin: 13 = digital pin 13 (LED on arduino nano).
+Only works with an Arduino. pin: 13 = digital pin 13 (LED on Arduino Nano).
 
 ```json
 {
@@ -352,7 +351,7 @@ Only works with an arduino. pin: 13 = digital pin 13 (LED on arduino nano).
 
 ### AnalogSensor example:
 
-A AnalogSensor can read analog pins of the arduino and display there value. 
+An AnalogSensor can read analog pins of the Arduino and display there value. 
 An optional preprocessing can be applied. Pin numbering starts at 14 (`A0`) 
 for the first analog pin.
 
