@@ -518,7 +518,8 @@ module.exports = (env) ->
             unless @_setPresence is event.values.presence
               @_setPresence(event.values.presence)
             clearTimeout(@_resetPresenceTimeout)
-            @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
+            if @config.autoReset is true
+              @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
       )
       super()
 
