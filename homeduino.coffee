@@ -129,7 +129,13 @@ module.exports = (env) ->
       setInterval(( => 
         @_readSensor().then( (result) =>
           lastError = null
-          @emit 'temperature', result.temperature
+          variableManager = hdPlugin.framework.variableManager
+          processing = @config.processing or "$value"
+          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.temperature)) 
+          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+            @emit 'temperature', value
+          )
+          #@emit 'temperature', result.temperature
         ).catch( (err) =>
           if lastError is err.message
             if hdPlugin.config.debug
@@ -188,8 +194,19 @@ module.exports = (env) ->
       setInterval(( => 
         @_readSensor().then( (result) =>
           lastError = null
-          @emit 'temperature', result.temperature
-          @emit 'humidity', result.humidity
+          variableManager = hdPlugin.framework.variableManager
+          processing = @config.processingTemp or "$value"
+          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.temperature)) 
+          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+            @emit 'temperature', value
+          )
+          #@emit 'temperature', result.temperature
+          processing = @config.processingHum or "$value"
+          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.humidity)) 
+          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+            @emit 'humidity', value
+          )
+          #@emit 'humidity', result.humidity
         ).catch( (err) =>
           if lastError is err.message
             if hdPlugin.config.debug
@@ -580,14 +597,29 @@ module.exports = (env) ->
             )
             if timeDelta < 2000
               return 
+            
             if event.values.temperature?
-              @_temperatue = event.values.temperature
+              variableManager = hdPlugin.framework.variableManager
+              processing = @config.processingTemp or "$value"
+              info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, event.values.temperature)) 
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_temperatue = value
+                @emit "temperature", @_temperatue
+              )
+              #@_temperatue = event.values.temperature
               # discard value if it is the same and was received just under two second ago
-              @emit "temperature", @_temperatue
+              #@emit "temperature", @_temperatue
             if event.values.humidity?
-              @_humidity = event.values.humidity
+              variableManager = hdPlugin.framework.variableManager
+              processing = @config.processingHum or "$value"
+              info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, event.values.humidity)) 
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_humidity = value
+                @emit "humidity", @_humidity
+              )
+              #@_humidity = event.values.humidity
               # discard value if it is the same and was received just under two second ago
-              @emit "humidity", @_humidity
+              #@emit "humidity", @_humidity
             @_lastReceiveTime = now
       )
       super()

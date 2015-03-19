@@ -16,6 +16,18 @@ module.exports = {
         description: "Polling interval for the readings, should be greater than 2"
         type: "integer"
         default: 10000
+      processingTemp: 
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the temperature 
+          value itself."
+        type: "string"
+        default: "$value"
+      processingHum: 
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the humidity 
+          value itself."
+        type: "string"
+        default: "$value"
     required: ["pin"]
   },
   HomeduinoDSTSensor: {
@@ -33,6 +45,12 @@ module.exports = {
       address:  
         description: "The address of the sensor"
         type: "string"
+      processing: 
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the 
+          value itself."
+        type: "string"
+        default: "$value"
   },
   HomeduinoRFSwitch: {
     title: "HomeduinoRFSwitch config options"
@@ -217,6 +235,18 @@ module.exports = {
             options:
               description: "The protocol options"
               type: "object"
+      processingTemp: 
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the temperature 
+          value itself."
+        type: "string"
+        default: "$value"
+      processingHum: 
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the humidity 
+          value itself."
+        type: "string"
+        default: "$value"
     required: ["protocols"]
   }
   HomeduinoRFWeatherStation: {
