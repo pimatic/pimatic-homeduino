@@ -305,6 +305,24 @@ module.exports = {
               type: "string"
               required: false
   }
+  HomeduinoContactSensor: {
+    title: "HomeduinoContactSensor config options"
+    type: "object"
+    extensions: ["xConfirm", "xLink", "xClosedLabel", "xOpenedLabel"]
+    properties:
+      inverted:
+        description: "active low?"
+        type: "boolean"
+        default: false
+      interval:
+        description: "Time until the pin is readed again."
+        type: "integer"
+        default: 10000
+      pin:
+        description: "Digital Pin number on the Arduino"
+        type: "integer"
+    required: ["pin"]
+  }
   HomeduinoAnalogSensor: {
     title: "HomeduinoAnalogSensor config options"
     type: "object"

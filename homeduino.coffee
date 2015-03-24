@@ -87,6 +87,7 @@ module.exports = (env) ->
         HomeduinoRFGenericSensor
         HomeduinoSwitch
         HomeduinoAnalogSensor
+        HomeduinoContactSensor
       ]
 
       for Cl in deviceClasses
@@ -889,6 +890,36 @@ module.exports = (env) ->
       return @_writeState(state).then( =>
         @_setState(state)
       )
+
+  class HomeduinoContactSensor extends env.devices.ContactSensor
+
+    constructor: (@config, lastState, @board) ->
+      @id = config.id
+      @name = config.name
+      @_contact = lastState?.contact?.value or false
+
+      # setup polling
+      hdPlugin.pendingConnect.then( => 
+        return @board.pinMode(@config.pin, Board.INPUT) 
+      ).then( => 
+        requestContactValue = =>
+          @board.digitalRead(@config.pin).then( (value) =>
+            hasContact = (
+              if value is "#{Board.HIGH}" then !@config.inverted 
+              else @config.inverted
+            )
+            @_setContact(hasContact)
+          ).catch( (error) =>
+            env.logger.error error
+            env.logger.debug error.stack
+          )
+          setTimeout(requestContactValue, @config.interval or 5000)
+        requestContactValue()
+      ).catch( (error) =>
+        env.logger.error error
+        env.logger.debug error.stack
+      )
+      super()
 
   class HomeduinoAnalogSensor extends env.devices.Sensor
 
