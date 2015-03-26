@@ -375,3 +375,21 @@ for the first analog pin.
 
 The analog value is between 0 and 1023 and can be preprocessed by an expression. In this example
 the value is scale to a value between 0 and 5.
+
+### ContactSensor example:
+
+An ContactSensor can read digital pins of the Arduino and display the
+state of it.
+
+```json
+{
+  "id": "omeduino-contact-sensor",
+  "name": "ContactSensor",
+  "class": "HomeduinoContactSensor",
+  "pin": 9,
+  "interval": 1000,
+  "inverted": true
+}
+```
+The pin must be set. Interval and inverted are optional.
+They are set by default to interval = 10000 and inverted = false.
