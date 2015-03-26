@@ -905,7 +905,7 @@ module.exports = (env) ->
         requestContactValue = =>
           @board.digitalRead(@config.pin).then( (value) =>
             hasContact = (
-              if value is "#{Board.HIGH}" then !@config.inverted 
+              if value is Board.HIGH then !@config.inverted 
               else @config.inverted
             )
             @_setContact(hasContact)
