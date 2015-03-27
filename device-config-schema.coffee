@@ -86,6 +86,9 @@ module.exports = {
               type: "boolean"
               description: "Toggle receive with this protocol"
               default: true
+            rfrepeats:
+              type: "number"
+              description: "The amount of RF repeats for this device"
       forceSend: 
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
@@ -118,6 +121,9 @@ module.exports = {
               type: "boolean"
               description: "Toggle receive with this protocol"
               default: true
+            rfrepeats:
+              type: "number"
+              description: "The amount of RF repeats for this device"
       forceSend: 
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
@@ -162,6 +168,9 @@ module.exports = {
                     type: "boolean"
                     description: "Toggle receive with this protocol"
                     default: true
+                  rfrepeats:
+                    type: "number"
+                    description: "The amount of RF repeats for this device"
             required: ["protocols"]
   }
   HomeduinoRFContactSensor: {
@@ -211,6 +220,17 @@ module.exports = {
             options:
               description: "The protocol options"
               type: "object"
+            send:
+              type: "boolean"
+              description: "Toggle send with this protocol"
+              default: true
+            receive:
+              type: "boolean"
+              description: "Toggle receive with this protocol"
+              default: true
+            rfrepeats:
+              type: "number"
+              description: "The amount of RF repeats for this device"
       forceSend: 
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
