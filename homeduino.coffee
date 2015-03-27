@@ -260,6 +260,14 @@ module.exports = (env) ->
             match = no
     return match
 
+  logDebug = (config, protocol, options) ->
+    message = "Sending Protocol: #{protocol.name}"
+    for field, content of options
+      message += " #{field}: #{content}"
+    message += " Pin: #{config.transmitterPin}
+                Repeats: #{config.rfrepeats}"
+    env.logger.debug(message)
+
   sendToSwitchesMixin = (protocols, state = null) ->
     pending = []
     for p in protocols
@@ -270,10 +278,7 @@ module.exports = (env) ->
           options.state = state if state?
           pending.push hdPlugin.pendingConnect.then( =>
             if @_pluginConfig.debug
-              env.logger.debug("Sending
-                 Pin:#{@_pluginConfig.transmitterPin}
-                 Repeats: #{@_pluginConfig.rfrepeats}
-                 Protocol: #{p.name}")
+              logDebug(@_pluginConfig, p, options)
             return @board.rfControlSendMessage(
               @_pluginConfig.transmitterPin, 
               @_pluginConfig.rfrepeats,
@@ -297,6 +302,8 @@ module.exports = (env) ->
             max = _protocol.values.dimlevel.max
             level = Math.round(level / ((100 / (max - min)) + min))
           extend options, {dimlevel: level}
+          if @_pluginConfig.debug
+            logDebug(@_pluginConfig, p, options)
           pending.push hdPlugin.pendingConnect.then( =>
             return @board.rfControlSendMessage(
               @_pluginConfig.transmitterPin,
