@@ -1,4 +1,4 @@
-{
+  {
   "name": "pimatic-homeduino",
   "description": "pimatic plugin to use various 433 MHz devices, sensors and more with an Arduino.",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://www.sweetpi.de)",
@@ -17,7 +17,7 @@
   },
   "configSchema": "homeduino-config-schema.coffee",
   "dependencies": {
-    "homeduino": "~0.0.38"
+    "homeduino": "~0.0.41"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"
