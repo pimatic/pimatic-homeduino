@@ -615,14 +615,18 @@ module.exports = (env) ->
         @attributes.battery = {
           description: "the battery status"
           type: "number"
+          unit: '%'
+          displaySparkline: false
           icon:
             noText: true
             mapping: {
-              'battery-fuel-1': 0
-              'battery-fuel-2': 1
-              'battery-fuel-3': 2
-              'battery-fuel-4': 3
-              'battery-fuel-5': 4
+              'icon-battery-empty': 0
+              'icon-battery-fuel-1': [0, 20]
+              'icon-battery-fuel-2': [20, 40]
+              'icon-battery-fuel-3': [40, 60]
+              'icon-battery-fuel-4': [60, 80]
+              'icon-battery-fuel-5': [80, 100]
+              'icon-battery-filled': 100
             }
         }
 
