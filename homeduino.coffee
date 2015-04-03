@@ -565,9 +565,13 @@ module.exports = (env) ->
       @name = config.name
       @_temperatue = lastState?.temperature?.value
       @_humidity = lastState?.humidity?.value
+      @_lowBattery = lastState?.lowBattery?.value
+      @_battery = lastState?.battery?.value
 
       hasTemperature = false
       hasHumidity = false
+      hasLowBattery = false # boolean battery indicator
+      hasBattery = false # numeric battery indicator
       for p in config.protocols
         _protocol = Board.getRfProtocol(p.name)
         unless _protocol?
@@ -576,7 +580,8 @@ module.exports = (env) ->
           throw new Error("\"#{p.name}\" is not a weather protocol.")
         hasTemperature = true if _protocol.values.temperature?
         hasHumidity = true if _protocol.values.humidity?
-
+        hasLowBattery = true if _protocol.values.lowBattery?
+        hasBattery = true if  _protocol.values.battery?
       @attributes = {}
 
       if hasTemperature
@@ -594,6 +599,33 @@ module.exports = (env) ->
           acronym: 'RH'
         }
 
+      if hasLowBattery
+        @attributes.lowBattery = {
+          description: "the battery status"
+          type: "boolean"
+          labels: ["low", 'ok']
+          icon:
+            noText: true
+            mapping: {
+              'icon-battery-filled': false
+              'icon-battery-empy': true
+            }
+        }
+      if hasBattery
+        @attributes.battery = {
+          description: "the battery status"
+          type: "number"
+          icon:
+            noText: true
+            mapping: {
+              'battery-fuel-1': 0
+              'battery-fuel-2': 1
+              'battery-fuel-3': 2
+              'battery-fuel-4': 3
+              'battery-fuel-5': 4
+            }
+        }
+
       @board.on('rf', (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
@@ -603,6 +635,7 @@ module.exports = (env) ->
               if @_lastReceiveTime? then (now - @_lastReceiveTime)
               else 9999999
             )
+            # discard value if it is the same and was received just under two second ago
             if timeDelta < 2000
               return 
             
@@ -614,9 +647,6 @@ module.exports = (env) ->
                 @_temperatue = value
                 @emit "temperature", @_temperatue
               )
-              #@_temperatue = event.values.temperature
-              # discard value if it is the same and was received just under two second ago
-              #@emit "temperature", @_temperatue
             if event.values.humidity?
               variableManager = hdPlugin.framework.variableManager
               processing = @config.processingHum or "$value"
@@ -625,16 +655,20 @@ module.exports = (env) ->
                 @_humidity = value
                 @emit "humidity", @_humidity
               )
-              #@_humidity = event.values.humidity
-              # discard value if it is the same and was received just under two second ago
-              #@emit "humidity", @_humidity
+            if event.values.lowBattery?
+              @_lowBattery = events.values.lowBattery
+              @emit "lowBattery", @_lowBattery
+            if event.values.battery?
+              @_battery = events.values.battery
+              @emit "battery", @_battery
             @_lastReceiveTime = now
       )
       super()
 
     getTemperature: -> Promise.resolve @_temperatue
     getHumidity: -> Promise.resolve @_humidity
-
+    getLowBattery: -> Promise.resolve @_lowBattery
+    getBattery: -> Promise.resolve @_battery
 
   class HomeduinoRFWeatherStation extends env.devices.Sensor
 
