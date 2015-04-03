@@ -660,10 +660,10 @@ module.exports = (env) ->
                 @emit "humidity", @_humidity
               )
             if event.values.lowBattery?
-              @_lowBattery = events.values.lowBattery
+              @_lowBattery = event.values.lowBattery
               @emit "lowBattery", @_lowBattery
             if event.values.battery?
-              @_battery = events.values.battery
+              @_battery = event.values.battery
               @emit "battery", @_battery
             @_lastReceiveTime = now
       )
