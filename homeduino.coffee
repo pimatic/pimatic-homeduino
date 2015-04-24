@@ -70,6 +70,33 @@ module.exports = (env) ->
           )
         )
       )
+      
+      # Enahnace the config schemes with available protocols, so we can build a better
+      # gui for them
+      protocols = _.cloneDeep(Board.getAllRfProtocols())
+      for p in protocols
+        supports = {
+          temperature: p.values.temperature
+          humidity: p.values.humidity
+          state: p.values.state
+          all: p.values.all
+          battery: p.values.battery
+          presence: p.values.presence
+          lowBattery: p.values.lowBattery
+        }
+        for k, v of supports
+          if v?
+            delete p.values[k]
+          else
+            delete supports[k]
+        for k, v of p.values
+          v.type = "string" if v.type is "binary"
+      availableProtocolOptions = {}
+      for p in protocols
+        availableProtocolOptions[p.name] = {
+          type: "object"
+          properties: p.values
+        } 
 
       deviceConfigDef = require("./device-config-schema")
 
@@ -92,6 +119,11 @@ module.exports = (env) ->
 
       for Cl in deviceClasses
         do (Cl) =>
+          dcd = deviceConfigDef[Cl.name]
+          dcd.properties.protocols?.items?.properties?.name.defines = {
+            property: "options"
+            options: availableProtocolOptions
+          }
           @framework.deviceManager.registerDeviceClass(Cl.name, {
             prepareConfig: (config) =>
               # legacy support for old configs (with just one protocol):
@@ -109,7 +141,7 @@ module.exports = (env) ->
                     ]
                     delete b.protocol
                     delete b.protocolOptions
-            configDef: deviceConfigDef[Cl.name]
+            configDef: dcd
             createCallback: (deviceConfig, lastState) => 
               device = new Cl(deviceConfig, lastState, @board, @config)
               return device
