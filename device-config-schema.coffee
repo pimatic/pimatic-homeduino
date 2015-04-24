@@ -57,14 +57,6 @@ module.exports = {
     type: "object"
     extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
-      protocol:
-        description: "The switch protocol to use."
-        type: "string"
-        default: ""
-      protocolOptions:
-        description: "The protocol options"
-        type: "object"
-        default: {}
       protocols:
         description: "The switch protocols to use."
         type: "array"
