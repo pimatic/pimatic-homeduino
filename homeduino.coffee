@@ -149,6 +149,18 @@ module.exports = (env) ->
 
       @framework.ruleManager.addPredicateProvider(new RFEventPredicateProvider(@framework))
 
+      # WIP
+      # This allows to process receives by incomping http requests WITHOUT password:
+      # We need a way to secure this, so that no receives can be send without proper auth
+
+      @framework.userManager.addAllowPublicAccessCallback( (req) =>
+        return req.url.match(/^\/homeduino\/received.*$/)?
+      )
+      app.get('/homeduino/received', (req, res) =>
+        console.dir req.query
+        res.end('ACK')
+      )
+
   hdPlugin = new HomeduinoPlugin()
 
   class HomeduinoDSTSensor extends env.devices.TemperatureSensor
