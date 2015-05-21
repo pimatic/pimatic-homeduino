@@ -164,7 +164,9 @@ module.exports = (env) ->
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processing or "$value"
-          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.temperature)) 
+          info = variableManager.parseVariableExpression(
+            processing.replace(/\$value\b/g, result.temperature)
+          ) 
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'temperature', value
           )
@@ -229,13 +231,17 @@ module.exports = (env) ->
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processingTemp or "$value"
-          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.temperature)) 
+          info = variableManager.parseVariableExpression(
+            processing.replace(/\$value\b/g, result.temperature)
+          ) 
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'temperature', value
           )
           #@emit 'temperature', result.temperature
           processing = @config.processingHum or "$value"
-          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.humidity)) 
+          info = variableManager.parseVariableExpression(
+            processing.replace(/\$value\b/g, result.humidity)
+          ) 
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'humidity', value
           )
@@ -678,7 +684,9 @@ module.exports = (env) ->
             if event.values.temperature?
               variableManager = hdPlugin.framework.variableManager
               processing = @config.processingTemp or "$value"
-              info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, event.values.temperature)) 
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.temperature)
+              ) 
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_temperatue = value
                 @emit "temperature", @_temperatue
@@ -686,7 +694,9 @@ module.exports = (env) ->
             if event.values.humidity?
               variableManager = hdPlugin.framework.variableManager
               processing = @config.processingHum or "$value"
-              info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, event.values.humidity)) 
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.humidity)
+              ) 
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_humidity = value
                 @emit "humidity", @_humidity
