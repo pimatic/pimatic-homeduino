@@ -244,7 +244,7 @@ module.exports = {
   HomeduinoRFWeatherStation: {
     title: "HomeduinoRFWeatherStation config options"
     type: "object"
-    extensions: ["xLink"]
+    extensions: ["xLink", "xAttributeOptions"]
     properties:
       values:
         type: "array"
