@@ -212,7 +212,7 @@ module.exports = {
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"
     type: "object"
-    extensions: ["xLink"]
+    extensions: ["xLink", "xAttributeOptions"]
     properties:
       protocols:
         description: "The protocols to use."
