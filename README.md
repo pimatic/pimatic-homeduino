@@ -337,8 +337,6 @@ Some contacts only emit an event on open. For this you can set autoReset to true
 ```
 ### Pin switch example:
 
-Only works with an Arduino. pin: 13 = digital pin 13 (LED on Arduino Nano).
-
 ```json
 {
   "id": "pin-switch",
