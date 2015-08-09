@@ -473,13 +473,28 @@ module.exports = (env) ->
             throw new Error(
               "\"#{p.name}\" in config of button \"#{b.id}\" is not a switch or a command protocol."
             )
+      @board.on('rf', (event) =>
+        for p in @config.buttons
+          unless p.receive is false
+            match = no
+            for o in p.protocols
+              if event.protocol is o.name
+                if event.values.id is o.options.id
+                  if event.values.unit is o.options.unit
+                    if event.values.state is o.options.state
+                      match = yes
+            if match
+              @emit('button', p.id)
+        )
+  
       super(config)
 
     _sendStateToSwitches: sendToSwitchesMixin
-
+    
     buttonPressed: (buttonId) ->
       for b in @config.buttons
         if b.id is buttonId
+          @emit 'button', b.id
           return @_sendStateToSwitches(b.protocols)
       throw new Error("No button with the id #{buttonId} found")
       
