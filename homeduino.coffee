@@ -476,7 +476,7 @@ module.exports = (env) ->
             
       @board.on('rf', (event) =>
         for b in @config.buttons
-          unless buttons.receive is false
+          unless b.receive is false
             match = no
             for p in b.protocols
               if doesProtocolMatch(event, p)
