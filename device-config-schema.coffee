@@ -3,7 +3,7 @@ module.exports = {
   HomeduinoDHTSensor: {
     title: "HomeduinoDHTSensor config options"
     type: "object"
-    extensions: ["xLink"]
+    extensions: ["xLink", "xAttributeOptions"]
     properties:
       type:
         description: "The type of the DHT sensor (22, 33, 44 or 55)"
@@ -33,7 +33,7 @@ module.exports = {
   HomeduinoDSTSensor: {
     title: "HomeduinoDSTSensor config options"
     type: "object"
-    extensions: ["xLink"]
+    extensions: ["xLink", "xAttributeOptions"]
     properties:
       interval:
         description: "Polling interval for the readings, should be greater than 2"
@@ -186,7 +186,7 @@ module.exports = {
     required: ["protocols"]
   }
   HomeduinoRFShutter: {
-    title: "HomeduinoRFSwitch config options"
+    title: "HomeduinoRFShutter config options"
     type: "object"
     extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
     properties:
@@ -270,7 +270,7 @@ module.exports = {
   HomeduinoRFGenericSensor: {
     title: "HomeduinoRFGenericSensor config options"
     type: "object"
-    extensions: ["xLink"]
+    extensions: ["xLink", "xAttributeOptions"]
     properties:
       protocols:
         description: "The protocols to use."
@@ -348,7 +348,7 @@ module.exports = {
   HomeduinoAnalogSensor: {
     title: "HomeduinoAnalogSensor config options"
     type: "object"
-    extensions: ["xLink"]
+    extensions: ["xLink", "xAttributeOptions"]
     properties:
       attributes:
         description: "The attributes (sensor values) of the sensor"
