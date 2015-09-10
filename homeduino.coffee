@@ -997,7 +997,12 @@ module.exports = (env) ->
     constructor: (@config, lastState, @board) ->
       @id = config.id
       @name = config.name
-      @_state = lastState?.state?.value or off
+
+      if @config.defaultState?
+        @_state = @config.defaultState
+      else
+        @_state = lastState?.state?.value or off
+
       hdPlugin.pendingConnect.then( =>
         return @board.pinMode(@config.pin, Board.OUTPUT)
       ).then( => 

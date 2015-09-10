@@ -452,5 +452,9 @@ module.exports = {
         description: "active low?"
         type: "boolean"
         default: false
+      defaultState:
+        description: "State to set on startup, if not given, last state will be restored"
+        type: "boolean"
+        required: false
   }
 }
