@@ -9,7 +9,7 @@
     "homeduino-config-schema.coffee",
     "device-config-schema.coffee"
   ],
-  "version": "0.8.59",
+  "version": "0.8.60",
   "homepage": "http://pimatic.org",
   "repository": {
     "type": "git",
