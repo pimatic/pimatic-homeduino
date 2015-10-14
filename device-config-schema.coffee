@@ -239,6 +239,12 @@ module.exports = {
           value itself."
         type: "string"
         default: "$value"
+      isFahrenheit:
+        description: "
+          boolean that sets the right units if the temperature is to be reported in
+           Fahrenheit"
+        type: "boolean"
+        default: false
     required: ["protocols"]
   }
   HomeduinoRFWeatherStation: {
@@ -300,7 +306,7 @@ module.exports = {
               type: "integer"
             decimals:
               description: "Decimals of the value in the rf message"
-              type: "integer"
+              type: "number"
               default: 0
             baseValue:
               description: "Offset that will be added to the value in the rf message"
