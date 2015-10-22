@@ -637,9 +637,8 @@ module.exports = (env) ->
       @attributes = {}
 
       if hasTemperature
-        tempUnit = '°C'
-        if isFahrenheit
-          tempUnit = '°F'
+        if isFahrenheit then tempUnit = '°F'
+        else tempUnit = '°C'
         @attributes.temperature = {
           description: "the messured temperature"
           type: "number"
