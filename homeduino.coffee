@@ -149,17 +149,19 @@ module.exports = (env) ->
 
       @framework.ruleManager.addPredicateProvider(new RFEventPredicateProvider(@framework))
 
-      # WIP
-      # This allows to process receives by incomping http requests WITHOUT password:
-      # We need a way to secure this, so that no receives can be send without proper auth
-
-      @framework.userManager.addAllowPublicAccessCallback( (req) =>
-        return req.url.match(/^\/homeduino\/received.*$/)?
-      )
-      app.get('/homeduino/received', (req, res) =>
-        console.dir req.query
-        res.end('ACK')
-      )
+      if @config.apikey? and @config.apikey.length > 0
+        @framework.userManager.addAllowPublicAccessCallback( (req) =>
+          return req.url.match(/^\/homeduino\/received.*$/)?
+        )
+        app.get('/homeduino/received', (req, res) =>
+          if req.query.apikey isnt @config.apikey
+            res.end('Invalid apikey')
+            return
+          buckets = JSON.parse(req.query.buckets)
+          pulses = req.query.pulses
+          @board.provessExternalReceive(buckets, pulses)
+          res.end('ACK')
+        )
 
   hdPlugin = new HomeduinoPlugin()
 
