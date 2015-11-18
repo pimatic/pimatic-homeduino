@@ -176,7 +176,9 @@ module.exports = (env) ->
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processing or "$value"
-          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.temperature)) 
+          info = variableManager.parseVariableExpression(
+            processing.replace(/\$value\b/g, result.temperature)
+          ) 
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'temperature', value
           )
@@ -241,13 +243,17 @@ module.exports = (env) ->
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processingTemp or "$value"
-          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.temperature)) 
+          info = variableManager.parseVariableExpression(
+            processing.replace(/\$value\b/g, result.temperature)
+          ) 
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'temperature', value
           )
           #@emit 'temperature', result.temperature
           processing = @config.processingHum or "$value"
-          info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, result.humidity)) 
+          info = variableManager.parseVariableExpression(
+            processing.replace(/\$value\b/g, result.humidity)
+          ) 
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'humidity', value
           )
@@ -479,13 +485,26 @@ module.exports = (env) ->
             throw new Error(
               "\"#{p.name}\" in config of button \"#{b.id}\" is not a switch or a command protocol."
             )
+            
+      @board.on('rf', (event) =>
+        for b in @config.buttons
+          unless b.receive is false
+            match = no
+            for p in b.protocols
+              if doesProtocolMatch(event, p)
+                match = yes
+            if match
+              @emit('button', b.id)
+        )
+  
       super(config)
 
     _sendStateToSwitches: sendToSwitchesMixin
-
+    
     buttonPressed: (buttonId) ->
       for b in @config.buttons
         if b.id is buttonId
+          @emit 'button', b.id
           return @_sendStateToSwitches(b.protocols)
       throw new Error("No button with the id #{buttonId} found")
       
@@ -690,7 +709,9 @@ module.exports = (env) ->
             if event.values.temperature?
               variableManager = hdPlugin.framework.variableManager
               processing = @config.processingTemp or "$value"
-              info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, event.values.temperature)) 
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.temperature)
+              ) 
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_temperatue = value
                 @emit "temperature", @_temperatue
@@ -698,7 +719,9 @@ module.exports = (env) ->
             if event.values.humidity?
               variableManager = hdPlugin.framework.variableManager
               processing = @config.processingHum or "$value"
-              info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, event.values.humidity)) 
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.humidity)
+              ) 
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_humidity = value
                 @emit "humidity", @_humidity
@@ -986,7 +1009,12 @@ module.exports = (env) ->
     constructor: (@config, lastState, @board) ->
       @id = config.id
       @name = config.name
-      @_state = lastState?.state?.value or off
+
+      if @config.defaultState?
+        @_state = @config.defaultState
+      else
+        @_state = lastState?.state?.value or off
+
       hdPlugin.pendingConnect.then( =>
         return @board.pinMode(@config.pin, Board.OUTPUT)
       ).then( => 
