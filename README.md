@@ -41,7 +41,7 @@ You can load the plugin by editing your `config.json` to include:
 in the `plugins` section. For all configuration options see [homeduino-config-schema](homeduino-config-schema.coffee)
 
 The pin numbers are Arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
-The `transmitterPin` must be a digitial pin between `2` (D2) and `13` (D13).
+The `transmitterPin` must be a digital pin between `2` (D2) and `13` (D13).
 
 ![nano-pins](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/pins-nano.png)
 

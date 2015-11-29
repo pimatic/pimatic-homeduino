@@ -175,7 +175,7 @@ module.exports = {
               description: "The protocol options"
               type: "object"
       autoReset:
-        description: """Reset the state after resetTime. Usefull for contact sensors, 
+        description: """Reset the state after resetTime. Useful for contact sensors, 
                       that only emit open or close events"""
         type: "boolean"
         default: false  
@@ -337,7 +337,7 @@ module.exports = {
         type: "boolean"
         default: false
       interval:
-        description: "Time until the pin is readed again."
+        description: "Time until the pin is read again."
         type: "integer"
         default: 10000
       pin:
@@ -430,12 +430,12 @@ module.exports = {
               description: "The protocol options"
               type: "object"
       autoReset:
-        description: """Reset the state after resetTime. Usefull for pir sensors, 
+        description: """Reset the state after resetTime. Useful for pir sensors, 
                       that emit present and absent events"""
         type: "boolean"
         default: true
       resetTime:
-        description: "Time after that the presence value is reseted to absent."
+        description: "Time after that the presence value is reset to absent."
         type: "integer"
         default: 10000
     required: ["protocols"]
