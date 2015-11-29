@@ -71,7 +71,7 @@ module.exports = (env) ->
         )
       )
       
-      # Enahnace the config schemes with available protocols, so we can build a better
+      # Enhance the config schemes with available protocols, so we can build a better
       # gui for them
       protocols = _.cloneDeep(Board.getAllRfProtocols())
       for p in protocols
@@ -198,7 +198,7 @@ module.exports = (env) ->
     _readSensor: ()-> 
       # Already reading? return the reading promise
       if @_pendingRead? then return @_pendingRead
-      # Don't read the sensor to frequently, the minimal reading interal should be 2.5 seconds
+      # Don't read the sensor too frequently, the minimal reading interval should be 2.5 seconds
       if @_lastReadResult?
         now = new Date().getTime()
         if (now - @_lastReadTime) < 2000
@@ -224,12 +224,12 @@ module.exports = (env) ->
 
     attributes:
       temperature:
-        description: "the messured temperature"
+        description: "the measured temperature"
         type: "number"
         unit: '°C'
         acronym: 'T'
       humidity:
-        description: "the messured humidity"
+        description: "the measured humidity"
         type: "number"
         unit: '%'
         acronym: 'RH'
@@ -273,7 +273,7 @@ module.exports = (env) ->
     _readSensor: (attempt = 0)-> 
       # Already reading? return the reading promise
       if @_pendingRead? then return @_pendingRead
-      # Don't read the sensor to frequently, the minimal reading interal should be 2.5 seconds
+      # Don't read the sensor too frequently, the minimal reading interval should be 2.5 seconds
       if @_lastReadResult?
         now = new Date().getTime()
         if (now - @_lastReadTime) < 2000
@@ -579,7 +579,7 @@ module.exports = (env) ->
       
       return Promise.resolve()
 
-    # Retuns a promise that is fulfilled when done.
+    # Returns a promise that is fulfilled when done.
     moveToPosition: (position) ->
       unless @config.forceSend
         if position is @_position then return Promise.resolve()
@@ -651,14 +651,14 @@ module.exports = (env) ->
 
       if hasTemperature
         @attributes.temperature = {
-          description: "the messured temperature"
+          description: "the measured temperature"
           type: "number"
           unit: '°C'
           acronym: 'T'
         }
       if hasHumidity
         @attributes.humidity = {
-          description: "the messured humidity"
+          description: "the measured humidity"
           type: "number"
           unit: '%'
           acronym: 'RH'
@@ -673,7 +673,7 @@ module.exports = (env) ->
             noText: true
             mapping: {
               'icon-battery-filled': false
-              'icon-battery-empy': true
+              'icon-battery-empty': true
             }
         }
       if hasBattery
@@ -804,7 +804,7 @@ module.exports = (env) ->
             if hasHumidity
               if !@attributes.humidity?
                 @attributes.humidity = {
-                  description: "the messured humidity"
+                  description: "the measured humidity"
                   type: "number"
                   unit: '%'
                   acronym: 'RH'
@@ -817,7 +817,7 @@ module.exports = (env) ->
             if hasTemperature
               if !@attributes.temperature?
                 @attributes.temperature = {
-                  description: "the messured temperature"
+                  description: "the measured temperature"
                   type: "number"
                   unit: '°C'
                   acronym: 'T'
@@ -831,7 +831,7 @@ module.exports = (env) ->
             if hasWindDirection
               if !@attributes.windDirection?
                 @attributes.windDirection = {
-                  description: "the messured wind direction"
+                  description: "the measured wind direction"
                   type: "string"
                   acronym: 'WIND'
                 }
@@ -979,7 +979,7 @@ module.exports = (env) ->
       if attributeConfig.acronym?
         @attributes[name].acronym = attributeConfig.acronym
 
-      # gnerate getter:
+      # generate getter:
       @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
 
     _updateAttribute: (attributeConfig, event) ->
@@ -1108,7 +1108,7 @@ module.exports = (env) ->
       if attributeConfig.acronym?
         @attributes[name].acronym = attributeConfig.acronym
                  
-      # gnerate getter:
+      # generate getter:
       @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
 
       # setup polling
