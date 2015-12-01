@@ -381,9 +381,27 @@ state of it.
 
 ```json
 {
-  "id": "omeduino-contact-sensor",
+  "id": "homeduino-contact-sensor",
   "name": "ContactSensor",
   "class": "HomeduinoContactSensor",
+  "pin": 9,
+  "interval": 1000,
+  "inverted": true
+}
+```
+The pin must be set. Interval and inverted are optional.
+They are set by default to interval = 10000 and inverted = false.
+
+### PIR sensor example:
+
+A PIR sensor can read digital pins of the Arduino and display the
+presence state of it.
+
+```json
+{
+  "id": "homeduino-pir",
+  "name": "PIR",
+  "class": "HomeduinoPir",
   "pin": 9,
   "interval": 1000,
   "inverted": true
