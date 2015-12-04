@@ -638,6 +638,7 @@ module.exports = (env) ->
       hasHumidity = false
       hasLowBattery = false # boolean battery indicator
       hasBattery = false # numeric battery indicator
+      isFahrenheit = config.isFahrenheit
       for p in config.protocols
         _protocol = Board.getRfProtocol(p.name)
         unless _protocol?
@@ -651,12 +652,15 @@ module.exports = (env) ->
       @attributes = {}
 
       if hasTemperature
+        if isFahrenheit then tempUnit = '°F'
+        else tempUnit = '°C'
         @attributes.temperature = {
           description: "the measured temperature"
           type: "number"
-          unit: '°C'
+          unit: tempUnit
           acronym: 'T'
         }
+
       if hasHumidity
         @attributes.humidity = {
           description: "the measured humidity"
