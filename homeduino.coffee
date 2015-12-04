@@ -115,6 +115,7 @@ module.exports = (env) ->
         HomeduinoSwitch
         HomeduinoAnalogSensor
         HomeduinoContactSensor
+        HomeduinoPir
       ]
 
       for Cl in deviceClasses
@@ -1050,13 +1051,13 @@ module.exports = (env) ->
       @_contact = lastState?.contact?.value or false
 
       # setup polling
-      hdPlugin.pendingConnect.then( => 
-        return @board.pinMode(@config.pin, Board.INPUT) 
-      ).then( => 
+      hdPlugin.pendingConnect.then( =>
+        return @board.pinMode(@config.pin, Board.INPUT)
+      ).then( =>
         requestContactValue = =>
           @board.digitalRead(@config.pin).then( (value) =>
             hasContact = (
-              if value is Board.HIGH then !@config.inverted 
+              if value is Board.HIGH then !@config.inverted
               else @config.inverted
             )
             @_setContact(hasContact)
@@ -1066,6 +1067,36 @@ module.exports = (env) ->
           )
           setTimeout(requestContactValue, @config.interval or 5000)
         requestContactValue()
+      ).catch( (error) =>
+        env.logger.error error
+        env.logger.debug error.stack
+      )
+      super()
+
+  class HomeduinoPir extends env.devices.PresenceSensor
+
+    constructor: (@config, lastState, @board) ->
+      @id = config.id
+      @name = config.name
+      @_presence = lastState?.presence?.value or false
+
+      # setup polling
+      hdPlugin.pendingConnect.then( =>
+        return @board.pinMode(@config.pin, Board.INPUT)
+      ).then( =>
+        requestPresenceValue = =>
+          @board.digitalRead(@config.pin).then( (value) =>
+            isPresent = (
+              if value is Board.HIGH then !@config.inverted
+              else @config.inverted
+            )
+            @_setPresence(isPresent)
+          ).catch( (error) =>
+            env.logger.error error
+            env.logger.debug error.stack
+          )
+          setTimeout(requestPresenceValue, @config.interval or 5000)
+        requestPresenceValue()
       ).catch( (error) =>
         env.logger.error error
         env.logger.debug error.stack

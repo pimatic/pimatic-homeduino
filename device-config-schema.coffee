@@ -345,6 +345,24 @@ module.exports = {
         type: "integer"
     required: ["pin"]
   }
+  HomeduinoPir: {
+    title: "HomeduinoPir config options"
+    type: "object"
+    extensions: ["xLink", "xPresentLabel", "xAbsentLabel"]
+    properties:
+      inverted:
+        description: "active low?"
+        type: "boolean"
+        default: false
+      interval:
+        description: "Time until the pin is read again."
+        type: "integer"
+        default: 10000
+      pin:
+        description: "Digital Pin number on the Arduino"
+        type: "integer"
+    required: ["pin"]
+  }
   HomeduinoAnalogSensor: {
     title: "HomeduinoAnalogSensor config options"
     type: "object"
