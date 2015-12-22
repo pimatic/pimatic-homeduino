@@ -71,7 +71,135 @@ Devices must be added manually to the device section of your pimatic config.
 
 A list with all supported protocols and protocol-options can be found [here](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
-### Weather station sensor example:
+### RF Actors
+
+RF Actors like the "HomeduinoRFSwitch" can be controlled or send to outlets with multiple protocols.
+Just add more protocols to the `protocols` array. You can also set if a protocol
+is used for sending or receiving. Default is `true` for both. 
+In some cases the target receiver don´t recognize the transmission. To improve this you can change 
+the amount of message repeats. By default this is set to seven. 
+
+## Switch example:
+
+A "HomeduinoRFSwitch" can only use switch protocols.
+
+```json
+{
+  "id": "rfswitch",
+  "name": "RFSwitch",
+  "class": "HomeduinoRFSwitch",
+  "protocols": [{
+    "name": "switch1",
+    "options": {
+      "id": 42,
+      "unit": 0
+    }
+  }]
+}
+```
+
+## Multi protocol switch example:
+
+```json
+    {
+      "id": "switchmp",
+      "name": "Multi Switch",
+      "class": "HomeduinoRFSwitch",
+      "protocols": [
+        {
+          "name": "switch1",
+          "options": {
+            "id": 9509718,
+            "unit": 0
+          },
+          "send": true,
+          "receive": true,
+          "rfrepeats": 4
+        },
+        {
+          "name": "switch1",
+          "options": {
+            "id": 9509718,
+            "unit": 1
+          },
+          "send": false,
+          "receive": true,
+          "rfrepeats": 9
+        }
+      ]
+    }
+```
+
+## Buttons Device example:
+
+A "HomeduinoRFButtonsDevice" can use switch and command protocols.
+```json
+{
+  "id": "homeduino-buttons",
+  "name": "Buttons",
+  "class": "HomeduinoRFButtonsDevice",
+  "buttons": [
+    {
+      "id": "test-button",
+      "text": "test",
+      "protocols": [{
+        "name": "switch1",
+        "options": {
+          "unit": 0,
+          "id": 42,
+          "state": true
+        }
+      }]
+    }
+  ]
+}
+```
+
+## Dimmer device example:
+
+The "HomeduinoRFDimmer" can only use dimmer protocols. The equivalent to dimmer1 is the switch1
+protocol.
+```json
+{
+  "id": "dimmer",
+  "name": "Dimmer",
+  "class": "HomeduinoRFDimmer",
+  "protocols": [
+    {
+      "name": "dimmer1",
+      "options": {
+        "id": 7654321,
+        "unit": 0
+      },
+      "send": true,
+      "receive": true
+    }
+  ]
+},
+```
+## Shutter sensor example:
+
+Can use switch protocols.
+
+```json
+{
+  "id": "homeduino-contact",
+  "name": "Shutter Controller",
+  "class": "HomeduinoRFShutter",
+  "protocols": [{
+    "name": "switch1",
+    "options": {
+      "unit": 0,
+      "id": 42
+    }
+  }]
+}
+```
+### RF Sensors
+
+RF Sensors receiving data from any kind of external sensor over 433Mhz messages.
+
+## Weather station sensor example:
 
 This is the basic sensor with only temperature and humidity
 ```json
@@ -113,85 +241,7 @@ It supports different values to display
 rain, temperature, humidity, windGust, windDirection and avgAirspeed
 The order of the listed values define the order of the displayed values.
 
- 
-
-### Switch example:
-
-```json
-{
-  "id": "rfswitch",
-  "name": "RFSwitch",
-  "class": "HomeduinoRFSwitch",
-  "protocols": [{
-    "name": "switch1",
-    "options": {
-      "id": 42,
-      "unit": 0
-    }
-  }]
-}
-```
-
-A switch (and other devices) can be controlled or send to outlets with multiple protocols. Just
-add more protocols to the `protocols` array. You can also set if a protocol
-is used for sending or receiving. Default is `true` for both.
-
-### Multi protocol switch example:
-
-```json
-    {
-      "id": "switchmp",
-      "name": "Multi Switch",
-      "class": "HomeduinoRFSwitch",
-      "protocols": [
-        {
-          "name": "switch1",
-          "options": {
-            "id": 9509718,
-            "unit": 0
-          },
-          "send": true,
-          "receive": true
-        },
-        {
-          "name": "switch1",
-          "options": {
-            "id": 9509718,
-            "unit": 1
-          },
-          "send": false,
-          "receive": true
-        }
-      ]
-    }
-```
-
-### DHT11/22 sensor example:
-
-```json
-{
-  "id": "homeduino-temperature",
-  "name": "DHT",
-  "class": "HomeduinoDHTSensor",
-  "type": 22,
-  "pin": 13
-}
-```
-
-### DST Dallas DS18B20 sensor example:
-
-```json
-{
-  "id": "homeduino-temperature-dst",
-  "name": "DST",
-  "class": "HomeduinoDSTSensor",
-  "pin": 12,
-  "address" : "104AE9B50008000E",
-  "interval" : 10000
-}
-```
-
-### PIR sensor example:
+## PIR sensor example:
 
 ```json
 {
@@ -209,7 +259,7 @@ is used for sending or receiving. Default is `true` for both.
 }
 ```
 
-### Contact sensor example:
+## Contact sensor example:
 
 ```json
 {
@@ -246,27 +296,7 @@ Some contacts only emit an event on open. For this you can set autoReset to true
 }
 ```
 
-### Shutter sensor example:
-
-*Can use switch protocols.*
-
-```json
-{
-  "id": "homeduino-contact",
-  "name": "Shutter Controller",
-  "class": "HomeduinoRFShutter",
-  "protocols": [{
-    "name": "switch1",
-    "options": {
-      "unit": 0,
-      "id": 42
-    }
-  }]
-}
-```
-
-
-### Generic RF Sensor with Arduino sender
+## Generic RF Sensor with Arduino sender
 
 ```json
 {
@@ -292,62 +322,37 @@ Some contacts only emit an event on open. For this you can set autoReset to true
 }
 ```
 
-### Buttons Device example:
+### Local Sensors
+
+Local sensors are connected to the arduino. This can be a simple read of an digital pin or an bus 
+sensor like the DS18B20
+
+## DHT11/22 sensor example:
 
 ```json
 {
-  "id": "homeduino-buttons",
-  "name": "Buttons",
-  "class": "HomeduinoRFButtonsDevice",
-  "buttons": [
-    {
-      "id": "test-button",
-      "text": "test",
-      "protocols": [{
-        "name": "switch1",
-        "options": {
-          "unit": 0,
-          "id": 42,
-          "state": true
-        }
-      }]
-    }
-  ]
-}
-```
-
-### Dimmer device example:
-```json
-{
-  "id": "dimmer",
-  "name": "Dimmer",
-  "class": "HomeduinoRFDimmer",
-  "protocols": [
-    {
-      "name": "dimmer1",
-      "options": {
-        "id": 7654321,
-        "unit": 0
-      },
-      "send": true,
-      "receive": true
-    }
-  ]
-},
-```
-### Pin switch example:
-
-```json
-{
-  "id": "pin-switch",
-  "name": "Pin Switch",
-  "class": "HomeduinoSwitch",
-  "inverted": false,
+  "id": "homeduino-temperature",
+  "name": "DHT",
+  "class": "HomeduinoDHTSensor",
+  "type": 22,
   "pin": 13
 }
 ```
 
-### AnalogSensor example:
+## DST Dallas DS18B20 sensor example:
+
+```json
+{
+  "id": "homeduino-temperature-dst",
+  "name": "DST",
+  "class": "HomeduinoDSTSensor",
+  "pin": 12,
+  "address" : "104AE9B50008000E",
+  "interval" : 10000
+}
+```
+
+## AnalogSensor example:
 
 An AnalogSensor can read analog pins of the Arduino and display there value. 
 An optional preprocessing can be applied. Pin numbering starts at 14 (`A0`) 
@@ -364,7 +369,7 @@ for the first analog pin.
       "unit": "V",
       "label": "Voltage",
       "pin": 14,
-      "interval": 5000,
+      "interval": 50000,
       "processing": "($value / 1023) * 5"
     }
   ]
@@ -374,7 +379,7 @@ for the first analog pin.
 The analog value is between 0 and 1023 and can be preprocessed by an expression. In this example
 the value is scale to a value between 0 and 5.
 
-### ContactSensor example:
+## ContactSensor example:
 
 An ContactSensor can read digital pins of the Arduino and display the
 state of it.
@@ -385,14 +390,14 @@ state of it.
   "name": "ContactSensor",
   "class": "HomeduinoContactSensor",
   "pin": 9,
-  "interval": 1000,
+  "interval": 10000,
   "inverted": true
 }
 ```
 The pin must be set. Interval and inverted are optional.
 They are set by default to interval = 10000 and inverted = false.
 
-### PIR sensor example:
+## PIR sensor example:
 
 A PIR sensor can read digital pins of the Arduino and display the
 presence state of it.
@@ -403,9 +408,25 @@ presence state of it.
   "name": "PIR",
   "class": "HomeduinoPir",
   "pin": 9,
-  "interval": 1000,
+  "interval": 10000,
   "inverted": true
 }
 ```
 The pin must be set. Interval and inverted are optional.
 They are set by default to interval = 10000 and inverted = false.
+
+### Local Actor
+
+A local actor is the "HomeduinoSwitch", which can toggle the state of an pin on the arduino
+
+## Pin switch example:
+
+```json
+{
+  "id": "pin-switch",
+  "name": "Pin Switch",
+  "class": "HomeduinoSwitch",
+  "inverted": false,
+  "pin": 13
+}
+```
