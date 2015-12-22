@@ -79,6 +79,7 @@ is used for sending or receiving. Default is `true` for both.
 In some cases the target receiver don´t recognize the transmission. To improve this you can change 
 the amount of message repeats. By default this is set to seven. 
 
+
 ## Switch example:
 
 A "HomeduinoRFSwitch" can only use switch protocols.
@@ -133,6 +134,7 @@ A "HomeduinoRFSwitch" can only use switch protocols.
 ## Buttons Device example:
 
 A "HomeduinoRFButtonsDevice" can use switch and command protocols.
+
 ```json
 {
   "id": "homeduino-buttons",
@@ -159,6 +161,7 @@ A "HomeduinoRFButtonsDevice" can use switch and command protocols.
 
 The "HomeduinoRFDimmer" can only use dimmer protocols. The equivalent to dimmer1 is the switch1
 protocol.
+
 ```json
 {
   "id": "dimmer",
@@ -199,9 +202,11 @@ Can use switch protocols.
 
 RF Sensors receiving data from any kind of external sensor over 433Mhz messages.
 
+
 ## Weather station sensor example:
 
 This is the basic sensor with only temperature and humidity
+
 ```json
 {
   "id": "rftemperature",
@@ -216,7 +221,9 @@ This is the basic sensor with only temperature and humidity
   }]
 }
 ```
+
 For weather stations like the Alecto WS-4500 you should use the weather station device
+
 ```json
 {
   "id": "weatherstation",
@@ -327,6 +334,7 @@ Some contacts only emit an event on open. For this you can set autoReset to true
 Local sensors are connected to the arduino. This can be a simple read of an digital pin or an bus 
 sensor like the DS18B20
 
+
 ## DHT11/22 sensor example:
 
 ```json
@@ -418,6 +426,7 @@ They are set by default to interval = 10000 and inverted = false.
 ### Local Actor
 
 A local actor is the "HomeduinoSwitch", which can toggle the state of an pin on the arduino
+
 
 ## Pin switch example:
 
