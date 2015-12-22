@@ -41,7 +41,7 @@ You can load the plugin by editing your `config.json` to include:
 in the `plugins` section. For all configuration options see [homeduino-config-schema](homeduino-config-schema.coffee)
 
 The pin numbers are Arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
-The `transmitterPin` must be a digitial pin between `2` (D2) and `13` (D13).
+The `transmitterPin` must be a digital pin between `2` (D2) and `13` (D13).
 
 ![nano-pins](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/pins-nano.png)
 
@@ -337,8 +337,6 @@ Some contacts only emit an event on open. For this you can set autoReset to true
 ```
 ### Pin switch example:
 
-Only works with an Arduino. pin: 13 = digital pin 13 (LED on Arduino Nano).
-
 ```json
 {
   "id": "pin-switch",
@@ -383,9 +381,27 @@ state of it.
 
 ```json
 {
-  "id": "omeduino-contact-sensor",
+  "id": "homeduino-contact-sensor",
   "name": "ContactSensor",
   "class": "HomeduinoContactSensor",
+  "pin": 9,
+  "interval": 1000,
+  "inverted": true
+}
+```
+The pin must be set. Interval and inverted are optional.
+They are set by default to interval = 10000 and inverted = false.
+
+### PIR sensor example:
+
+A PIR sensor can read digital pins of the Arduino and display the
+presence state of it.
+
+```json
+{
+  "id": "homeduino-pir",
+  "name": "PIR",
+  "class": "HomeduinoPir",
   "pin": 9,
   "interval": 1000,
   "inverted": true

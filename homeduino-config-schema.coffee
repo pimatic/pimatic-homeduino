@@ -63,4 +63,8 @@ module.exports = {
     rfrepeats:
       description: "Amount of RF repeats"
       default: 7
+    apikey:
+      description: "Api key for external nodes"
+      type: "string"
+      required: false
 }
