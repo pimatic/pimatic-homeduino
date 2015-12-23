@@ -80,7 +80,7 @@ In some cases the target receiver don´t recognize the transmission. To improve 
 the amount of message repeats. By default this is set to seven. 
 
 
-## Switch example:
+##### Switch example:
 
 A "HomeduinoRFSwitch" can only use switch protocols.
 
@@ -99,7 +99,7 @@ A "HomeduinoRFSwitch" can only use switch protocols.
 }
 ```
 
-## Multi protocol switch example:
+##### Multi protocol switch example:
 
 ```json
     {
@@ -131,7 +131,7 @@ A "HomeduinoRFSwitch" can only use switch protocols.
     }
 ```
 
-## Buttons Device example:
+##### Buttons Device example:
 
 A "HomeduinoRFButtonsDevice" can use switch and command protocols.
 
@@ -157,7 +157,7 @@ A "HomeduinoRFButtonsDevice" can use switch and command protocols.
 }
 ```
 
-## Dimmer device example:
+##### Dimmer device example:
 
 The "HomeduinoRFDimmer" can only use dimmer protocols. The equivalent to dimmer1 is the switch1
 protocol.
@@ -180,7 +180,7 @@ protocol.
   ]
 },
 ```
-## Shutter sensor example:
+##### Shutter sensor example:
 
 Can use switch protocols.
 
@@ -203,7 +203,7 @@ Can use switch protocols.
 RF Sensors receiving data from any kind of external sensor over 433Mhz messages.
 
 
-## Weather station sensor example:
+##### Weather station sensor example:
 
 This is the basic sensor with only temperature and humidity
 
@@ -248,7 +248,7 @@ It supports different values to display
 rain, temperature, humidity, windGust, windDirection and avgAirspeed
 The order of the listed values define the order of the displayed values.
 
-## PIR sensor example:
+##### PIR sensor example:
 
 ```json
 {
@@ -266,7 +266,7 @@ The order of the listed values define the order of the displayed values.
 }
 ```
 
-## Contact sensor example:
+##### Contact sensor example:
 
 ```json
 {
@@ -303,7 +303,7 @@ Some contacts only emit an event on open. For this you can set autoReset to true
 }
 ```
 
-## Generic RF Sensor with Arduino sender
+##### Generic RF Sensor with Arduino sender
 
 ```json
 {
@@ -335,7 +335,7 @@ Local sensors are connected to the arduino. This can be a simple read of an digi
 sensor like the DS18B20
 
 
-## DHT11/22 sensor example:
+##### DHT11/22 sensor example:
 
 ```json
 {
@@ -347,7 +347,7 @@ sensor like the DS18B20
 }
 ```
 
-## DST Dallas DS18B20 sensor example:
+##### DST Dallas DS18B20 sensor example:
 
 ```json
 {
@@ -360,7 +360,7 @@ sensor like the DS18B20
 }
 ```
 
-## AnalogSensor example:
+##### AnalogSensor example:
 
 An AnalogSensor can read analog pins of the Arduino and display there value. 
 An optional preprocessing can be applied. Pin numbering starts at 14 (`A0`) 
@@ -387,7 +387,7 @@ for the first analog pin.
 The analog value is between 0 and 1023 and can be preprocessed by an expression. In this example
 the value is scale to a value between 0 and 5.
 
-## ContactSensor example:
+##### ContactSensor example:
 
 An ContactSensor can read digital pins of the Arduino and display the
 state of it.
@@ -405,7 +405,7 @@ state of it.
 The pin must be set. Interval and inverted are optional.
 They are set by default to interval = 10000 and inverted = false.
 
-## PIR sensor example:
+##### PIR sensor example:
 
 A PIR sensor can read digital pins of the Arduino and display the
 presence state of it.
@@ -428,7 +428,7 @@ They are set by default to interval = 10000 and inverted = false.
 A local actor is the "HomeduinoSwitch", which can toggle the state of an pin on the arduino
 
 
-## Pin switch example:
+##### Pin switch example:
 
 ```json
 {
