@@ -116,6 +116,7 @@ module.exports = (env) ->
         HomeduinoAnalogSensor
         HomeduinoContactSensor
         HomeduinoPir
+        HomeduinoAnalogDimmer
       ]
 
       for Cl in deviceClasses
@@ -1045,6 +1046,54 @@ module.exports = (env) ->
       assert state is on or state is off
       return @_writeState(state).then( =>
         @_setState(state)
+      )
+
+  class HomeduinoAnalogDimmer extends env.devices.DimmerActuator
+
+    constructor: (@config, lastState, @board) ->
+      @id = config.id
+      @name = config.name
+      @_dimlevel = lastState?.dimlevel?.value or 0
+      @_lastdimlevel = lastState?.lastdimlevel?.value or 100
+      @_state = lastState?.state?.value or off
+      
+      if @config.pin not in [3,5,6,9,10,11]
+        throw new Error("The selected pin:\"#{@config.pin}\" is invalid. 
+                         You must use one of these pins 3,5,6,9,10,11.")
+      hdPlugin.pendingConnect.then( =>
+        return @board.pinMode(@config.pin, Board.OUTPUT)
+      ).then( => 
+        return @_writeLevel(@_dimlevel)
+      ).catch( (error) =>
+        env.logger.error error
+        env.logger.debug error.stack
+      )
+      super()
+
+    _writeLevel: (level) ->
+      min = 0
+      max = 255
+      dimlevel = Math.round(level * ((100.0 / (max - min))+min))
+      return hdPlugin.pendingConnect.then( =>
+        return @board.analogWrite(@config.pin, dimlevel)
+      )
+        
+    changeStateTo: (state) ->
+      assert state is on or state is off
+      if state is on then turnOn
+      else turnOff
+
+
+    turnOn: -> @changeDimlevelTo(@_lastdimlevel)
+
+    changeDimlevelTo: (level) ->
+      unless @config.forceSend
+        if @_dimlevel is level then return Promise.resolve true
+      unless @_dimlevel is 0
+        @_lastdimlevel = @_dimlevel
+
+      return @_writeLevel(level).then( =>
+        @_setDimlevel(level)
       )
 
   class HomeduinoContactSensor extends env.devices.ContactSensor

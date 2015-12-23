@@ -480,5 +480,19 @@ module.exports = {
         description: "State to set on startup, if not given, last state will be restored"
         type: "boolean"
         required: false
-  }
+  },
+  HomeduinoAnalogDimmer: {
+    title: "HomeduinoAnalogDimmer config options"
+    type: "object"
+    extensions: ["xConfirm"]
+    properties:
+      pin:
+        description: "The pin"
+        type: "number"      
+      forceSend: 
+        type: "boolean"
+        description: "Resend signal even if switch has the requested state already"
+        default: true
+    required: ["pin"]
+  },
 }
