@@ -316,17 +316,9 @@ module.exports = (env) ->
   logDebug = (config, protocol, options, rfrepeats) ->
     message = "Sending Protocol: #{protocol.name}"
     for field, content of options
-      message += " #{field}: #{content}"
-    message += " Pin: #{config.transmitterPin}
-                Repeats: #{rfrepeats}"
-    env.logger.debug(message)
-
-  logDebug = (config, protocol, options) ->
-    message = "Sending Protocol: #{protocol.name}"
-    for field, content of options
-      message += " #{field}: #{content}"
-    message += " Pin: #{config.transmitterPin}
-                Repeats: #{config.rfrepeats}"
+      message += " #{field}:#{content}"
+    message += " Pin:#{config.transmitterPin}
+                Repeats:#{rfrepeats}"
     env.logger.debug(message)
 
   sendToSwitchesMixin = (protocols, state = null) ->
