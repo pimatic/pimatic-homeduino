@@ -425,10 +425,12 @@ They are set by default to interval = 10000 and inverted = false.
 
 ### Local Actor
 
-A local actor is the "HomeduinoSwitch", which can toggle the state of an pin on the arduino
+A local actor is an output on the Arduino like an digital pin or a PWM.
 
 
 ##### Pin switch example:
+
+The "HomeduinoSwitch" can toggle the state of an pin on the arduino.
 
 ```json
 {
@@ -437,5 +439,20 @@ A local actor is the "HomeduinoSwitch", which can toggle the state of an pin on 
   "class": "HomeduinoSwitch",
   "inverted": false,
   "pin": 13
+}
+```
+
+##### AnalogDimmer example:
+
+The AnalogDimmer activates one of the PWM channels on the Arduino. At the moment only the 
+following pins are allowed 3,5,6,9,10,11. The Dimmer maps an value from 0-100 to 0-255.
+The PWM frequency is about 490Hz.
+
+```json
+{
+  "id": "analogDimmer1",
+  "name": "analogDimmer",
+  "class": "HomeduinoAnalogDimmer",
+  "pin": 9
 }
 ```
