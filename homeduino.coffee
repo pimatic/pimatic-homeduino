@@ -1077,7 +1077,7 @@ module.exports = (env) ->
       super()
 
     _writeLevel: (level) ->
-      dimlevel = numberMapping(level,0,100,0,255)
+      dimlevel = Math.round(numberMapping(level,0,100,0,255))
       return hdPlugin.pendingConnect.then( =>
         return @board.analogWrite(@config.pin, dimlevel)
       )
