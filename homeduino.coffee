@@ -314,18 +314,23 @@ module.exports = (env) ->
             match = no
     return match
 
-  checkProtocolProperties = (p, types) ->
+  checkProtocolProperties = (deviceId, p, types) ->
     _protocol = Board.getRfProtocol(p.name)
+    errPrefix = "Error validating protocols config for #{deviceId}:"
     unless _protocol?
-      throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+      throw new Error("#{errPrefix} Could not find a protocol with the name \"#{p.name}\".")
     if _protocol.type not in types
-      throw new Error("\"#{p.name}\" is not a \"#{types}\" protocol.")
+      throw new Error(
+        "#{errPrefix} \"#{p.name}\" must has one of the following types: \"#{types.join(", ")}\""
+      )
     for value of p.options
       contains=false
       for pvalue of _protocol.values
         if value is pvalue then contains=true
       if not contains
-        throw new Error("Protocol \"#{p.name}\" don´t contains property \"#{value}\"")
+        throw new Error(
+          "#{errPrefix} Protocol \"#{p.name}\" has no propterty named \"#{value}\"."
+        )
   
   logDebug = (config, protocol, options, rfrepeats) ->
     message = "Sending Protocol: #{protocol.name}"
@@ -399,7 +404,7 @@ module.exports = (env) ->
       @_state = lastState?.state?.value
       
       for p in config.protocols
-        checkProtocolProperties(p, ["switch"])
+        checkProtocolProperties(@id, p, ["switch"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -442,7 +447,7 @@ module.exports = (env) ->
       @_state = lastState?.state?.value or off
       
       for p in config.protocols
-        checkProtocolProperties(p, ["switch", "dimmer"])
+        checkProtocolProperties(@id, p, ["switch", "dimmer"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -490,7 +495,7 @@ module.exports = (env) ->
 
       for b in config.buttons
         for p in b.protocols
-          checkProtocolProperties(p, ["switch","command"])
+          checkProtocolProperties(@id, p, ["switch","command"])
             
       @board.on('rf', (event) =>
         for b in @config.buttons
@@ -523,7 +528,7 @@ module.exports = (env) ->
       @_contact = lastState?.contact?.value or false
 
       for p in config.protocols
-        checkProtocolProperties(p, ["switch","contact"])
+        checkProtocolProperties(@id, p, ["switch","contact"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -550,7 +555,7 @@ module.exports = (env) ->
       @_position = lastState?.position?.value or 'stopped'
 
       for p in config.protocols
-        checkProtocolProperties(p, ["switch"])
+        checkProtocolProperties(@id, p, ["switch"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -598,7 +603,7 @@ module.exports = (env) ->
       @_presence = lastState?.presence?.value or false
 
       for p in config.protocols
-        checkProtocolProperties(p, ["pir"])
+        checkProtocolProperties(@id, p, ["pir"])
 
       resetPresence = ( =>
         @_setPresence(no)
@@ -635,7 +640,7 @@ module.exports = (env) ->
       hasBattery = false # numeric battery indicator
       isFahrenheit = config.isFahrenheit
       for p in config.protocols
-        checkProtocolProperties(p, ["weather"])
+        checkProtocolProperties(@id, p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
         hasTemperature = true if _protocol.values.temperature?
         hasHumidity = true if _protocol.values.humidity?
@@ -759,7 +764,7 @@ module.exports = (env) ->
       hasHumidity = false
       hasRain = false
       for p in config.protocols
-        checkProtocolProperties(p, ["weather"])
+        checkProtocolProperties(@id, p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
         hasRain = true if _protocol.values.rain?
         hasHumidity = true if _protocol.values.humidity?
@@ -928,7 +933,7 @@ module.exports = (env) ->
       @name = config.name
 
       for p in config.protocols
-        checkProtocolProperties(p, ["generic"])
+        checkProtocolProperties(@id, p, ["generic"])
 
       @attributes = {}
       for attributeConfig in @config.attributes
