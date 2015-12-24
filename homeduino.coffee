@@ -20,20 +20,25 @@ module.exports = (env) ->
         unless 2 <= @config.transmitterPin <= 13
           throw new Error("transmitterPin must be between 2 and 13")
 
-      @board = new Board(@config.driver, @config.driverOptions)
+      @board = new Board(@config)
+
+      @board.on("debugSend", (data) =>
+        if @config.debugLevel > 1
+          env.logger.debug("Sended   string: \"#{data}\"")
+      )
 
       @board.on("data", (data) =>
-        if @config.debug
-          env.logger.debug("data: \"#{data}\"")
+        if @config.debugLevel > 1
+          env.logger.debug("Received string: \"#{data}\"")
       )
 
       @board.on("rfReceive", (event) => 
-        if @config.debug
+        if @config.debugLevel > 0
           env.logger.debug 'received:', event.pulseLengths, event.pulses
       )
 
       @board.on("rf", (event) =>  
-        if @config.debug
+        if @config.debugLevel > 0
           env.logger.debug "#{event.protocol}: ", event.values
       )
 
@@ -56,7 +61,7 @@ module.exports = (env) ->
 
             if @config.enableReceiving
               @board.rfControlStartReceiving(@config.receiverPin).then( =>
-                if @config.debug
+                if @config.debugLevel > 0
                   env.logger.debug("Receiving on pin #{@config.receiverPin}")
               ).catch( (err) =>
                 env.logger.error("Couldn't start receiving: #{err.message}.")

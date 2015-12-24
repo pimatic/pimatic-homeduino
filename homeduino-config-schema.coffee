@@ -56,10 +56,10 @@ module.exports = {
       description: "Time to wait for ready package on connection"
       type: "integer"
       default: 5*60*1000 # 5min
-    debug:
+    debugLevel:
       description: "Log information for debugging, including received messages"
-      type: "boolean"
-      default: true
+      type: "integer"
+      default: 0
     rfrepeats:
       description: "Amount of RF repeats"
       default: 7
