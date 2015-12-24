@@ -454,9 +454,9 @@ module.exports = (env) ->
               else
                 _protocol = Board.getRfProtocol(p.name)
                 if _protocol.values.dimlevel?
-                  min = _protocol.values.dimlevel.min
-                  max = _protocol.values.dimlevel.max
-                  dimlevel = Math.round(event.values.dimlevel * ((100.0 / (max - min))+min))
+                  p_min = _protocol.values.dimlevel.min
+                  p_max = _protocol.values.dimlevel.max
+                  dimlevel = Math.round(numberMapping(event.values.dimlevel,0,100,p_min,p_max))
                   @_setDimlevel(dimlevel)
         )
       super()
