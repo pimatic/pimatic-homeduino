@@ -322,6 +322,10 @@ module.exports = (env) ->
                 Repeats:#{rfrepeats}"
     env.logger.debug(message)
 
+  #eventually this can be part of the framework
+  numberMapping = (X, in_min, in_max, out_min, out_max)->
+    return (X-in_min)*(out_max-out_min)/(in_max-in_min)+out_min
+
   sendToSwitchesMixin = (protocols, state = null) ->
     pending = []
     for p in protocols
@@ -1073,9 +1077,7 @@ module.exports = (env) ->
       super()
 
     _writeLevel: (level) ->
-      min = 0
-      max = 255
-      dimlevel = Math.round(level * ((100.0 / (max - min))+min))
+      dimlevel = numberMapping(level,0,100,0,255)
       return hdPlugin.pendingConnect.then( =>
         return @board.analogWrite(@config.pin, dimlevel)
       )
