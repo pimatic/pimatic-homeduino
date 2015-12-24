@@ -313,6 +313,19 @@ module.exports = (env) ->
           if event.values[optName] isnt optValue
             match = no
     return match
+
+  checkProtocolProperties = (p, types) ->
+    _protocol = Board.getRfProtocol(p.name)
+    unless _protocol?
+      throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+    if _protocol.type not in types
+      throw new Error("\"#{p.name}\" is not a \"#{types}\" protocol.")
+    for value of p.options
+      contains=false
+      for pvalue of _protocol.values
+        if value is pvalue then contains=true
+      if not contains
+        throw new Error("Protocol \"#{p.name}\" don´t contains property \"#{value}\"")
   
   logDebug = (config, protocol, options, rfrepeats) ->
     message = "Sending Protocol: #{protocol.name}"
@@ -386,11 +399,7 @@ module.exports = (env) ->
       @_state = lastState?.state?.value
       
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "switch"
-          throw new Error("\"#{p.name}\" is not a switch protocol.")
+        checkProtocolProperties(p, ["switch"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -433,11 +442,7 @@ module.exports = (env) ->
       @_state = lastState?.state?.value or off
       
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "dimmer" or "switch"
-          throw new Error("\"#{p.name}\" is not a dimmer or a switch protocol.")
+        checkProtocolProperties(p, ["switch", "dimmer"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -485,16 +490,7 @@ module.exports = (env) ->
 
       for b in config.buttons
         for p in b.protocols
-          _protocol = Board.getRfProtocol(p.name)
-          unless _protocol?
-            throw new Error(
-              "Could not find a protocol with the name \"#{p.name}\" in config" +
-              " of button \"#{b.id}\"."
-            )
-          unless _protocol.type is "switch" or "command"
-            throw new Error(
-              "\"#{p.name}\" in config of button \"#{b.id}\" is not a switch or a command protocol."
-            )
+          checkProtocolProperties(p, ["switch","command"])
             
       @board.on('rf', (event) =>
         for b in @config.buttons
@@ -527,9 +523,7 @@ module.exports = (env) ->
       @_contact = lastState?.contact?.value or false
 
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        checkProtocolProperties(p, ["switch","contact"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -556,9 +550,7 @@ module.exports = (env) ->
       @_position = lastState?.position?.value or 'stopped'
 
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        checkProtocolProperties(p, ["switch"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -606,11 +598,7 @@ module.exports = (env) ->
       @_presence = lastState?.presence?.value or false
 
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "pir"
-          throw new Error("\"#{p.name}\" is not a PIR protocol.")
+        checkProtocolProperties(p, ["pir"])
 
       resetPresence = ( =>
         @_setPresence(no)
@@ -647,11 +635,8 @@ module.exports = (env) ->
       hasBattery = false # numeric battery indicator
       isFahrenheit = config.isFahrenheit
       for p in config.protocols
+        checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "weather"
-          throw new Error("\"#{p.name}\" is not a weather protocol.")
         hasTemperature = true if _protocol.values.temperature?
         hasHumidity = true if _protocol.values.humidity?
         hasLowBattery = true if _protocol.values.lowBattery?
@@ -774,11 +759,8 @@ module.exports = (env) ->
       hasHumidity = false
       hasRain = false
       for p in config.protocols
+        checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "weather"
-          throw new Error("\"#{p.name}\" is not a weather protocol.")
         hasRain = true if _protocol.values.rain?
         hasHumidity = true if _protocol.values.humidity?
         hasTemperature = true if _protocol.values.temperature?
@@ -946,11 +928,7 @@ module.exports = (env) ->
       @name = config.name
 
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "generic"
-          throw new Error("\"#{p.name}\" is not a generic protocol.")
+        checkProtocolProperties(p, ["generic"])
 
       @attributes = {}
       for attributeConfig in @config.attributes
