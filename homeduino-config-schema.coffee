@@ -52,7 +52,7 @@ module.exports = {
       description: "The Arduino digital pin to search for DS18B20 sensors on."
       type: "integer"
       default: 12
-    connectionTimeout: 
+    connectionTimeout:
       description: "Time to wait for ready package on connection"
       type: "integer"
       default: 5*60*1000 # 5min

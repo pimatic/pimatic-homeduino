@@ -9,22 +9,22 @@ module.exports = {
         description: "The type of the DHT sensor (22, 33, 44 or 55)"
         type: "integer"
         default: 22
-      pin: 
+      pin:
         description: "The digital pin, the DHT sensor is connected to."
         type: "integer"
       interval:
         description: "Polling interval for the readings, should be greater than 2"
         type: "integer"
         default: 10000
-      processingTemp: 
+      processingTemp:
         description: "
-          expression that can preprocess the value, $value is a placeholder for the temperature 
+          expression that can preprocess the value, $value is a placeholder for the temperature
           value itself."
         type: "string"
         default: "$value"
-      processingHum: 
+      processingHum:
         description: "
-          expression that can preprocess the value, $value is a placeholder for the humidity 
+          expression that can preprocess the value, $value is a placeholder for the humidity
           value itself."
         type: "string"
         default: "$value"
@@ -42,12 +42,12 @@ module.exports = {
       pin:
         description: "The digital pin the DST sensor is connected to."
         type : "integer"
-      address:  
+      address:
         description: "The address of the sensor"
         type: "string"
-      processing: 
+      processing:
         description: "
-          expression that can preprocess the value, $value is a placeholder for the 
+          expression that can preprocess the value, $value is a placeholder for the
           value itself."
         type: "string"
         default: "$value"
@@ -81,7 +81,7 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
-      forceSend: 
+      forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
@@ -116,7 +116,7 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
-      forceSend: 
+      forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
@@ -184,10 +184,10 @@ module.exports = {
               description: "The protocol options"
               type: "object"
       autoReset:
-        description: """Reset the state after resetTime. Useful for contact sensors, 
+        description: """Reset the state after resetTime. Useful for contact sensors,
                       that only emit open or close events"""
         type: "boolean"
-        default: false  
+        default: false
       resetTime:
         description: """Time after that the contact state is reseted."""
         type: "integer"
@@ -223,7 +223,7 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
-      forceSend: 
+      forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
@@ -247,15 +247,15 @@ module.exports = {
             options:
               description: "The protocol options"
               type: "object"
-      processingTemp: 
+      processingTemp:
         description: "
-          expression that can preprocess the value, $value is a placeholder for the temperature 
+          expression that can preprocess the value, $value is a placeholder for the temperature
           value itself."
         type: "string"
         default: "$value"
-      processingHum: 
+      processingHum:
         description: "
-          expression that can preprocess the value, $value is a placeholder for the humidity 
+          expression that can preprocess the value, $value is a placeholder for the humidity
           value itself."
         type: "string"
         default: "$value"
@@ -412,16 +412,16 @@ module.exports = {
               description: "A custom label to use in the frontend."
               type: "string"
               default: ""
-            pin: 
+            pin:
               description: "Arduino analog pin to read"
               type: "integer"
             interval:
               description: "The interval in which the analog pin should be read in ms"
               type: "integer"
               default: 5000
-            processing: 
+            processing:
               description: "
-                expression that can preprocess the value, $value is a placeholder for the analog 
+                expression that can preprocess the value, $value is a placeholder for the analog
                 value itself."
               type: "string"
               default: "$value"
@@ -474,7 +474,7 @@ module.exports = {
               description: "The protocol options"
               type: "object"
       autoReset:
-        description: """Reset the state after resetTime. Useful for pir sensors, 
+        description: """Reset the state after resetTime. Useful for pir sensors,
                       that emit present and absent events"""
         type: "boolean"
         default: true
@@ -508,8 +508,8 @@ module.exports = {
     properties:
       pin:
         description: "The pin"
-        type: "number"      
-      forceSend: 
+        type: "number"
+      forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
