@@ -557,9 +557,10 @@ module.exports = (env) ->
       @id = config.id
       @name = config.name
       @_position = lastState?.position?.value or 'stopped'
-
+      @_types = {}
       for p in config.protocols
-        checkProtocolProperties(p, ["switch"])
+        checkProtocolProperties(p, ["switch", "command"])
+        @_types[p.name] = Board.getRfProtocol(p.name).type #save the protocol type
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -570,10 +571,17 @@ module.exports = (env) ->
           # ignore own send messages
           if (now - @_lastSendTime) < 3000
             return
-          if @_position is 'stopped'
-            @_setPosition(if event.values.state then 'up' else 'down')
-          else
-            @_setPosition('stopped')
+          if p.type is 'switch'
+            if @_position is 'stopped'
+              @_setPosition(if event.values.state then 'up' else 'down')
+            else
+              @_setPosition('stopped')
+
+          else if p.type is 'command'
+            if event.values.command in ["stop", "stopped"]
+              @_setPosition("stopped")
+            else
+              @_setPosition(event.values.command)
       )
       super()
 
@@ -582,7 +590,13 @@ module.exports = (env) ->
     stop: ->
       unless @config.forceSend
         if @_position is 'stopped' then return Promise.resolve()
-      @_sendStateToSwitches(@config.protocols, @_position is 'up').then( =>
+
+      protocols = _.clone(@config.protocols)
+      for p in protocols
+        if @_types[p.name] is "command"
+          p.options.command = "stop"
+
+      @_sendStateToSwitches(protocols, @_position is 'up').then( =>
         @_setPosition('stopped')
       )
 
@@ -593,10 +607,15 @@ module.exports = (env) ->
       unless @config.forceSend
         if position is @_position then return Promise.resolve()
       if position is 'stopped' then return @stop()
-      else return @_sendStateToSwitches(@config.protocols, position is 'up').then( =>
+      else
+        protocols = _.clone(@config.protocols)
+        for p in protocols
+          if @_types[p.name] is "command"
+            p.options.command = position
+        return @_sendStateToSwitches(protocols, position is 'up').then( =>
         @_lastSendTime = new Date().getTime()
         @_setPosition(position)
-      )
+        )
 
 
   class HomeduinoRFPir extends env.devices.PresenceSensor
