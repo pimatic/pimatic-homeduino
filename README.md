@@ -245,8 +245,10 @@ For weather stations like the Alecto WS-4500 you should use the weather station 
 },
 ```
 It supports different values to display
-rain, temperature, humidity, windGust, windDirection and avgAirspeed
+rain, temperature, humidity, windGust, windDirection, avgAirspeed, lowBattery and battery.
 The order of the listed values define the order of the displayed values.
+"lowBattery" is an boolean value and "battery" is an percentage value from 0 to 100.
+Most protocols supports only an "lowBattery" value.
 
 ##### PIR sensor example:
 

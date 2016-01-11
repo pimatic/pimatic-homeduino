@@ -779,6 +779,8 @@ module.exports = (env) ->
       @_temperatue = lastState?.temperature?.value or 0
       @_humidity = lastState?.humidity?.value or 0
       @_rain = lastState?.rain?.value or 0
+      @_lowBattery = lastState?.lowBattery?.value or false
+      @_battery = lastState?.battery?.value or 100
 
       hasWindGust = false
       hasAvgAirspeed = false
@@ -786,6 +788,8 @@ module.exports = (env) ->
       hasTemperature = false
       hasHumidity = false
       hasRain = false
+      hasLowBattery = false # boolean battery indicator
+      hasBattery = false # numeric battery indicator
       for p in config.protocols
         checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
@@ -795,10 +799,13 @@ module.exports = (env) ->
         hasWindDirection = true if _protocol.values.windDirection?
         hasAvgAirspeed = true if _protocol.values.avgAirspeed?
         hasWindGust = true if _protocol.values.windGust?
+        hasLowBattery = true if _protocol.values.lowBattery?
+        hasBattery = true if  _protocol.values.battery?
 
       hasNoAttributes = (
         !hasRain and !hasHumidity and !hasTemperature and
-        !hasWindGust and !hasAvgAirspeed and !hasWindDirection
+        !hasWindGust and !hasAvgAirspeed and !hasWindDirection and
+        !hasLowBattery and !hasBattery
       )
       if hasNoAttributes
         throw new Error(
@@ -889,10 +896,54 @@ module.exports = (env) ->
               env.logger.warn(
                 "#{@id}: windGust is defined but no protocol in config contains windGust data!"
               )
+          when "lowBattery"
+            if hasLowBattery
+              if !@attributes.lowBattery?
+                @attributes.lowBattery = {
+                  description: "the battery status"
+                  type: "boolean"
+                  labels: ["low", 'ok']
+                  icon:
+                    noText: true
+                    mapping: {
+                      'icon-battery-filled': false
+                      'icon-battery-empty': true
+                    }
+                }
+            else
+              env.logger.warn(
+                "#{@id}: lowBattery is defined but no protocol in config contains lowBattery data!"
+              )
+          when "battery"
+            if hasBattery
+              if !@attributes.battery?
+                @attributes.battery = {
+                  description: "the battery status"
+                  type: "number"
+                  unit: '%'
+                  displaySparkline: false
+                  icon:
+                    noText: true
+                    mapping: {
+                      'icon-battery-empty': 0
+                      'icon-battery-fuel-1': [0, 20]
+                      'icon-battery-fuel-2': [20, 40]
+                      'icon-battery-fuel-3': [40, 60]
+                      'icon-battery-fuel-4': [60, 80]
+                      'icon-battery-fuel-5': [80, 100]
+                      'icon-battery-filled': 100
+                    }
+                }
+            else
+              env.logger.warn(
+                "#{@id}: battery is defined but no protocol in config contains battery data!"
+              )
           else
             throw new Error(
               "Values should be one of: " +
-              "rain, humidity, temperature, windDirection, avgAirspeed, windGust"
+              "rain, humidity, temperature, "+
+              "windDirection, avgAirspeed, windGust, "+
+              "lowBattery, battery"
             )
 
       @board.on('rf', (event) =>
@@ -904,33 +955,34 @@ module.exports = (env) ->
               if @_lastReceiveTime? then (now - @_lastReceiveTime)
               else 9999999
             )
+            # discard value if it is the same and was received just under two second ago
             if timeDelta < 2000
               return
             if event.values.windGust?
               @_windGust = event.values.windGust
-              # discard value if it is the same and was received just under two second ago
               @emit "windGust", @_windGust
             if event.values.avgAirspeed?
               @_avgAirspeed = event.values.avgAirspeed
-              # discard value if it is the same and was received just under two second ago
               @emit "avgAirspeed", @_avgAirspeed
             if event.values.windDirection?
               @_windDirection = event.values.windDirection
-              # discard value if it is the same and was received just under two second ago
               dir = @_directionToString(@_windDirection)
               @emit "windDirection", "#{@_windDirection}°(#{dir})"
             if event.values.temperature?
               @_temperatue = event.values.temperature
-              # discard value if it is the same and was received just under two second ago
               @emit "temperature", @_temperatue
             if event.values.humidity?
               @_humidity = event.values.humidity
-              # discard value if it is the same and was received just under two second ago
               @emit "humidity", @_humidity
             if event.values.rain?
               @_rain = event.values.rain
-              # discard value if it is the same and was received just under two second ago
               @emit "rain", @_rain
+            if event.values.lowBattery?
+              @_lowBattery = event.values.lowBattery
+              @emit "lowBattery", @_lowBattery
+            if event.values.battery?
+              @_battery = event.values.battery
+              @emit "battery", @_battery
             @_lastReceiveTime = now
       )
       super()
@@ -947,7 +999,8 @@ module.exports = (env) ->
     getRain: -> Promise.resolve @_rain
     getTemperature: -> Promise.resolve @_temperatue
     getHumidity: -> Promise.resolve @_humidity
-
+    getLowBattery: -> Promise.resolve @_lowBattery
+    getBattery: -> Promise.resolve @_battery
 
   class HomeduinoRFGenericSensor extends env.devices.Sensor
 
