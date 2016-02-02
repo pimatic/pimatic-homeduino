@@ -250,6 +250,22 @@ The order of the listed values define the order of the displayed values.
 "lowBattery" is an boolean value and "battery" is an percentage value from 0 to 100.
 Most protocols supports only an "lowBattery" value.
 
+Has your sensor a known offset for an value, then you can add a preprocessing to correct the values.
+For the "HomeduinoRFTemperature" these are
+(The following is an example)
+```json
+  "processingTemp": "$value + 10",
+  "processingHum": "$value * 0.5",
+```
+And for the "HomeduinoRFWeatherStation" these are
+```json
+  "processingTemp": "($value - 1.2) * 0.9",
+  "processingHum": "$value",
+  "processingWindGust": "$value",
+  "processingAvgAirspeed": "$value",
+  "processingWindDirection": "$value + 45",
+  "processingRain": "$value",
+```
 ##### PIR sensor example:
 
 ```json

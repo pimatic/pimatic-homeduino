@@ -958,25 +958,75 @@ module.exports = (env) ->
             # discard value if it is the same and was received just under two second ago
             if timeDelta < 2000
               return
+            variableManager = hdPlugin.framework.variableManager
             if event.values.windGust?
-              @_windGust = event.values.windGust
-              @emit "windGust", @_windGust
+              processing = @config.processingWindGust or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.windGust)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_windGust = value
+                @emit "windGust", @_windGust
+              )
+              #@_windGust = event.values.windGust
+              #@emit "windGust", @_windGust
             if event.values.avgAirspeed?
-              @_avgAirspeed = event.values.avgAirspeed
-              @emit "avgAirspeed", @_avgAirspeed
+              processing = @config.processingAvgAirspeed or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.avgAirspeed)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_avgAirspeed = value
+                @emit "avgAirspeed", @_avgAirspeed
+              )
+              #@_avgAirspeed = event.values.avgAirspeed
+              #@emit "avgAirspeed", @_avgAirspeed
             if event.values.windDirection?
-              @_windDirection = event.values.windDirection
-              dir = @_directionToString(@_windDirection)
-              @emit "windDirection", "#{@_windDirection}°(#{dir})"
+              processing = @config.processingWindDirection or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.windDirection)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_windDirection = value
+                dir = @_directionToString(@_windDirection)
+                @emit "windDirection", "#{@_windDirection}°(#{dir})"
+              )
+              #@_windDirection = event.values.windDirection
+              #dir = @_directionToString(@_windDirection)
+              #@emit "windDirection", "#{@_windDirection}°(#{dir})"
             if event.values.temperature?
-              @_temperatue = event.values.temperature
-              @emit "temperature", @_temperatue
+              processing = @config.processingTemp or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.temperature)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_temperature = value
+                @emit "temperature", @_temperature
+              )
+              #@_temperatue = event.values.temperature
+              #@emit "temperature", @_temperatue
             if event.values.humidity?
-              @_humidity = event.values.humidity
-              @emit "humidity", @_humidity
+              processing = @config.processingHum or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.humidity)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_humidity = value
+                @emit "temperature", @_humidity
+              )
+              #@_humidity = event.values.humidity
+              #@emit "humidity", @_humidity
             if event.values.rain?
-              @_rain = event.values.rain
-              @emit "rain", @_rain
+              processing = @config.processingRain or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.rain)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_rain = value
+                @emit "temperature", @_rain
+              )
+              #@_rain = event.values.rain
+              #@emit "rain", @_rain
             if event.values.lowBattery?
               @_lowBattery = event.values.lowBattery
               @emit "lowBattery", @_lowBattery

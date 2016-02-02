@@ -291,6 +291,42 @@ module.exports = {
             options:
               description: "The protocol options"
               type: "object"
+      processingTemp:
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the
+          value itself."
+        type: "string"
+        default: "$value"
+      processingHum:
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the
+          value itself."
+        type: "string"
+        default: "$value"
+      processingWindGust:
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the
+          value itself."
+        type: "string"
+        default: "$value"
+      processingAvgAirspeed:
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the
+          value itself."
+        type: "string"
+        default: "$value"
+      processingWindDirection:
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the
+          value itself."
+        type: "string"
+        default: "$value"
+      processingRain:
+        description: "
+          expression that can preprocess the value, $value is a placeholder for the
+          value itself."
+        type: "string"
+        default: "$value"
     required: ["protocols"]
   }
   HomeduinoRFGenericSensor: {
