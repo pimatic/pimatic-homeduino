@@ -1012,7 +1012,7 @@ module.exports = (env) ->
               )
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_humidity = value
-                @emit "temperature", @_humidity
+                @emit "humidity", @_humidity
               )
               #@_humidity = event.values.humidity
               #@emit "humidity", @_humidity
