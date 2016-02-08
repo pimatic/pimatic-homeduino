@@ -1023,7 +1023,7 @@ module.exports = (env) ->
               )
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_rain = value
-                @emit "temperature", @_rain
+                @emit "rain", @_rain
               )
               #@_rain = event.values.rain
               #@emit "rain", @_rain
