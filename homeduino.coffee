@@ -326,11 +326,13 @@ module.exports = (env) ->
     for value of p.options
       contains=false
       for pvalue of _protocol.values
-        properties += "\"#{pvalue}\" "
+        #properties += "\"#{pvalue}\" "
         if value is pvalue
           contains=true
           break
       if not contains
+        for pvalue of _protocol.values
+          properties += "\"#{pvalue}\" "
         throw new Error(
           "Protocol \"#{p.name}\" has no property named \"#{value}\".
            Available properties are: #{properties}"
