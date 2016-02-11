@@ -28,6 +28,11 @@ module.exports = {
           value itself."
         type: "string"
         default: "$value"
+      removeOutliers:
+        description: "
+          removes outliers of temperature and humidity values"
+        type: "boolean"
+        default: false
     required: ["pin"]
   },
   HomeduinoDSTSensor: {
@@ -263,6 +268,11 @@ module.exports = {
         description: "
           boolean that sets the right units if the temperature is to be reported in
            Fahrenheit"
+        type: "boolean"
+        default: false
+      removeOutliers:
+        description: "
+          removes outliers of temperature and humidity values"
         type: "boolean"
         default: false
     required: ["protocols"]
