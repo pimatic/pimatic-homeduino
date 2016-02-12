@@ -137,6 +137,8 @@ module.exports = (env) ->
           res.end('ACK')
         )
 
+      #This is our uploader mapping. The key (left) value represents the arduino gcc hex file.
+      #The value (right) is the used uploader. You can see we used often the nano uploader.
       @supportedArduBoards = {
         "uno": "uno"
         "mega": "mega"
@@ -155,6 +157,7 @@ module.exports = (env) ->
       #hexFilePath = pluginPath+"/arduino/Homeduino_"+
       #              @supportedArduBoards[@config.driverOptions.board]+".hex"
       #env.logger.debug(hexFilePath)
+      @arduUpdaterReg = false
       @_registerArduUpdater()
 
 
@@ -162,19 +165,21 @@ module.exports = (env) ->
     _registerArduUpdater:()=>
       if @config.driver is "serialport"
         @framework.on "after init", =>
-          arduUpdater = @framework.pluginManager.getPlugin("arduino-manager")
+          arduUpdater = @framework.pluginManager.getPlugin("arduino-updater")
           if arduUpdater?
             arduinos = arduUpdater.getSupportedBoards()
+            boards = (key for key, val of @supportedArduBoards)
             unless @config.driverOptions.board?
               env.logger.warn("You have installed pimatic-arduino-updater but you haven´t "+
                               "specified a Arduino board for Homeduino. "+
-                              "Supported boards are: TODO CHANGE#{arduinos.join(", ")}")
+                              "Supported boards are: #{boards.join(", ")}")
             else if @supportedArduBoards[@config.driverOptions.board] not in arduinos
               env.logger.warn("You have specified a unsupported Arduino board. "+
-                              "Supported boards are: TODO CHANGE#{arduinos.join(", ")}")
+                              "Supported boards are: #{boards.join(", ")}")
             else
-              arduUpdater.registerPlugin(@config.plugin)
+              @arduUpdaterReg = arduUpdater.registerPlugin(@config.plugin)
 
+    #This function will be called from the arduino-updater'to determin a necessary update
     arduinoUpdate:()=>
       env.logger.info "ArduinoUpdate function call"
       pluginPath = @framework.pluginManager.pathToPlugin("pimatic-"+@config.plugin)
@@ -192,6 +197,8 @@ module.exports = (env) ->
 
       return state
 
+    #This function will be called after update
+    #TODO: Remove and change to Promise system
     arduinoReady:()=>
       @_conectToBoard()
 
