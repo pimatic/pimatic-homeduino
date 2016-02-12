@@ -236,9 +236,14 @@ module.exports = (env) ->
         unit: '%'
         acronym: 'RH'
 
+    #sortfunction, because JavaScript does lexicographical sort
+    sortfunction = (a,b) -> a - b
+
     constructor: (@config, lastState, @board) ->
       @id = config.id
       @name = config.name
+      @_temperatures = []
+      @_humidities = []
       super()
 
       lastError = null
@@ -251,6 +256,20 @@ module.exports = (env) ->
             processing.replace(/\$value\b/g, result.temperature)
           )
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+            if @config.removeOutliers is true
+              @_temperatures.push value
+              # if array size > 7, shift array
+              if @_temperatures.length > 7
+                @_temperatures.shift()
+              #check for outlier if array contains 7 entries
+              if @_temperatures.length == 7
+                processedValues = _.clone(@_temperatures)
+                processedValues.sort(sortfunction)
+                middle = processedValues[3]
+                diff = 0.5 + 3.0 * (processedValues[5] - processedValues[1])
+                if value > middle + diff or value < middle - diff
+                  env.logger.info @name, ' temperature value dismissed: ', value, ' ' , @_temperatures
+                  return
             @emit 'temperature', value
           )
           #@emit 'temperature', result.temperature
@@ -259,6 +278,20 @@ module.exports = (env) ->
             processing.replace(/\$value\b/g, result.humidity)
           )
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+            if @config.removeOutliers is true
+              @_humidities.push value
+              # if array size > 7, shift array
+              if @_humidities.length > 7
+                @_humidities.shift()
+              #check for outlier if array contains 7 entries
+              if @_humidities.length == 7
+                processedValues = _.clone(@_humidities)
+                processedValues.sort(sortfunction)
+                middle = processedValues[3]
+                diff = 1.0 + 3.0 * (processedValues[5] - processedValues[1])
+                if value > middle + diff or value < middle - diff
+                  env.logger.info @name, ' humidity value dismissed: ', value, ' ' , @_humidities
+                  return
             @emit 'humidity', value
           )
           #@emit 'humidity', result.humidity
@@ -649,6 +682,9 @@ module.exports = (env) ->
 
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
 
+    #sortfunction, because JavaScript does lexicographical sort
+    sortfunction = (a,b) -> a - b
+
     constructor: (@config, lastState, @board) ->
       @id = config.id
       @name = config.name
@@ -656,6 +692,8 @@ module.exports = (env) ->
       @_humidity = lastState?.humidity?.value
       @_lowBattery = lastState?.lowBattery?.value
       @_battery = lastState?.battery?.value
+      @_temperatures = []
+      @_humidities = []
 
       hasTemperature = false
       hasHumidity = false
@@ -740,6 +778,19 @@ module.exports = (env) ->
                 processing.replace(/\$value\b/g, event.values.temperature)
               )
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                if @config.removeOutliers is true
+                  @_temperatures.push value
+                  if @_temperatures.length > 7
+                    @_temperatures.shift()
+                  #check for outlier if array contains 7 entries
+                  if @_temperatures.length == 7
+                    processedValues = _.clone(@_temperatures)
+                    processedValues.sort(sortfunction)
+                    middle = processedValues[3]
+                    diff = 0.5 + 3.0 * (processedValues[5] - processedValues[1])
+                    if value > middle + diff or value < middle - diff
+                      env.logger.info @name, ' temperature value dismissed: ', value, ' ' , @_temperatures
+                      return
                 @_temperatue = value
                 @emit "temperature", @_temperatue
               )
@@ -750,6 +801,20 @@ module.exports = (env) ->
                 processing.replace(/\$value\b/g, event.values.humidity)
               )
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                if @config.removeOutliers is true
+                  @_humidities.push value
+                  # if array size > 7, shift array
+                  if @_humidities.length > 7
+                    @_humidities.shift()
+                  #check for outlier if array contains 7 entries
+                  if @_humidities.length == 7
+                    processedValues = _.clone(@_humidities)
+                    processedValues.sort(sortfunction)
+                    middle = processedValues[3]
+                    diff = 1.0 + 3.0 * (processedValues[5] - processedValues[1])
+                    if value > middle + diff or value < middle - diff
+                      env.logger.info @name, ' humidity value dismissed: ', value, ' ' , @_humidities
+                      return
                 @_humidity = value
                 @emit "humidity", @_humidity
               )
