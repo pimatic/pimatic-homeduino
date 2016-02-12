@@ -41,35 +41,7 @@ module.exports = (env) ->
         env.logger.warn "Couldn't connect (#{err.message}), retrying..."
       )
 
-      @pendingConnect = new Promise( (resolve, reject) =>
-        @framework.on "after init", ( =>
-          @board.connect(@config.connectionTimeout).then( =>
-            env.logger.info("Connected to homeduino device.")
-
-            if @config.enableDSTSensors
-              @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) ->
-                env.logger.info("DST sensors: #{ret.sensors}")
-              ).catch( (err) =>
-                env.logger.error("Couldn't scan for DST sensors: #{err.message}.")
-                env.logger.debug(err.stack)
-              )
-
-            if @config.enableReceiving
-              @board.rfControlStartReceiving(@config.receiverPin).then( =>
-                if @config.debug
-                  env.logger.debug("Receiving on pin #{@config.receiverPin}")
-              ).catch( (err) =>
-                env.logger.error("Couldn't start receiving: #{err.message}.")
-                env.logger.debug(err.stack)
-              )
-            return
-          ).then(resolve).catch( (err) =>
-            env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
-            env.logger.error(err.stack)
-            reject(err)
-          )
-        )
-      )
+      @_conectToBoard()
 
       # Enhance the config schemes with available protocols, so we can build a better
       # gui for them
@@ -164,6 +136,96 @@ module.exports = (env) ->
           @board.provessExternalReceive(buckets, pulses)
           res.end('ACK')
         )
+
+      @supportedArduBoards = {
+        "uno": "uno"
+        "mega": "mega"
+        "mega2560": "mega"
+        "leonardo": "leonardo"
+        "micro": "micro"
+        "nano328": "nano"
+        "nano": "nano"
+        "pro328": "nano"
+        "pro5v": "nano"
+        "pro5v328": "nano"
+        "pro": "nano"
+        "diecimila": "duemilanove168"
+      }
+      #pluginPath = @framework.pluginManager.pathToPlugin("pimatic-"+@config.plugin)
+      #hexFilePath = pluginPath+"/arduino/Homeduino_"+
+      #              @supportedArduBoards[@config.driverOptions.board]+".hex"
+      #env.logger.debug(hexFilePath)
+      @_registerArduUpdater()
+
+
+
+    _registerArduUpdater:()=>
+      if @config.driver is "serialport"
+        @framework.on "after init", =>
+          arduUpdater = @framework.pluginManager.getPlugin("arduino-manager")
+          if arduUpdater?
+            arduinos = arduUpdater.getSupportedBoards()
+            unless @config.driverOptions.board?
+              env.logger.warn("You have installed pimatic-arduino-updater but you haven´t "+
+                              "specified a Arduino board for Homeduino. "+
+                              "Supported boards are: TODO CHANGE#{arduinos.join(", ")}")
+            else if @supportedArduBoards[@config.driverOptions.board] not in arduinos
+              env.logger.warn("You have specified a unsupported Arduino board. "+
+                              "Supported boards are: TODO CHANGE#{arduinos.join(", ")}")
+            else
+              arduUpdater.registerPlugin(@config.plugin)
+
+    arduinoUpdate:()=>
+      env.logger.info "ArduinoUpdate function call"
+      pluginPath = @framework.pluginManager.pathToPlugin("pimatic-"+@config.plugin)
+      hexFilePath = pluginPath+"/arduino/Homeduino_"+@config.driverOptions.board+".hex"
+      state = {
+        update:false
+        port: @config.driverOptions.serialDevice
+        board: @supportedArduBoards[@config.driverOptions.board]
+        file: hexFilePath
+      }
+      if false#update is true
+        #if @pendingConnect?
+        @board.disconnect()
+        state.update = true
+
+      return state
+
+    arduinoReady:()=>
+      @_conectToBoard()
+
+
+    _conectToBoard:()=>
+      @pendingConnect = new Promise( (resolve, reject) =>
+        @framework.on "after init", ( =>
+          @board.connect(@config.connectionTimeout).then( =>
+            env.logger.info("Connected to homeduino device.")
+
+            if @config.enableDSTSensors
+              @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) ->
+                env.logger.info("DST sensors: #{ret.sensors}")
+              ).catch( (err) =>
+                env.logger.error("Couldn't scan for DST sensors: #{err.message}.")
+                env.logger.debug(err.stack)
+              )
+
+            if @config.enableReceiving
+              @board.rfControlStartReceiving(@config.receiverPin).then( =>
+                if @config.debug
+                  env.logger.debug("Receiving on pin #{@config.receiverPin}")
+              ).catch( (err) =>
+                env.logger.error("Couldn't start receiving: #{err.message}.")
+                env.logger.debug(err.stack)
+              )
+            return
+          ).then(resolve).catch( (err) =>
+            env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
+            env.logger.error(err.stack)
+            reject(err)
+          )
+        )
+      )
 
   hdPlugin = new HomeduinoPlugin()
 
