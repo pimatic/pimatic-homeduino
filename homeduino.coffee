@@ -27,12 +27,12 @@ module.exports = (env) ->
           env.logger.debug("data: \"#{data}\"")
       )
 
-      @board.on("rfReceive", (event) => 
+      @board.on("rfReceive", (event) =>
         if @config.debug
           env.logger.debug 'received:', event.pulseLengths, event.pulses
       )
 
-      @board.on("rf", (event) =>  
+      @board.on("rf", (event) =>
         if @config.debug
           env.logger.debug "#{event.protocol}: ", event.values
       )
@@ -47,7 +47,7 @@ module.exports = (env) ->
             env.logger.info("Connected to homeduino device.")
 
             if @config.enableDSTSensors
-              @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) -> 
+              @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) ->
                 env.logger.info("DST sensors: #{ret.sensors}")
               ).catch( (err) =>
                 env.logger.error("Couldn't scan for DST sensors: #{err.message}.")
@@ -70,7 +70,7 @@ module.exports = (env) ->
           )
         )
       )
-      
+
       # Enhance the config schemes with available protocols, so we can build a better
       # gui for them
       protocols = _.cloneDeep(Board.getAllRfProtocols())
@@ -96,7 +96,7 @@ module.exports = (env) ->
         availableProtocolOptions[p.name] = {
           type: "object"
           properties: p.values
-        } 
+        }
 
       deviceConfigDef = require("./device-config-schema")
 
@@ -144,7 +144,7 @@ module.exports = (env) ->
                     delete b.protocol
                     delete b.protocolOptions
             configDef: dcd
-            createCallback: (deviceConfig, lastState) => 
+            createCallback: (deviceConfig, lastState) =>
               device = new Cl(deviceConfig, lastState, @board, @config)
               return device
           })
@@ -175,14 +175,14 @@ module.exports = (env) ->
       super()
 
       lastError = null
-      setInterval(( => 
+      setInterval(( =>
         @_readSensor().then( (result) =>
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processing or "$value"
           info = variableManager.parseVariableExpression(
             processing.replace(/\$value\b/g, result.temperature)
-          ) 
+          )
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'temperature', value
           )
@@ -196,8 +196,8 @@ module.exports = (env) ->
           lastError = err.message
         )
       ), @config.interval)
-    
-    _readSensor: ()-> 
+
+    _readSensor: ()->
       # Already reading? return the reading promise
       if @_pendingRead? then return @_pendingRead
       # Don't read the sensor too frequently, the minimal reading interval should be 2.5 seconds
@@ -218,7 +218,7 @@ module.exports = (env) ->
         @_pendingRead = null
         throw err
       )
-      
+
     getTemperature: -> @_readSensor().then( (result) -> result.temperature )
 
   #Original DHT implementation
@@ -242,14 +242,14 @@ module.exports = (env) ->
       super()
 
       lastError = null
-      setInterval(( => 
+      setInterval(( =>
         @_readSensor().then( (result) =>
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processingTemp or "$value"
           info = variableManager.parseVariableExpression(
             processing.replace(/\$value\b/g, result.temperature)
-          ) 
+          )
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'temperature', value
           )
@@ -257,7 +257,7 @@ module.exports = (env) ->
           processing = @config.processingHum or "$value"
           info = variableManager.parseVariableExpression(
             processing.replace(/\$value\b/g, result.humidity)
-          ) 
+          )
           variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
             @emit 'humidity', value
           )
@@ -271,8 +271,8 @@ module.exports = (env) ->
           lastError = err.message
         )
       ), @config.interval)
-    
-    _readSensor: (attempt = 0)-> 
+
+    _readSensor: (attempt = 0)->
       # Already reading? return the reading promise
       if @_pendingRead? then return @_pendingRead
       # Don't read the sensor too frequently, the minimal reading interval should be 2.5 seconds
@@ -298,7 +298,7 @@ module.exports = (env) ->
         else
           throw err
       )
-      
+
     getTemperature: -> @_readSensor().then( (result) -> result.temperature )
     getHumidity: -> @_readSensor().then( (result) -> result.humidity )
 
@@ -313,7 +313,45 @@ module.exports = (env) ->
           if event.values[optName] isnt optValue
             match = no
     return match
-  
+
+  checkProtocolProperties = (p, types) ->
+    _protocol = Board.getRfProtocol(p.name)
+    unless _protocol?
+      throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+    if _protocol.type not in types
+      throw new Error(
+        "\"#{p.name}\" must be one of the following types: \"#{types.join(", ")}\""
+      )
+    properties = ""
+    for value of p.options
+      contains=false
+      for pvalue of _protocol.values
+        #properties += "\"#{pvalue}\" "
+        if value is pvalue
+          contains=true
+          break
+      if not contains
+        for pvalue of _protocol.values
+          properties += "\"#{pvalue}\" "
+        throw new Error(
+          "Protocol \"#{p.name}\" has no property named \"#{value}\". "+
+          "Available properties are: #{properties}"
+        )
+
+  checkProtocolCommands = (p) ->
+    _protocol = Board.getRfProtocol(p.name)
+    if _protocol.type is "command"
+      unless p.options.command?
+        throw new Error(
+          "You must define a command for protocol \"#{p.name}\". "+
+          "Available commands are: \"#{_protocol.commands.join(", ")}\""
+          )
+      if p.options.command not in _protocol.commands
+        throw new Error(
+          "Protocol \"#{p.name}\" can´t handle the command \"#{p.options.command}\". "+
+          "Available commands are: \"#{_protocol.commands.join(", ")}\""
+          )
+
   logDebug = (config, protocol, options, rfrepeats) ->
     message = "Sending Protocol: #{protocol.name}"
     for field, content of options
@@ -339,9 +377,9 @@ module.exports = (env) ->
             if @_pluginConfig.debug
               logDebug(@_pluginConfig, p, options, rfrepeats)
             return @board.rfControlSendMessage(
-              @_pluginConfig.transmitterPin, 
+              @_pluginConfig.transmitterPin,
               rfrepeats,
-              p.name, 
+              p.name,
               options
             )
           )
@@ -368,14 +406,14 @@ module.exports = (env) ->
             return @board.rfControlSendMessage(
               @_pluginConfig.transmitterPin,
               @_pluginConfig.rfrepeats,
-              p.name, 
+              p.name,
               options
             )
           )
     return Promise.all(pending)
 
   extend = (obj, mixin) ->
-    obj[name] = method for name, method of mixin        
+    obj[name] = method for name, method of mixin
     obj
 
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
@@ -384,13 +422,9 @@ module.exports = (env) ->
       @id = config.id
       @name = config.name
       @_state = lastState?.state?.value
-      
+
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "switch"
-          throw new Error("\"#{p.name}\" is not a switch protocol.")
+        checkProtocolProperties(p, ["switch"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -408,7 +442,7 @@ module.exports = (env) ->
 
             if match
               @emit('rf', event) # used by the RFEventPredicateHandler
-              @_setState(event.values.state) 
+              @_setState(event.values.state)
         )
       super()
 
@@ -431,13 +465,9 @@ module.exports = (env) ->
       @_dimlevel = lastState?.dimlevel?.value or 0
       @_lastdimlevel = lastState?.lastdimlevel?.value or 100
       @_state = lastState?.state?.value or off
-      
+
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "dimmer" or "switch"
-          throw new Error("\"#{p.name}\" is not a dimmer or a switch protocol.")
+        checkProtocolProperties(p, ["switch", "dimmer"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -461,7 +491,7 @@ module.exports = (env) ->
         )
       super()
 
-    _sendLevelToDimmers: sendToDimmersMixin   
+    _sendLevelToDimmers: sendToDimmersMixin
 
     turnOn: -> @changeDimlevelTo(@_lastdimlevel)
 
@@ -476,7 +506,7 @@ module.exports = (env) ->
       @_sendLevelToDimmers(@config.protocols, state, level).then( =>
         @_setDimlevel(level)
       )
-  
+
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -485,17 +515,9 @@ module.exports = (env) ->
 
       for b in config.buttons
         for p in b.protocols
-          _protocol = Board.getRfProtocol(p.name)
-          unless _protocol?
-            throw new Error(
-              "Could not find a protocol with the name \"#{p.name}\" in config" +
-              " of button \"#{b.id}\"."
-            )
-          unless _protocol.type is "switch" or "command"
-            throw new Error(
-              "\"#{p.name}\" in config of button \"#{b.id}\" is not a switch or a command protocol."
-            )
-            
+          checkProtocolProperties(p, ["switch","command"])
+          checkProtocolCommands(p)
+
       @board.on('rf', (event) =>
         for b in @config.buttons
           unless b.receive is false
@@ -506,18 +528,18 @@ module.exports = (env) ->
             if match
               @emit('button', b.id)
         )
-  
+
       super(config)
 
     _sendStateToSwitches: sendToSwitchesMixin
-    
+
     buttonPressed: (buttonId) ->
       for b in @config.buttons
         if b.id is buttonId
           @emit 'button', b.id
           return @_sendStateToSwitches(b.protocols)
       throw new Error("No button with the id #{buttonId} found")
-      
+
 
   class HomeduinoRFContactSensor extends env.devices.ContactSensor
 
@@ -527,16 +549,14 @@ module.exports = (env) ->
       @_contact = lastState?.contact?.value or false
 
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        checkProtocolProperties(p, ["switch","contact"])
 
       @board.on('rf', (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
             hasContact = (
-              if event.values.contact? then event.values.contact 
+              if event.values.contact? then event.values.contact
               else (not event.values.state)
             )
             @_setContact(hasContact)
@@ -554,11 +574,10 @@ module.exports = (env) ->
       @id = config.id
       @name = config.name
       @_position = lastState?.position?.value or 'stopped'
-
+      @_types = {}
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
+        checkProtocolProperties(p, ["switch", "command"])
+        @_types[p.name] = Board.getRfProtocol(p.name).type #save the protocol type
 
       @board.on('rf', (event) =>
         for p in @config.protocols
@@ -569,10 +588,17 @@ module.exports = (env) ->
           # ignore own send messages
           if (now - @_lastSendTime) < 3000
             return
-          if @_position is 'stopped'
-            @_setPosition(if event.values.state then 'up' else 'down')
-          else
-            @_setPosition('stopped')
+          if p.type is 'switch'
+            if @_position is 'stopped'
+              @_setPosition(if event.values.state then 'up' else 'down')
+            else
+              @_setPosition('stopped')
+
+          else if p.type is 'command'
+            if event.values.command in ["stop", "stopped"]
+              @_setPosition("stopped")
+            else
+              @_setPosition(event.values.command)
       )
       super()
 
@@ -581,10 +607,16 @@ module.exports = (env) ->
     stop: ->
       unless @config.forceSend
         if @_position is 'stopped' then return Promise.resolve()
-      @_sendStateToSwitches(@config.protocols, @_position is 'up').then( =>
+
+      protocols = _.clone(@config.protocols, true)
+      for p in protocols
+        if @_types[p.name] is "command"
+          p.options.command = "stop"
+
+      @_sendStateToSwitches(protocols, @_position is 'up').then( =>
         @_setPosition('stopped')
       )
-      
+
       return Promise.resolve()
 
     # Returns a promise that is fulfilled when done.
@@ -592,10 +624,15 @@ module.exports = (env) ->
       unless @config.forceSend
         if position is @_position then return Promise.resolve()
       if position is 'stopped' then return @stop()
-      else return @_sendStateToSwitches(@config.protocols, position is 'up').then( =>
+      else
+        protocols = _.clone(@config.protocols, true)
+        for p in protocols
+          if @_types[p.name] is "command"
+            p.options.command = position
+        return @_sendStateToSwitches(protocols, position is 'up').then( =>
         @_lastSendTime = new Date().getTime()
         @_setPosition(position)
-      )
+        )
 
 
   class HomeduinoRFPir extends env.devices.PresenceSensor
@@ -606,11 +643,7 @@ module.exports = (env) ->
       @_presence = lastState?.presence?.value or false
 
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "pir"
-          throw new Error("\"#{p.name}\" is not a PIR protocol.")
+        checkProtocolProperties(p, ["pir"])
 
       resetPresence = ( =>
         @_setPresence(no)
@@ -647,11 +680,8 @@ module.exports = (env) ->
       hasBattery = false # numeric battery indicator
       isFahrenheit = config.isFahrenheit
       for p in config.protocols
+        checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "weather"
-          throw new Error("\"#{p.name}\" is not a weather protocol.")
         hasTemperature = true if _protocol.values.temperature?
         hasHumidity = true if _protocol.values.humidity?
         hasLowBattery = true if _protocol.values.lowBattery?
@@ -718,14 +748,14 @@ module.exports = (env) ->
             )
             # discard value if it is the same and was received just under two second ago
             if timeDelta < 2000
-              return 
-            
+              return
+
             if event.values.temperature?
               variableManager = hdPlugin.framework.variableManager
               processing = @config.processingTemp or "$value"
               info = variableManager.parseVariableExpression(
                 processing.replace(/\$value\b/g, event.values.temperature)
-              ) 
+              )
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_temperatue = value
                 @emit "temperature", @_temperatue
@@ -735,7 +765,7 @@ module.exports = (env) ->
               processing = @config.processingHum or "$value"
               info = variableManager.parseVariableExpression(
                 processing.replace(/\$value\b/g, event.values.humidity)
-              ) 
+              )
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
                 @_humidity = value
                 @emit "humidity", @_humidity
@@ -766,6 +796,8 @@ module.exports = (env) ->
       @_temperatue = lastState?.temperature?.value or 0
       @_humidity = lastState?.humidity?.value or 0
       @_rain = lastState?.rain?.value or 0
+      @_lowBattery = lastState?.lowBattery?.value or false
+      @_battery = lastState?.battery?.value or 100
 
       hasWindGust = false
       hasAvgAirspeed = false
@@ -773,22 +805,24 @@ module.exports = (env) ->
       hasTemperature = false
       hasHumidity = false
       hasRain = false
+      hasLowBattery = false # boolean battery indicator
+      hasBattery = false # numeric battery indicator
       for p in config.protocols
+        checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "weather"
-          throw new Error("\"#{p.name}\" is not a weather protocol.")
         hasRain = true if _protocol.values.rain?
         hasHumidity = true if _protocol.values.humidity?
         hasTemperature = true if _protocol.values.temperature?
         hasWindDirection = true if _protocol.values.windDirection?
         hasAvgAirspeed = true if _protocol.values.avgAirspeed?
         hasWindGust = true if _protocol.values.windGust?
+        hasLowBattery = true if _protocol.values.lowBattery?
+        hasBattery = true if  _protocol.values.battery?
 
       hasNoAttributes = (
-        !hasRain and !hasHumidity and !hasTemperature and 
-        !hasWindGust and !hasAvgAirspeed and !hasWindDirection
+        !hasRain and !hasHumidity and !hasTemperature and
+        !hasWindGust and !hasAvgAirspeed and !hasWindDirection and
+        !hasLowBattery and !hasBattery
       )
       if hasNoAttributes
         throw new Error(
@@ -799,7 +833,7 @@ module.exports = (env) ->
 
       for s in config.values
         switch s
-          when "rain" 
+          when "rain"
             if hasRain
               if !@attributes.rain?
                 @attributes.rain = {
@@ -808,7 +842,7 @@ module.exports = (env) ->
                   unit: 'mm'
                   acronym: 'RAIN'
                 }
-            else 
+            else
               env.logger.warn(
                 "#{@id}: rain is defined but no protocol in config contains rain data!"
               )
@@ -821,7 +855,7 @@ module.exports = (env) ->
                   unit: '%'
                   acronym: 'RH'
                 }
-            else 
+            else
               env.logger.warn(
                 "#{@id}: humidity is defined but no protocol in config contains humidity data!"
               )
@@ -834,7 +868,7 @@ module.exports = (env) ->
                   unit: '°C'
                   acronym: 'T'
                 }
-            else 
+            else
               env.logger.warn(
                 "#{@id}: temperature is defined but no protocol in config contains " +
                 "temperature data!"
@@ -847,7 +881,7 @@ module.exports = (env) ->
                   type: "string"
                   acronym: 'WIND'
                 }
-            else 
+            else
               env.logger.warn(
                 "#{@id}: windDirection is defined but no protocol in config contains " +
                 "windDirection data!"
@@ -861,11 +895,11 @@ module.exports = (env) ->
                   unit: 'm/s'
                   acronym: 'SPEED'
                 }
-            else 
+            else
               env.logger.warn(
-                "#{@id}: avgAirspeed is defined but no protocol in config contains " + 
+                "#{@id}: avgAirspeed is defined but no protocol in config contains " +
                 "avgAirspeed data!"
-              ) 
+              )
           when "windGust"
             if hasWindGust
               if !@attributes.windGust?
@@ -875,14 +909,58 @@ module.exports = (env) ->
                   unit: 'm/s'
                   acronym: 'GUST'
                 }
-            else 
+            else
               env.logger.warn(
                 "#{@id}: windGust is defined but no protocol in config contains windGust data!"
-              ) 
-          else 
+              )
+          when "lowBattery"
+            if hasLowBattery
+              if !@attributes.lowBattery?
+                @attributes.lowBattery = {
+                  description: "the battery status"
+                  type: "boolean"
+                  labels: ["low", 'ok']
+                  icon:
+                    noText: true
+                    mapping: {
+                      'icon-battery-filled': false
+                      'icon-battery-empty': true
+                    }
+                }
+            else
+              env.logger.warn(
+                "#{@id}: lowBattery is defined but no protocol in config contains lowBattery data!"
+              )
+          when "battery"
+            if hasBattery
+              if !@attributes.battery?
+                @attributes.battery = {
+                  description: "the battery status"
+                  type: "number"
+                  unit: '%'
+                  displaySparkline: false
+                  icon:
+                    noText: true
+                    mapping: {
+                      'icon-battery-empty': 0
+                      'icon-battery-fuel-1': [0, 20]
+                      'icon-battery-fuel-2': [20, 40]
+                      'icon-battery-fuel-3': [40, 60]
+                      'icon-battery-fuel-4': [60, 80]
+                      'icon-battery-fuel-5': [80, 100]
+                      'icon-battery-filled': 100
+                    }
+                }
+            else
+              env.logger.warn(
+                "#{@id}: battery is defined but no protocol in config contains battery data!"
+              )
+          else
             throw new Error(
-              "Values should be one of: " + 
-              "rain, humidity, temperature, windDirection, avgAirspeed, windGust"
+              "Values should be one of: " +
+              "rain, humidity, temperature, "+
+              "windDirection, avgAirspeed, windGust, "+
+              "lowBattery, battery"
             )
 
       @board.on('rf', (event) =>
@@ -894,33 +972,84 @@ module.exports = (env) ->
               if @_lastReceiveTime? then (now - @_lastReceiveTime)
               else 9999999
             )
+            # discard value if it is the same and was received just under two second ago
             if timeDelta < 2000
-              return 
+              return
+            variableManager = hdPlugin.framework.variableManager
             if event.values.windGust?
-              @_windGust = event.values.windGust
-              # discard value if it is the same and was received just under two second ago
-              @emit "windGust", @_windGust
+              processing = @config.processingWindGust or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.windGust)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_windGust = value
+                @emit "windGust", @_windGust
+              )
+              #@_windGust = event.values.windGust
+              #@emit "windGust", @_windGust
             if event.values.avgAirspeed?
-              @_avgAirspeed = event.values.avgAirspeed
-              # discard value if it is the same and was received just under two second ago
-              @emit "avgAirspeed", @_avgAirspeed
+              processing = @config.processingAvgAirspeed or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.avgAirspeed)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_avgAirspeed = value
+                @emit "avgAirspeed", @_avgAirspeed
+              )
+              #@_avgAirspeed = event.values.avgAirspeed
+              #@emit "avgAirspeed", @_avgAirspeed
             if event.values.windDirection?
-              @_windDirection = event.values.windDirection
-              # discard value if it is the same and was received just under two second ago
-              dir = @_directionToString(@_windDirection)
-              @emit "windDirection", "#{@_windDirection}°(#{dir})"
+              processing = @config.processingWindDirection or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.windDirection)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_windDirection = value
+                dir = @_directionToString(@_windDirection)
+                @emit "windDirection", "#{@_windDirection}°(#{dir})"
+              )
+              #@_windDirection = event.values.windDirection
+              #dir = @_directionToString(@_windDirection)
+              #@emit "windDirection", "#{@_windDirection}°(#{dir})"
             if event.values.temperature?
-              @_temperatue = event.values.temperature
-              # discard value if it is the same and was received just under two second ago
-              @emit "temperature", @_temperatue
+              processing = @config.processingTemp or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.temperature)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_temperature = value
+                @emit "temperature", @_temperature
+              )
+              #@_temperatue = event.values.temperature
+              #@emit "temperature", @_temperatue
             if event.values.humidity?
-              @_humidity = event.values.humidity
-              # discard value if it is the same and was received just under two second ago
-              @emit "humidity", @_humidity
+              processing = @config.processingHum or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.humidity)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_humidity = value
+                @emit "humidity", @_humidity
+              )
+              #@_humidity = event.values.humidity
+              #@emit "humidity", @_humidity
             if event.values.rain?
-              @_rain = event.values.rain
-              # discard value if it is the same and was received just under two second ago
-              @emit "rain", @_rain
+              processing = @config.processingRain or "$value"
+              info = variableManager.parseVariableExpression(
+                processing.replace(/\$value\b/g, event.values.rain)
+              )
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_rain = value
+                @emit "rain", @_rain
+              )
+              #@_rain = event.values.rain
+              #@emit "rain", @_rain
+            if event.values.lowBattery?
+              @_lowBattery = event.values.lowBattery
+              @emit "lowBattery", @_lowBattery
+            if event.values.battery?
+              @_battery = event.values.battery
+              @emit "battery", @_battery
             @_lastReceiveTime = now
       )
       super()
@@ -937,7 +1066,8 @@ module.exports = (env) ->
     getRain: -> Promise.resolve @_rain
     getTemperature: -> Promise.resolve @_temperatue
     getHumidity: -> Promise.resolve @_humidity
-    
+    getLowBattery: -> Promise.resolve @_lowBattery
+    getBattery: -> Promise.resolve @_battery
 
   class HomeduinoRFGenericSensor extends env.devices.Sensor
 
@@ -946,11 +1076,7 @@ module.exports = (env) ->
       @name = config.name
 
       for p in config.protocols
-        _protocol = Board.getRfProtocol(p.name)
-        unless _protocol?
-          throw new Error("Could not find a protocol with the name \"#{p.name}\".")
-        unless _protocol.type is "generic"
-          throw new Error("\"#{p.name}\" is not a generic protocol.")
+        checkProtocolProperties(p, ["generic"])
 
       @attributes = {}
       for attributeConfig in @config.attributes
@@ -976,7 +1102,7 @@ module.exports = (env) ->
       @attributes[name] = {
         description: name
         label: (
-          if attributeConfig.label? and attributeConfig.label.length > 0 then attributeConfig.label 
+          if attributeConfig.label? and attributeConfig.label.length > 0 then attributeConfig.label
           else name
         )
         type: "number"
@@ -984,7 +1110,7 @@ module.exports = (env) ->
       # Set unit
       if attributeConfig.unit? and attributeConfig.unit.length > 0
         @attributes[name].unit = attributeConfig.unit
-        
+
       if attributeConfig.discrete?
         @attributes[name].discrete = attributeConfig.discrete
 
@@ -1031,7 +1157,7 @@ module.exports = (env) ->
 
       hdPlugin.pendingConnect.then( =>
         return @board.pinMode(@config.pin, Board.OUTPUT)
-      ).then( => 
+      ).then( =>
         return @_writeState(@_state)
       ).catch( (error) =>
         env.logger.error error
@@ -1047,7 +1173,7 @@ module.exports = (env) ->
       return hdPlugin.pendingConnect.then( =>
         return @board.digitalWrite(@config.pin, if _state then Board.HIGH else Board.LOW)
       )
-        
+
     changeStateTo: (state) ->
       assert state is on or state is off
       return @_writeState(state).then( =>
@@ -1062,13 +1188,13 @@ module.exports = (env) ->
       @_dimlevel = lastState?.dimlevel?.value or 0
       @_lastdimlevel = lastState?.lastdimlevel?.value or 100
       @_state = lastState?.state?.value or off
-      
+
       if @config.pin not in [3,5,6,9,10,11]
-        throw new Error("The selected pin:\"#{@config.pin}\" is invalid. 
+        throw new Error("The selected pin:\"#{@config.pin}\" is invalid.
                          You must use one of these pins 3,5,6,9,10,11.")
       hdPlugin.pendingConnect.then( =>
         return @board.pinMode(@config.pin, Board.OUTPUT)
-      ).then( => 
+      ).then( =>
         return @_writeLevel(@_dimlevel)
       ).catch( (error) =>
         env.logger.error error
@@ -1081,7 +1207,7 @@ module.exports = (env) ->
       return hdPlugin.pendingConnect.then( =>
         return @board.analogWrite(@config.pin, dimlevel)
       )
-        
+
     changeStateTo: (state) ->
       assert state is on or state is off
       if state is on then turnOn
@@ -1181,7 +1307,7 @@ module.exports = (env) ->
       @attributes[name] = {
         description: name
         label: (
-          if attributeConfig.label? and attributeConfig.label.length > 0 then attributeConfig.label 
+          if attributeConfig.label? and attributeConfig.label.length > 0 then attributeConfig.label
           else name
         )
         type: "number"
@@ -1195,19 +1321,19 @@ module.exports = (env) ->
 
       if attributeConfig.acronym?
         @attributes[name].acronym = attributeConfig.acronym
-                 
+
       # generate getter:
       @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
 
       # setup polling
-      hdPlugin.pendingConnect.then( => 
-        return @board.pinMode(attributeConfig.pin, Board.INPUT) 
-      ).then( => 
+      hdPlugin.pendingConnect.then( =>
+        return @board.pinMode(attributeConfig.pin, Board.INPUT)
+      ).then( =>
         variableManager = hdPlugin.framework.variableManager
         processing = attributeConfig.processing or "$value"
         requestAttributeValue = =>
           @board.analogRead(attributeConfig.pin).then( (value) =>
-            info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, value)) 
+            info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, value))
             variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
               @_attributesMeta[name].value = value
               @emit name, value
@@ -1236,7 +1362,7 @@ module.exports = (env) ->
     constructor: (@framework) ->
 
     # ### parsePredicate()
-    parsePredicate: (input, context) ->  
+    parsePredicate: (input, context) ->
 
       rfSwitchDevices = _(@framework.deviceManager.devices)
         .filter( (device) => device instanceof HomeduinoRFSwitch ).value()
@@ -1260,7 +1386,7 @@ module.exports = (env) ->
               match = next.getFullMatch()
           )
         )
- 
+
       # If we have a match
       if match?
         assert device?
@@ -1280,18 +1406,18 @@ module.exports = (env) ->
     constructor: (@device, @state) ->
     setup: ->
       lastTime = 0
-      @rfListener = (event) => 
+      @rfListener = (event) =>
         if @state is event.values.state
           now = new Date().getTime()
           # suppress same values within 200ms
           if now - lastTime <= 200
             return
           lastTime = now
-          @emit 'change', 'event' 
+          @emit 'change', 'event'
       @device.on 'rf', @rfListener
       super()
     getValue: -> Promise.resolve(false)
-    destroy: -> 
+    destroy: ->
       @device.removeListener "rf", @rfListener
       super()
     getType: -> 'event'

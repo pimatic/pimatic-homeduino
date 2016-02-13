@@ -1,10 +1,10 @@
 pimatic-homeduino
 =======================
 
-Plugin for using various 433 Mhz devices and sensors with a connected Arduino with 
+Plugin for using various 433 Mhz devices and sensors with a connected Arduino with
 [homeduino](https://github.com/pimatic/homeduino) sketch or directly with capable hardware like the Raspberry Pi.
 
-This plugins supports all 433 MHz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs) 
+This plugins supports all 433 MHz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs)
 [protocol implementations](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
 
@@ -19,7 +19,7 @@ The plugin can be used with two different hardware combinations:
 
 ### A.Connected Arduino (recommended)
 
-![Hardware](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/hardware.jpg)  
+![Hardware](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/hardware.jpg)
 
 -------------
 You can load the plugin by editing your `config.json` to include:
@@ -67,7 +67,7 @@ The pin numbers are [wiringPi pin numbers](http://wiringpi.com/pins/).
 Devices
 ------
 
-Devices must be added manually to the device section of your pimatic config. 
+Devices must be added manually to the device section of your pimatic config.
 
 A list with all supported protocols and protocol-options can be found [here](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
 
@@ -78,7 +78,6 @@ Just add more protocols to the `protocols` array. You can also set if a protocol
 is used for sending or receiving. Default is `true` for both. 
 In some cases the target receiver does not recognize the transmission. To improve this you can change 
 the amount of message repeats. By default this is set to seven. 
-
 
 ##### Switch example:
 
@@ -244,9 +243,29 @@ For weather stations like the Alecto WS-4500 you should use the weather station 
   ]
 },
 ```
-It supports different values to display: `rain`, `temperature`, `humidity`, `windGust`, 
-`windDirection` and `avgAirspeed`. The ordering corresponds to the display ordering in the frontend.
+It supports different values to display
+`rain`, `temperature`, `humidity`, `windGust`, `windDirection`, `avgAirspeed`, `lowBattery` and 
+`battery`.
+The ordering corresponds to the display ordering in the frontend.
+`lowBattery` is an boolean value and `battery` is an percentage value from 0 to 100.
+Most protocols supports only an `lowBattery` value.
 
+Has your sensor a known offset for an value, then you can add a preprocessing to correct the values.
+For the "HomeduinoRFTemperature" these are
+(The following is an example)
+```json
+  "processingTemp": "$value + 10",
+  "processingHum": "$value * 0.5",
+```
+And for the "HomeduinoRFWeatherStation" these are
+```json
+  "processingTemp": "($value - 1.2) * 0.9",
+  "processingHum": "$value",
+  "processingWindGust": "$value",
+  "processingAvgAirspeed": "$value",
+  "processingWindDirection": "$value + 45",
+  "processingRain": "$value",
+```
 ##### PIR sensor example:
 
 ```json
@@ -330,7 +349,7 @@ Some contacts only emit an event on open. For this you can set `autoReset` to `t
 
 ### Local Sensors
 
-Local sensors are connected to the arduino. This can be a simple read of an digital pin or an bus 
+Local sensors are connected to the arduino. This can be a simple read of an digital pin or an bus
 sensor like the DS18B20
 
 
@@ -361,8 +380,8 @@ sensor like the DS18B20
 
 ##### AnalogSensor example:
 
-An AnalogSensor can read analog pins of the Arduino and display there value. 
-An optional preprocessing can be applied. Pin numbering starts at 14 (`A0`) 
+An AnalogSensor can read analog pins of the Arduino and display there value.
+An optional preprocessing can be applied. Pin numbering starts at 14 (`A0`)
 for the first analog pin.
 
 ```json
@@ -443,7 +462,7 @@ The "HomeduinoSwitch" can toggle the state of an pin on the arduino.
 
 ##### AnalogDimmer example:
 
-The AnalogDimmer activates one of the PWM channels on the Arduino. At the moment only the 
+The AnalogDimmer activates one of the PWM channels on the Arduino. At the moment only the
 following pins are allowed 3,5,6,9,10,11. The Dimmer maps an value from 0-100 to 0-255.
 The PWM frequency is about 490Hz.
 
