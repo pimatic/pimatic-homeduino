@@ -76,7 +76,7 @@ A list with all supported protocols and protocol-options can be found [here](htt
 RF Actors like the "HomeduinoRFSwitch" can be controlled or send to outlets with multiple protocols.
 Just add more protocols to the `protocols` array. You can also set if a protocol
 is used for sending or receiving. Default is `true` for both. 
-In some cases the target receiver don´t recognize the transmission. To improve this you can change 
+In some cases the target receiver does not recognize the transmission. To improve this you can change 
 the amount of message repeats. By default this is set to seven. 
 
 
@@ -244,9 +244,8 @@ For weather stations like the Alecto WS-4500 you should use the weather station 
   ]
 },
 ```
-It supports different values to display
-rain, temperature, humidity, windGust, windDirection and avgAirspeed
-The order of the listed values define the order of the displayed values.
+It supports different values to display: `rain`, `temperature`, `humidity`, `windGust`, 
+`windDirection` and `avgAirspeed`. The ordering corresponds to the display ordering in the frontend.
 
 ##### PIR sensor example:
 
@@ -283,7 +282,7 @@ The order of the listed values define the order of the displayed values.
 }
 ```
 
-Some contacts only emit an event on open. For this you can set autoReset to true:
+Some contacts only emit an event on open. For this you can set `autoReset` to `true`:
 
 ```json
 {
