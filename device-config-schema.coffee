@@ -81,6 +81,7 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
+              required: false
       forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
@@ -116,6 +117,7 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
+              required: false
       forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
@@ -163,6 +165,7 @@ module.exports = {
                   rfrepeats:
                     type: "number"
                     description: "The amount of RF repeats for this device"
+                  required: false
             required: ["protocols"]
   }
   HomeduinoRFContactSensor: {
@@ -223,6 +226,7 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
+            required: false
       forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
