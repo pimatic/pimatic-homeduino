@@ -6,6 +6,8 @@ module.exports = (env) ->
   # Require the [cassert library](https://github.com/rhoot/cassert).
   assert = env.require 'cassert'
   _ = env.require('lodash')
+  semver = env.require('semver')
+  fs = require('fs')
   homeduino = require('homeduino')
   M = env.matcher
 
@@ -21,6 +23,26 @@ module.exports = (env) ->
           throw new Error("transmitterPin must be between 2 and 13")
 
       @board = new Board(@config.driver, @config.driverOptions)
+
+      @pluginPath = @framework.pluginManager.pathToPlugin("pimatic-"+@config.plugin)
+      packageJson = JSON.parse fs.readFileSync(@pluginPath + '/package.json', "utf8")
+
+      @board.on("ready", (boardinfo) =>
+        tag = boardinfo.tag or 'ard'
+        version = boardinfo.version or '0.0.0'
+        switch tag
+          when 'ard'
+            if semver.lt(version, packageJson['homduino-hex-version'].ard)
+              @ardUpdate = true
+              env.logger.debug("Arduino Homeduino Version old")
+              updater = @framework.pluginManager.getPlugin("arduino-updater")
+              if updater?
+                @pendingConnect.then(() =>
+                  @arduinoUpdate(updater)
+                )
+              else
+                env.logger.debug "No Arduino-updater found"
+      )
 
       @board.on("data", (data) =>
         if @config.debug
@@ -41,7 +63,11 @@ module.exports = (env) ->
         env.logger.warn "Couldn't connect (#{err.message}), retrying..."
       )
 
-      @_conectToBoard()
+      @pendingConnect = new Promise( (resolve, reject) =>
+        @framework.on "after init", ( =>
+          @_conectToBoard().delay(1000).then(resolve, reject)
+        )
+      )
 
       # Enhance the config schemes with available protocols, so we can build a better
       # gui for them
@@ -180,57 +206,49 @@ module.exports = (env) ->
               @arduUpdaterReg = arduUpdater.registerPlugin(@config.plugin)
 
     #This function will be called from the arduino-updater'to determin a necessary update
-    arduinoUpdate:()=>
+    arduinoUpdate: (updater) =>
       env.logger.info "ArduinoUpdate function call"
-      pluginPath = @framework.pluginManager.pathToPlugin("pimatic-"+@config.plugin)
-      hexFilePath = pluginPath+"/arduino/Homeduino_"+@config.driverOptions.board+".hex"
+      # return wenn kein updater erwünscht
+      hexFilePath = @pluginPath+"/arduino/Homeduino_"+@config.driverOptions.board+".hex"
       state = {
-        update:false
         port: @config.driverOptions.serialDevice
         board: @supportedArduBoards[@config.driverOptions.board]
         file: hexFilePath
       }
-      if false#update is true
-        #if @pendingConnect?
-        @board.disconnect()
-        state.update = true
 
-      return state
-
-    #This function will be called after update
-    #TODO: Remove and change to Promise system
-    arduinoReady:()=>
-      @_conectToBoard()
+      return @pendingConnect = @board.disconnect().then( () =>
+        updater.flashArduino(state,@)
+      ).then( () =>
+        @_conectToBoard()
+      )
 
 
     _conectToBoard:()=>
-      @pendingConnect = new Promise( (resolve, reject) =>
-        @framework.on "after init", ( =>
-          @board.connect(@config.connectionTimeout).then( =>
-            env.logger.info("Connected to homeduino device.")
+      return new Promise( (resolve, reject) =>
+        return @board.connect(@config.connectionTimeout).then( =>
+          env.logger.info("Connected to homeduino device.")
 
-            if @config.enableDSTSensors
-              @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) ->
-                env.logger.info("DST sensors: #{ret.sensors}")
-              ).catch( (err) =>
-                env.logger.error("Couldn't scan for DST sensors: #{err.message}.")
-                env.logger.debug(err.stack)
-              )
+          if @config.enableDSTSensors
+            @board.readDstSensors(@config.dstSearchAddressPin).then( (ret) ->
+              env.logger.info("DST sensors: #{ret.sensors}")
+            ).catch( (err) =>
+              env.logger.error("Couldn't scan for DST sensors: #{err.message}.")
+              env.logger.debug(err.stack)
+            )
 
-            if @config.enableReceiving
-              @board.rfControlStartReceiving(@config.receiverPin).then( =>
-                if @config.debug
-                  env.logger.debug("Receiving on pin #{@config.receiverPin}")
-              ).catch( (err) =>
-                env.logger.error("Couldn't start receiving: #{err.message}.")
-                env.logger.debug(err.stack)
-              )
-            return
-          ).then(resolve).catch( (err) =>
-            env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
-            env.logger.error(err.stack)
-            reject(err)
-          )
+          if @config.enableReceiving
+            @board.rfControlStartReceiving(@config.receiverPin).then( =>
+              if @config.debug
+                env.logger.debug("Receiving on pin #{@config.receiverPin}")
+            ).catch( (err) =>
+              env.logger.error("Couldn't start receiving: #{err.message}.")
+              env.logger.debug(err.stack)
+            )
+          return
+        ).then(resolve).catch( (err) =>
+          env.logger.error("Couldn't connect to homeduino device: #{err.message}.")
+          env.logger.error(err.stack)
+          reject(err)
         )
       )
 
