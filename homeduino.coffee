@@ -12,6 +12,7 @@ module.exports = (env) ->
   M = env.matcher
 
   Board = homeduino.Board
+  settled = (promise) -> Promise.settle([promise])
 
   class HomeduinoPlugin extends env.plugins.Plugin
 
@@ -33,12 +34,12 @@ module.exports = (env) ->
         switch tag
           when 'ard'
             if semver.lt(version, packageJson['homduino-hex-version'].ard)
-              @ardUpdate = true
               env.logger.debug("Arduino Homeduino Version old")
               updater = @framework.pluginManager.getPlugin("arduino-updater")
               if updater?
-                @pendingConnect.then(() =>
-                  @arduinoUpdate(updater)
+                @arduinoUpdate(updater).catch( (error) =>
+                  env.logger.error("homeduino update failed: #{error.message}")
+                  env.logger.debug(error.stack)
                 )
               else
                 env.logger.debug "No Arduino-updater found"
@@ -63,7 +64,7 @@ module.exports = (env) ->
         env.logger.warn "Couldn't connect (#{err.message}), retrying..."
       )
 
-      @pendingConnect = new Promise( (resolve, reject) =>
+      @_lastAction = new Promise( (resolve, reject) =>
         @framework.on "after init", ( =>
           @_conectToBoard().delay(1000).then(resolve, reject)
         )
@@ -187,6 +188,10 @@ module.exports = (env) ->
       @_registerArduUpdater()
 
 
+    nextAction: (next) ->
+      # run next after the last action did complete
+      @_lastAction = settled(@_lastAction).then(next)
+      return @_lastAction
 
     _registerArduUpdater:()=>
       if @config.driver is "serialport"
@@ -216,10 +221,15 @@ module.exports = (env) ->
         file: hexFilePath
       }
 
-      return @pendingConnect = @board.disconnect().then( () =>
-        updater.flashArduino(state,@)
-      ).then( () =>
-        @_conectToBoard()
+      return @nextAction( =>
+        # Give the board some more time before disconnect
+        return Promise.delay(2000).then( =>
+          return @board.disconnect()
+        ).then( () =>
+          updater.flashArduino(state,@)
+        ).then( () =>
+          @_conectToBoard()
+        )
       )
 
 
@@ -292,7 +302,7 @@ module.exports = (env) ->
         now = new Date().getTime()
         if (now - @_lastReadTime) < 2000
           return Promise.resolve @_lastReadResult
-      @_pendingRead = hdPlugin.pendingConnect.then( =>
+      @_pendingRead = hdPlugin.nextAction( =>
         env.logger.debug("pin #{@config.pin}, address #{@config.address}")
 
         return @board.readDstSensor(@config.pin, @config.address).then( (result) =>
@@ -367,7 +377,7 @@ module.exports = (env) ->
         now = new Date().getTime()
         if (now - @_lastReadTime) < 2000
           return Promise.resolve @_lastReadResult
-      @_pendingRead = hdPlugin.pendingConnect.then( =>
+      @_pendingRead = hdPlugin.nextAction( =>
         return @board.readDHT(@config.type, @config.pin).then( (result) =>
           @_lastReadResult = result
           @_lastReadTime = (new Date()).getTime()
@@ -444,7 +454,7 @@ module.exports = (env) ->
           unless options.all? then options.all = no
           options.state = state if state?
           rfrepeats = unless p.rfrepeats? then @_pluginConfig.rfrepeats else p.rfrepeats
-          pending.push hdPlugin.pendingConnect.then( =>
+          pending.push hdPlugin.nextAction( =>
             if @_pluginConfig.debug
               logDebug(@_pluginConfig, p, options, rfrepeats)
             return @board.rfControlSendMessage(
@@ -473,7 +483,7 @@ module.exports = (env) ->
           rfrepeats = unless p.rfrepeats? then @_pluginConfig.rfrepeats else p.rfrepeats
           if @_pluginConfig.debug
             logDebug(@_pluginConfig, p, options, rfrepeats)
-          pending.push hdPlugin.pendingConnect.then( =>
+          pending.push hdPlugin.nextAction( =>
             return @board.rfControlSendMessage(
               @_pluginConfig.transmitterPin,
               @_pluginConfig.rfrepeats,
@@ -1225,7 +1235,7 @@ module.exports = (env) ->
       else
         @_state = lastState?.state?.value or off
 
-      hdPlugin.pendingConnect.then( =>
+      hdPlugin.nextAction( =>
         return @board.pinMode(@config.pin, Board.OUTPUT)
       ).then( =>
         return @_writeState(@_state)
@@ -1240,7 +1250,7 @@ module.exports = (env) ->
     _writeState: (state) ->
       if @config.inverted then _state = not state
       else _state = state
-      return hdPlugin.pendingConnect.then( =>
+      return hdPlugin.nextAction( =>
         return @board.digitalWrite(@config.pin, if _state then Board.HIGH else Board.LOW)
       )
 
@@ -1262,7 +1272,7 @@ module.exports = (env) ->
       if @config.pin not in [3,5,6,9,10,11]
         throw new Error("The selected pin:\"#{@config.pin}\" is invalid.
                          You must use one of these pins 3,5,6,9,10,11.")
-      hdPlugin.pendingConnect.then( =>
+      hdPlugin.nextAction( =>
         return @board.pinMode(@config.pin, Board.OUTPUT)
       ).then( =>
         return @_writeLevel(@_dimlevel)
@@ -1274,7 +1284,7 @@ module.exports = (env) ->
 
     _writeLevel: (level) ->
       dimlevel = Math.round(numberMapping(level,0,100,0,255))
-      return hdPlugin.pendingConnect.then( =>
+      return hdPlugin.nextAction( =>
         return @board.analogWrite(@config.pin, dimlevel)
       )
 
@@ -1304,7 +1314,7 @@ module.exports = (env) ->
       @_contact = lastState?.contact?.value or false
 
       # setup polling
-      hdPlugin.pendingConnect.then( =>
+      hdPlugin.nextAction( =>
         return @board.pinMode(@config.pin, Board.INPUT)
       ).then( =>
         requestContactValue = =>
@@ -1334,19 +1344,21 @@ module.exports = (env) ->
       @_presence = lastState?.presence?.value or false
 
       # setup polling
-      hdPlugin.pendingConnect.then( =>
+      hdPlugin.nextAction( =>
         return @board.pinMode(@config.pin, Board.INPUT)
       ).then( =>
         requestPresenceValue = =>
-          @board.digitalRead(@config.pin).then( (value) =>
-            isPresent = (
-              if value is Board.HIGH then !@config.inverted
-              else @config.inverted
+          hdPlugin.nextAction( =>
+            return @board.digitalRead(@config.pin).then( (value) =>
+              isPresent = (
+                if value is Board.HIGH then !@config.inverted
+                else @config.inverted
+              )
+              @_setPresence(isPresent)
+            ).catch( (error) =>
+              env.logger.error error
+              env.logger.debug error.stack
             )
-            @_setPresence(isPresent)
-          ).catch( (error) =>
-            env.logger.error error
-            env.logger.debug error.stack
           )
           setTimeout(requestPresenceValue, @config.interval or 5000)
         requestPresenceValue()
@@ -1396,21 +1408,23 @@ module.exports = (env) ->
       @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
 
       # setup polling
-      hdPlugin.pendingConnect.then( =>
+      hdPlugin.nextAction( =>
         return @board.pinMode(attributeConfig.pin, Board.INPUT)
       ).then( =>
         variableManager = hdPlugin.framework.variableManager
         processing = attributeConfig.processing or "$value"
         requestAttributeValue = =>
-          @board.analogRead(attributeConfig.pin).then( (value) =>
-            info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, value))
-            variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-              @_attributesMeta[name].value = value
-              @emit name, value
+          hdPlugin.nextAction( =>
+            return @board.analogRead(attributeConfig.pin).then( (value) =>
+              info = variableManager.parseVariableExpression(processing.replace(/\$value\b/g, value))
+              variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
+                @_attributesMeta[name].value = value
+                @emit name, value
+              )
+            ).catch( (error) =>
+              env.logger.error error
+              env.logger.debug error.stack
             )
-          ).catch( (error) =>
-            env.logger.error error
-            env.logger.debug error.stack
           )
           setTimeout(requestAttributeValue, attributeConfig.interval or 5000)
         requestAttributeValue()
