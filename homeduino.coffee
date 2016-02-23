@@ -38,14 +38,14 @@ module.exports = (env) ->
               env.logger.debug("Arduino Homeduino Version old")
               updater = @framework.pluginManager.getPlugin("arduino-updater")
               if updater?
-                if @autoUpdate
+                #if @autoUpdate
 #                  @arduinoUpdate(updater).catch( (error) =>
 #                    env.logger.error("homeduino update failed: #{error.message}")
 #                    env.logger.debug(error.stack)
 #                  )
                   updater.requestArduinoUpdate(@config.plugin)
-                else
-                  env.logger.debug("Automatic update isnt allowed")
+                #else
+                #  env.logger.debug("Automatic update isnt allowed")
               else
                 env.logger.debug "No Arduino-updater found"
             else
@@ -224,7 +224,8 @@ module.exports = (env) ->
               pluginProperties = {
                 name: @config.plugin
                 port: @config.driverOptions.serialDevice
-                board: @supportedArduBoards[@config.driverOptions.board]
+                board: @config.driverOptions.board
+                uploader: @supportedArduBoards[@config.driverOptions.board]
                 file: @pluginPath+"/arduino/Homeduino_"+@config.driverOptions.board+".hex"
               }
               @arduUpdaterReg = arduUpdater.registerPlugin(pluginProperties)
