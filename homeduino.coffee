@@ -34,25 +34,21 @@ module.exports = (env) ->
         switch tag
           when 'ard'
             if semver.lt(version, packageJson['homduino-hex-version'].ard)
-              @arduinoOutdated = true
               env.logger.debug("Arduino Homeduino Version old")
               updater = @framework.pluginManager.getPlugin("arduino-updater")
               if updater?
-                #if @autoUpdate
-#                  @arduinoUpdate(updater).catch( (error) =>
-#                    env.logger.error("homeduino update failed: #{error.message}")
-#                    env.logger.debug(error.stack)
-#                  )
-                  updater.requestArduinoUpdate(@config.plugin)
-                #else
-                #  env.logger.debug("Automatic update isnt allowed")
+                if @updateAllow
+                  #Call this function to inform the arduino-updater, that an update is necessary.
+                  #It will return true when the update is ready or false when not auto update
+                  #rights are granted. So you should store the result to prevent a endless loop
+                  @updateAllow=updater.requestArduinoUpdate(@config.plugin)
+                else
+                  env.logger.debug("Automatic update isnt allowed")
               else
                 env.logger.debug "No Arduino-updater found"
             else
-              @arduinoOutdated = false
               env.logger.debug("Arduino up to date")
           else
-            @arduinoOutdated = false
             env.logger.debug("Arduino up to date")
       )
 
@@ -191,13 +187,9 @@ module.exports = (env) ->
         "pro": "nano"
         "diecimila": "duemilanove168"
       }
-      #pluginPath = @framework.pluginManager.pathToPlugin("pimatic-"+@config.plugin)
-      #hexFilePath = pluginPath+"/arduino/Homeduino_"+
-      #              @supportedArduBoards[@config.driverOptions.board]+".hex"
-      #env.logger.debug(hexFilePath)
+
       @arduUpdaterReg = false
-      @autoUpdate = false
-      @arduinoOutdated = true
+      @updateAllow = true
       @_registerArduUpdater()
 
 
@@ -229,8 +221,6 @@ module.exports = (env) ->
                 file: @pluginPath+"/arduino/Homeduino_"+@config.driverOptions.board+".hex"
               }
               @arduUpdaterReg = arduUpdater.registerPlugin(pluginProperties)
-              @autoUpdate = arduUpdater.autoUpdateAllow(@config.plugin)
-
 
     disconnect:()=>
       env.logger.debug("disconnect function")
@@ -244,33 +234,6 @@ module.exports = (env) ->
 
     connect:()=>
       @_conectToBoard()
-
-
-    #This function will be called from the arduino-updater'to determin a necessary update
-#    arduinoUpdate: (updater) =>
-#      env.logger.debug "ArduinoUpdate function call"
-#      hexFilePath = @pluginPath+"/arduino/Homeduino_"+@config.driverOptions.board+".hex"
-#      arduinoProperties = {
-#        port: @config.driverOptions.serialDevice
-#        board: @supportedArduBoards[@config.driverOptions.board]
-#        file: hexFilePath
-#      }
-
-#      return @nextAction( =>
-#        # Give the board some more time before disconnect
-#        return Promise.delay(2000).then( =>
-#          return @board.disconnect()
-#        ).then( () =>
-#          updater.flashArduino(arduinoProperties,@).then((autoUpdate) =>
-#            #env.logger.debug("After flash, updateState: #{autoUpdate}")
-#            if autoUpdate?
-#              if autoUpdate is true or autoUpdate is false
-#                @autoUpdate = autoUpdate
-#              )
-#        ).then( () =>
-#          @_conectToBoard()
-#        )
-#      )
 
     _conectToBoard:()=>
       return new Promise( (resolve, reject) =>
