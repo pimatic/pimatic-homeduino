@@ -462,15 +462,31 @@ module.exports = (env) ->
     for value of p.options
       contains=false
       for pvalue of _protocol.values
-        properties += "\"#{pvalue}\" "
+        #properties += "\"#{pvalue}\" "
         if value is pvalue
           contains=true
           break
       if not contains
+        for pvalue of _protocol.values
+          properties += "\"#{pvalue}\" "
         throw new Error(
-          "Protocol \"#{p.name}\" has no property named \"#{value}\".
-           Available properties are: #{properties}"
+          "Protocol \"#{p.name}\" has no property named \"#{value}\". "+
+          "Available properties are: #{properties}"
         )
+
+  checkProtocolCommands = (p) ->
+    _protocol = Board.getRfProtocol(p.name)
+    if _protocol.type is "command"
+      unless p.options.command?
+        throw new Error(
+          "You must define a command for protocol \"#{p.name}\". "+
+          "Available commands are: \"#{_protocol.commands.join(", ")}\""
+          )
+      if p.options.command not in _protocol.commands
+        throw new Error(
+          "Protocol \"#{p.name}\" can´t handle the command \"#{p.options.command}\". "+
+          "Available commands are: \"#{_protocol.commands.join(", ")}\""
+          )
 
   logDebug = (config, protocol, options, rfrepeats) ->
     message = "Sending Protocol: #{protocol.name}"
@@ -636,6 +652,7 @@ module.exports = (env) ->
       for b in config.buttons
         for p in b.protocols
           checkProtocolProperties(p, ["switch","command"])
+          checkProtocolCommands(p)
 
       @board.on('rf', (event) =>
         for b in @config.buttons

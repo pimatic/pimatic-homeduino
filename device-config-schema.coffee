@@ -28,7 +28,6 @@ module.exports = {
           value itself."
         type: "string"
         default: "$value"
-    required: ["pin"]
   },
   HomeduinoDSTSensor: {
     title: "HomeduinoDSTSensor config options"
@@ -81,11 +80,11 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
+              required: false
       forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
-    required: ["protocols"]
   },
   HomeduinoRFDimmer: {
     title: "HomeduinoRFDimmer config options"
@@ -116,11 +115,11 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
+              required: false
       forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
-    required: ["protocols"]
   },
   HomeduinoRFButtonsDevice: {
     title: "HomeduinoRFButtonsDevice config options"
@@ -163,7 +162,7 @@ module.exports = {
                   rfrepeats:
                     type: "number"
                     description: "The amount of RF repeats for this device"
-            required: ["protocols"]
+                    required: false
   }
   HomeduinoRFContactSensor: {
     title: "HomeduinoRFContactSensor config options"
@@ -192,7 +191,6 @@ module.exports = {
         description: """Time after that the contact state is reseted."""
         type: "integer"
         default: 10000
-    required: ["protocols"]
   }
   HomeduinoRFShutter: {
     title: "HomeduinoRFShutter config options"
@@ -223,11 +221,11 @@ module.exports = {
             rfrepeats:
               type: "number"
               description: "The amount of RF repeats for this device"
+              required: false
       forceSend:
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
-    required: ["protocols"]
   }
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"
@@ -265,7 +263,6 @@ module.exports = {
            Fahrenheit"
         type: "boolean"
         default: false
-    required: ["protocols"]
   }
   HomeduinoRFWeatherStation: {
     title: "HomeduinoRFWeatherStation config options"
@@ -327,7 +324,6 @@ module.exports = {
           value itself."
         type: "string"
         default: "$value"
-    required: ["protocols"]
   }
   HomeduinoRFGenericSensor: {
     title: "HomeduinoRFGenericSensor config options"
@@ -405,7 +401,6 @@ module.exports = {
       pin:
         description: "Digital Pin number on the Arduino"
         type: "integer"
-    required: ["pin"]
   }
   HomeduinoPir: {
     title: "HomeduinoPir config options"
@@ -423,7 +418,6 @@ module.exports = {
       pin:
         description: "Digital Pin number on the Arduino"
         type: "integer"
-    required: ["pin"]
   }
   HomeduinoAnalogSensor: {
     title: "HomeduinoAnalogSensor config options"
@@ -518,7 +512,6 @@ module.exports = {
         description: "Time after that the presence value is reset to absent."
         type: "integer"
         default: 10000
-    required: ["protocols"]
   }
   HomeduinoSwitch: {
     title: "HomeduinoSwitch config options"
@@ -549,6 +542,5 @@ module.exports = {
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
-    required: ["pin"]
   },
 }
