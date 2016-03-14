@@ -8,6 +8,25 @@ module.exports = {
       type: "string"
       enum: ["serialport", "gpio"]
       default: "serialport"
+      defines:
+        property: "driverOptions"
+        options:
+          serialport:
+            title: "serialport driver options"
+            type: "object"
+            properties:
+              serialDevice:
+                description: "The name of the serial device to use"
+                type: "string"
+                default: "/dev/ttyUSB0"
+              baudrate:
+                description: "The baudrate to use for serial communication"
+                type: "integer"
+                default: 115200
+          gpio:
+            title: "gpio driver options"
+            type: "object"
+            properties: {}
     driverOptions:
       description: "Options for the driver"
       type: "object"
@@ -15,23 +34,6 @@ module.exports = {
         "serialDevice": "/dev/ttyUSB0",
         "baudrate": 115200
       }
-      # oneOf: [
-      #   {
-      #     title: "serialport driver options"
-      #     properties:
-      #       serialDevice:
-      #         description: "The name of the serial device to use"
-      #         type: "string"
-      #         default: "/dev/ttyUSB0"
-      #       baudrate:
-      #         description: "The baudrate to use for serial communication"
-      #         type: "integer"
-      #         default: 115200
-      #   },
-      #   {
-      #     properties: {}
-      #   }
-      #]
     enableReceiving:
       description: "Enable the receiving of 433mhz rf signals?"
       type: "boolean"
@@ -62,6 +64,7 @@ module.exports = {
       default: true
     rfrepeats:
       description: "Amount of RF repeats"
+      type: "integer"
       default: 7
     apikey:
       description: "Api key for external nodes"
