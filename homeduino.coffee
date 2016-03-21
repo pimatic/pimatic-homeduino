@@ -170,8 +170,8 @@ module.exports = (env) ->
   class HomeduinoDSTSensor extends env.devices.TemperatureSensor
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       super()
 
       lastError = null
@@ -419,11 +419,11 @@ module.exports = (env) ->
   class HomeduinoRFSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_state = lastState?.state?.value
 
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["switch"])
 
       @board.on('rf', (event) =>
@@ -460,13 +460,13 @@ module.exports = (env) ->
     _lastdimlevel: null
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_dimlevel = lastState?.dimlevel?.value or 0
       @_lastdimlevel = lastState?.lastdimlevel?.value or 100
       @_state = lastState?.state?.value or off
 
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["switch", "dimmer"])
 
       @board.on('rf', (event) =>
@@ -510,10 +510,10 @@ module.exports = (env) ->
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
 
-      for b in config.buttons
+      for b in @config.buttons
         for p in b.protocols
           checkProtocolProperties(p, ["switch","command"])
           checkProtocolCommands(p)
@@ -544,11 +544,11 @@ module.exports = (env) ->
   class HomeduinoRFContactSensor extends env.devices.ContactSensor
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_contact = lastState?.contact?.value or false
 
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["switch","contact"])
 
       @board.on('rf', (event) =>
@@ -571,11 +571,11 @@ module.exports = (env) ->
   class HomeduinoRFShutter extends env.devices.ShutterController
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_position = lastState?.position?.value or 'stopped'
       @_types = {}
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["switch", "command"])
         @_types[p.name] = Board.getRfProtocol(p.name).type #save the protocol type
 
@@ -638,11 +638,11 @@ module.exports = (env) ->
   class HomeduinoRFPir extends env.devices.PresenceSensor
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_presence = lastState?.presence?.value or false
 
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["pir"])
 
       resetPresence = ( =>
@@ -667,8 +667,8 @@ module.exports = (env) ->
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_temperatue = lastState?.temperature?.value
       @_humidity = lastState?.humidity?.value
       @_lowBattery = lastState?.lowBattery?.value
@@ -679,7 +679,7 @@ module.exports = (env) ->
       hasLowBattery = false # boolean battery indicator
       hasBattery = false # numeric battery indicator
       isFahrenheit = config.isFahrenheit
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
         hasTemperature = true if _protocol.values.temperature?
@@ -788,8 +788,8 @@ module.exports = (env) ->
   class HomeduinoRFWeatherStation extends env.devices.Sensor
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_windGust = lastState?.windGust?.value or 0
       @_avgAirspeed = lastState?.avgAirspeed?.value or 0
       @_windDirection = lastState?.windDirection?.value or 0
@@ -807,7 +807,7 @@ module.exports = (env) ->
       hasRain = false
       hasLowBattery = false # boolean battery indicator
       hasBattery = false # numeric battery indicator
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
         hasRain = true if _protocol.values.rain?
@@ -831,7 +831,7 @@ module.exports = (env) ->
 
       @attributes = {}
 
-      for s in config.values
+      for s in @config.values
         switch s
           when "rain"
             if hasRain
@@ -1072,10 +1072,10 @@ module.exports = (env) ->
   class HomeduinoRFGenericSensor extends env.devices.Sensor
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
 
-      for p in config.protocols
+      for p in @config.protocols
         checkProtocolProperties(p, ["generic"])
 
       @attributes = {}
@@ -1147,8 +1147,8 @@ module.exports = (env) ->
   class HomeduinoSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
 
       if @config.defaultState?
         @_state = @config.defaultState
@@ -1183,8 +1183,8 @@ module.exports = (env) ->
   class HomeduinoAnalogDimmer extends env.devices.DimmerActuator
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_dimlevel = lastState?.dimlevel?.value or 0
       @_lastdimlevel = lastState?.lastdimlevel?.value or 100
       @_state = lastState?.state?.value or off
@@ -1229,8 +1229,8 @@ module.exports = (env) ->
   class HomeduinoContactSensor extends env.devices.ContactSensor
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_contact = lastState?.contact?.value or false
 
       # setup polling
@@ -1259,8 +1259,8 @@ module.exports = (env) ->
   class HomeduinoPir extends env.devices.PresenceSensor
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @_presence = lastState?.presence?.value or false
 
       # setup polling
@@ -1289,8 +1289,8 @@ module.exports = (env) ->
   class HomeduinoAnalogSensor extends env.devices.Sensor
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
 
       @attributes = {}
       for attributeConfig in @config.attributes
