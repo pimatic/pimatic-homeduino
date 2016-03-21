@@ -237,8 +237,8 @@ module.exports = (env) ->
         acronym: 'RH'
 
     constructor: (@config, lastState, @board) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       super()
 
       lastError = null
