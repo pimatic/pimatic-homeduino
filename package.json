@@ -17,10 +17,10 @@
   },
   "configSchema": "homeduino-config-schema.coffee",
   "dependencies": {
-    "homeduino": "~0.0.53"
+    "homeduino": "git+https://github.com/pimatic/homeduinojs.git#serialport-update"
   },
   "peerDependencies": {
-    "pimatic": ">=0.8.0 <1.0.0"
+    "pimatic": "0.9.*"
   },
   "engines": {
     "node": ">0.8.x",
