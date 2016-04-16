@@ -508,7 +508,7 @@ module.exports = (env) ->
               @emit('button', b.id)
       )
       @on('destroy', () => @board.removeListener('rf', rfListener) )
-      super(config)
+      super(@config)
 
     _sendStateToSwitches: sendToSwitchesMixin
 
