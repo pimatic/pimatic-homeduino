@@ -175,27 +175,19 @@ module.exports = (env) ->
       super()
 
       lastError = null
-      setInterval(( =>
-        @_readSensor().then( (result) =>
+      getter = ( =>
+        return @_readSensor().then( (result) =>
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processing or "$value"
           info = variableManager.parseVariableExpression(
             processing.replace(/\$value\b/g, result.temperature)
           )
-          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-            @emit 'temperature', value
-          )
-          #@emit 'temperature', result.temperature
-        ).catch( (err) =>
-          if lastError is err.message
-            if hdPlugin.config.debug
-              env.logger.debug("Suppressing repeated error message from DST read: #{err.message}")
-            return
-          env.logger.error("Error reading DST Sensor: #{err.message}.")
-          lastError = err.message
+          return variableManager.evaluateNumericExpression(info.tokens)
         )
-      ), @config.interval)
+      )
+      @_createGetter('temperature', getter)
+      @_setupPolling('temperature', @config.interval)
 
     _readSensor: ()->
       # Already reading? return the reading promise
@@ -219,7 +211,6 @@ module.exports = (env) ->
         throw err
       )
 
-    getTemperature: -> @_readSensor().then( (result) -> result.temperature )
 
   #Original DHT implementation
   class HomeduinoDHTSensor extends env.devices.TemperatureSensor
@@ -242,35 +233,25 @@ module.exports = (env) ->
       super()
 
       lastError = null
-      setInterval(( =>
-        @_readSensor().then( (result) =>
-          lastError = null
-          variableManager = hdPlugin.framework.variableManager
-          processing = @config.processingTemp or "$value"
-          info = variableManager.parseVariableExpression(
-            processing.replace(/\$value\b/g, result.temperature)
+      getterFor = (attrName, processing) =>
+        return( () =>
+          @_readSensor().then( (result) =>
+            lastError = null
+            variableManager = hdPlugin.framework.variableManager
+            info = variableManager.parseVariableExpression(
+              processing.replace(/\$value\b/g, result[attrName])
+            )
+            return variableManager.evaluateNumericExpression(info.tokens)
           )
-          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-            @emit 'temperature', value
-          )
-          #@emit 'temperature', result.temperature
-          processing = @config.processingHum or "$value"
-          info = variableManager.parseVariableExpression(
-            processing.replace(/\$value\b/g, result.humidity)
-          )
-          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-            @emit 'humidity', value
-          )
-          #@emit 'humidity', result.humidity
-        ).catch( (err) =>
-          if lastError is err.message
-            if hdPlugin.config.debug
-              env.logger.debug("Suppressing repeated error message from DHT read: #{err.message}")
-            return
-          env.logger.error("Error reading DHT Sensor: #{err.message}.")
-          lastError = err.message
         )
-      ), @config.interval)
+
+      tempGetter = getterFor('temperature', @config.processingTemp or "$value")
+      @_createGetter('temperature', tempGetter)
+      @_setupPolling('temperature', @config.interval)
+
+      humGetter = getterFor('humidity', @config.processingHum or "$value")
+      @_createGetter('humidity', humGetter)
+      @_setupPolling('humidity', @config.interval)
 
     _readSensor: (attempt = 0)->
       # Already reading? return the reading promise
@@ -298,10 +279,6 @@ module.exports = (env) ->
         else
           throw err
       )
-
-    getTemperature: -> @_readSensor().then( (result) -> result.temperature )
-    getHumidity: -> @_readSensor().then( (result) -> result.humidity )
-
 
   doesProtocolMatch = (event, protocol) ->
     match = no
@@ -426,7 +403,7 @@ module.exports = (env) ->
       for p in @config.protocols
         checkProtocolProperties(p, ["switch"])
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           unless p.receive is false
             if p.name is "rolling1"
@@ -444,6 +421,7 @@ module.exports = (env) ->
               @emit('rf', event) # used by the RFEventPredicateHandler
               @_setState(event.values.state)
         )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _sendStateToSwitches: sendToSwitchesMixin
@@ -469,7 +447,7 @@ module.exports = (env) ->
       for p in @config.protocols
         checkProtocolProperties(p, ["switch", "dimmer"])
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           unless p.receive is false
             match = doesProtocolMatch(event, p)
@@ -489,6 +467,7 @@ module.exports = (env) ->
                   dimlevel = Math.round(numberMapping(event.values.dimlevel,0,100,p_min,p_max))
                   @_setDimlevel(dimlevel)
         )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _sendLevelToDimmers: sendToDimmersMixin
@@ -518,7 +497,7 @@ module.exports = (env) ->
           checkProtocolProperties(p, ["switch","command"])
           checkProtocolCommands(p)
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for b in @config.buttons
           unless b.receive is false
             match = no
@@ -527,8 +506,8 @@ module.exports = (env) ->
                 match = yes
             if match
               @emit('button', b.id)
-        )
-
+      )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super(config)
 
     _sendStateToSwitches: sendToSwitchesMixin
@@ -551,7 +530,7 @@ module.exports = (env) ->
       for p in @config.protocols
         checkProtocolProperties(p, ["switch","contact"])
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
@@ -566,6 +545,7 @@ module.exports = (env) ->
                 @_setContact(!hasContact)
               ), @config.resetTime)
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
   class HomeduinoRFShutter extends env.devices.ShutterController
@@ -579,7 +559,7 @@ module.exports = (env) ->
         checkProtocolProperties(p, ["switch", "command"])
         @_types[p.name] = Board.getRfProtocol(p.name).type #save the protocol type
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           unless match
@@ -600,6 +580,7 @@ module.exports = (env) ->
             else
               @_setPosition(event.values.command)
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _sendStateToSwitches: sendToSwitchesMixin
@@ -649,7 +630,7 @@ module.exports = (env) ->
         @_setPresence(no)
       )
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
@@ -659,6 +640,7 @@ module.exports = (env) ->
             if @config.autoReset is true
               @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     getPresence: -> Promise.resolve @_presence
@@ -737,7 +719,7 @@ module.exports = (env) ->
             }
         }
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
@@ -778,6 +760,7 @@ module.exports = (env) ->
               @emit "battery", @_battery
             @_lastReceiveTime = now
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     getTemperature: -> Promise.resolve @_temperatue
@@ -963,7 +946,7 @@ module.exports = (env) ->
               "lowBattery, battery"
             )
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
@@ -1052,6 +1035,7 @@ module.exports = (env) ->
               @emit "battery", @_battery
             @_lastReceiveTime = now
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _directionToString: (direction)->
@@ -1083,13 +1067,14 @@ module.exports = (env) ->
         @_createAttribute(attributeConfig)
 
       @_lastReceiveTimes = {}
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
             for attributeConfig in @config.attributes
               @_updateAttribute(attributeConfig, event)
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _createAttribute: (attributeConfig) ->
@@ -1213,7 +1198,6 @@ module.exports = (env) ->
       if state is on then turnOn
       else turnOff
 
-
     turnOn: -> @changeDimlevelTo(@_lastdimlevel)
 
     changeDimlevelTo: (level) ->
@@ -1229,31 +1213,28 @@ module.exports = (env) ->
   class HomeduinoContactSensor extends env.devices.ContactSensor
 
     constructor: (@config, lastState, @board) ->
-      @id = @config.id
+      @id = @config.idaaAA
       @name = @config.name
       @_contact = lastState?.contact?.value or false
-
+      modeSet = false
       # setup polling
-      hdPlugin.pendingConnect.then( =>
-        return @board.pinMode(@config.pin, Board.INPUT)
-      ).then( =>
-        requestContactValue = =>
-          @board.digitalRead(@config.pin).then( (value) =>
+      getContactValue = =>
+        hdPlugin.pendingConnect.then( =>
+          unless modeSet
+            return @board.pinMode(@config.pin, Board.INPUT).then( () => modeSet = true )
+        ).catch( (err) => modeSet = false )
+        .then( =>
+          return @board.digitalRead(@config.pin).then( (value) =>
             hasContact = (
               if value is Board.HIGH then !@config.inverted
               else @config.inverted
             )
             @_setContact(hasContact)
-          ).catch( (error) =>
-            env.logger.error error
-            env.logger.debug error.stack
+            return hasContact
           )
-          setTimeout(requestContactValue, @config.interval or 5000)
-        requestContactValue()
-      ).catch( (error) =>
-        env.logger.error error
-        env.logger.debug error.stack
-      )
+        )
+      @setupPolling('contact', @config.interval or 5000, getContactValue)
+      @_createGetter('contact', getContactValue)
       super()
 
   class HomeduinoPir extends env.devices.PresenceSensor
