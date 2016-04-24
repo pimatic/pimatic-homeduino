@@ -211,6 +211,9 @@ module.exports = (env) ->
         throw err
       )
 
+    destroy: ->
+      super()
+
 
   #Original DHT implementation
   class HomeduinoDHTSensor extends env.devices.TemperatureSensor
@@ -279,6 +282,9 @@ module.exports = (env) ->
         else
           throw err
       )
+
+    destroy: ->
+      super()
 
   doesProtocolMatch = (event, protocol) ->
     match = no
@@ -433,6 +439,8 @@ module.exports = (env) ->
         @_setState(state)
       )
 
+    destroy: ->
+      super()
 
   class HomeduinoRFDimmer extends env.devices.DimmerActuator
     _lastdimlevel: null
@@ -486,6 +494,9 @@ module.exports = (env) ->
         @_setDimlevel(level)
       )
 
+    destroy: ->
+      super()
+
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -519,6 +530,8 @@ module.exports = (env) ->
           return @_sendStateToSwitches(b.protocols)
       throw new Error("No button with the id #{buttonId} found")
 
+    destroy: ->
+      super()
 
   class HomeduinoRFContactSensor extends env.devices.ContactSensor
 
@@ -546,6 +559,9 @@ module.exports = (env) ->
               ), @config.resetTime)
       )
       @on('destroy', () => @board.removeListener('rf', rfListener) )
+      super()
+
+    destroy: ->
       super()
 
   class HomeduinoRFShutter extends env.devices.ShutterController
@@ -611,10 +627,12 @@ module.exports = (env) ->
           if @_types[p.name] is "command"
             p.options.command = position
         return @_sendStateToSwitches(protocols, position is 'up').then( =>
-        @_lastSendTime = new Date().getTime()
-        @_setPosition(position)
+          @_lastSendTime = new Date().getTime()
+          @_setPosition(position)
         )
 
+    destroy: ->
+      super()
 
   class HomeduinoRFPir extends env.devices.PresenceSensor
 
@@ -645,6 +663,8 @@ module.exports = (env) ->
 
     getPresence: -> Promise.resolve @_presence
 
+    destroy: ->
+      super()
 
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
 
@@ -767,6 +787,9 @@ module.exports = (env) ->
     getHumidity: -> Promise.resolve @_humidity
     getLowBattery: -> Promise.resolve @_lowBattery
     getBattery: -> Promise.resolve @_battery
+
+    destroy: ->
+      super()
 
   class HomeduinoRFWeatherStation extends env.devices.Sensor
 
@@ -1053,6 +1076,9 @@ module.exports = (env) ->
     getLowBattery: -> Promise.resolve @_lowBattery
     getBattery: -> Promise.resolve @_battery
 
+    destroy: ->
+      super()
+
   class HomeduinoRFGenericSensor extends env.devices.Sensor
 
     constructor: (@config, lastState, @board) ->
@@ -1129,6 +1155,9 @@ module.exports = (env) ->
       @emit name, value
       @_lastReceiveTimes[name] = now
 
+    destroy: ->
+      super()
+
   class HomeduinoSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board) ->
@@ -1164,6 +1193,9 @@ module.exports = (env) ->
       return @_writeState(state).then( =>
         @_setState(state)
       )
+
+    destroy: ->
+      super()
 
   class HomeduinoAnalogDimmer extends env.devices.DimmerActuator
 
@@ -1210,6 +1242,9 @@ module.exports = (env) ->
         @_setDimlevel(level)
       )
 
+    destroy: ->
+      super()
+
   class HomeduinoContactSensor extends env.devices.ContactSensor
 
     constructor: (@config, lastState, @board) ->
@@ -1235,6 +1270,9 @@ module.exports = (env) ->
         )
       @setupPolling('contact', @config.interval or 5000, getContactValue)
       @_createGetter('contact', getContactValue)
+      super()
+
+    destroy: ->
       super()
 
   class HomeduinoPir extends env.devices.PresenceSensor
@@ -1265,6 +1303,9 @@ module.exports = (env) ->
         env.logger.error error
         env.logger.debug error.stack
       )
+      super()
+
+    destroy: ->
       super()
 
   class HomeduinoAnalogSensor extends env.devices.Sensor
@@ -1329,6 +1370,9 @@ module.exports = (env) ->
         env.logger.error error
         env.logger.debug error.stack
       )
+
+    destroy: ->
+      super()
 
   ###
   The RF-Event Predicate Provider
