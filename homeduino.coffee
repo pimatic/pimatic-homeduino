@@ -529,7 +529,7 @@ module.exports = (env) ->
               @emit('button', b.id)
         )
 
-      super(config)
+      super(@config)
 
     _sendStateToSwitches: sendToSwitchesMixin
 
@@ -678,7 +678,7 @@ module.exports = (env) ->
       hasHumidity = false
       hasLowBattery = false # boolean battery indicator
       hasBattery = false # numeric battery indicator
-      isFahrenheit = config.isFahrenheit
+      isFahrenheit = @config.isFahrenheit
       for p in @config.protocols
         checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
