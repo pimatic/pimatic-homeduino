@@ -1213,7 +1213,7 @@ module.exports = (env) ->
   class HomeduinoContactSensor extends env.devices.ContactSensor
 
     constructor: (@config, lastState, @board) ->
-      @id = @config.idaaAA
+      @id = @config.id
       @name = @config.name
       @_contact = lastState?.contact?.value or false
       modeSet = false
