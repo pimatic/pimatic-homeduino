@@ -2,6 +2,7 @@
   "name": "pimatic-homeduino",
   "description": "pimatic plugin to use various 433 MHz devices, sensors and more with an Arduino.",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://www.sweetpi.de)",
+  "license": "GPL-2.0",
   "main": "homeduino",
   "files": [
     "homeduino.coffee",
