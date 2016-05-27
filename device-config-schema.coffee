@@ -384,6 +384,10 @@ module.exports = {
               description: "Acronym to show as value label in the frontend"
               type: "string"
               required: false
+            icon:
+              description: "Definition for an icon representation of the attribute value, e.g. a battery level"
+              type: "object"
+              required: false
   }
   HomeduinoContactSensor: {
     title: "HomeduinoContactSensor config options"

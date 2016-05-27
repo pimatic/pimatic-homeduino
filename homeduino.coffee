@@ -1117,6 +1117,9 @@ module.exports = (env) ->
       if attributeConfig.acronym?
         @attributes[name].acronym = attributeConfig.acronym
 
+      if attributeConfig.icon?
+        @attributes[name].icon = attributeConfig.icon
+
       # generate getter:
       @_createGetter(name, => Promise.resolve(@_attributesMeta[name].value))
 
