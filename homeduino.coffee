@@ -671,7 +671,7 @@ module.exports = (env) ->
     constructor: (@config, lastState, @board) ->
       @id = @config.id
       @name = @config.name
-      @_temperatue = lastState?.temperature?.value
+      @_temperature = lastState?.temperature?.value
       @_humidity = lastState?.humidity?.value
       @_lowBattery = lastState?.lowBattery?.value
       @_battery = lastState?.battery?.value
@@ -759,8 +759,8 @@ module.exports = (env) ->
                 processing.replace(/\$value\b/g, event.values.temperature)
               )
               variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-                @_temperatue = value
-                @emit "temperature", @_temperatue
+                @_temperature = value
+                @emit "temperature", @_temperature
               )
             if event.values.humidity?
               variableManager = hdPlugin.framework.variableManager
@@ -783,7 +783,7 @@ module.exports = (env) ->
       @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
-    getTemperature: -> Promise.resolve @_temperatue
+    getTemperature: -> Promise.resolve @_temperature
     getHumidity: -> Promise.resolve @_humidity
     getLowBattery: -> Promise.resolve @_lowBattery
     getBattery: -> Promise.resolve @_battery
@@ -799,7 +799,7 @@ module.exports = (env) ->
       @_windGust = lastState?.windGust?.value or 0
       @_avgAirspeed = lastState?.avgAirspeed?.value or 0
       @_windDirection = lastState?.windDirection?.value or 0
-      @_temperatue = lastState?.temperature?.value or 0
+      @_temperature = lastState?.temperature?.value or 0
       @_humidity = lastState?.humidity?.value or 0
       @_rain = lastState?.rain?.value or 0
       @_lowBattery = lastState?.lowBattery?.value or false
@@ -1026,8 +1026,8 @@ module.exports = (env) ->
                 @_temperature = value
                 @emit "temperature", @_temperature
               )
-              #@_temperatue = event.values.temperature
-              #@emit "temperature", @_temperatue
+              #@_temperature = event.values.temperature
+              #@emit "temperature", @_temperature
             if event.values.humidity?
               processing = @config.processingHum or "$value"
               info = variableManager.parseVariableExpression(
@@ -1071,7 +1071,7 @@ module.exports = (env) ->
     getAvgAirspeed: -> Promise.resolve @_avgAirspeed
     getWindGust: -> Promise.resolve @_windGust
     getRain: -> Promise.resolve @_rain
-    getTemperature: -> Promise.resolve @_temperatue
+    getTemperature: -> Promise.resolve @_temperature
     getHumidity: -> Promise.resolve @_humidity
     getLowBattery: -> Promise.resolve @_lowBattery
     getBattery: -> Promise.resolve @_battery
