@@ -421,7 +421,7 @@ module.exports = (env) ->
 
   #eventually this can be part of the framework
   numberMapping = (X, in_min, in_max, out_min, out_max)->
-    return (X-in_min)*(out_max-out_min)/(in_max-in_min)+out_min
+    return (X-in_min)*(in_max-in_min)/(out_max-out_min)+out_min
 
   sendToSwitchesMixin = (protocols, state = null) ->
     pending = []
