@@ -41,6 +41,82 @@ module.exports = (env) ->
         env.logger.warn "Couldn't connect (#{err.message}), retrying..."
       )
 
+      @framework.deviceManager.on('discover', (eventData) =>
+
+        discoveredDevices = {};
+
+        @framework.deviceManager.discoverMessage(
+          'pimatic-homeduino', "Waiting for RF messages"
+        )
+
+        # Stop searching after configured time
+        setTimeout(( =>
+          @board.removeListener("rf", discoverListener)
+        ), eventData.time)
+
+
+
+        # Received presentation message from the gateway
+        @board.on("rf", discoverListener = (event) =>
+          protocolName = event.protocol
+          protocol = null
+          for p in protocols
+            if p.name is protocolName
+              protocol = p
+          if protocol?
+            protocolValues = {}
+            for own k of protocol.values
+              if event.values[k]?
+                protocolValues[k] = event.values[k]
+
+            protocolConfig = [
+              {
+                name: protocolName,
+                options: protocolValues
+              }
+            ]
+
+            switch protocol.type
+              when 'switch'
+                config = {
+                  class: 'HomeduinoRFSwitch'
+                  protocols: protocolConfig
+                }
+              when 'dimmer'
+                config = {
+                  class: 'HomeduinoRFDimmer'
+                  protocols: protocolConfig
+                }
+              when 'weather'
+                config = {
+                  class: 'HomeduinoRFWeatherStation'
+                  protocols: protocolConfig
+                }
+              when 'contact'
+                config = {
+                  class: 'HomeduinoRFContactSensor'
+                  protocols: protocolConfig
+                }
+          if config?
+            # Only show devices once
+            hash = JSON.stringify(config)
+            if discoveredDevices[hash]
+              return
+            discoveredDevices[hash] = true
+
+            deviceName = ""
+            if protocol.brands? and protocol.brands.length > 0
+              deviceName = protocol.brands.join('/')
+            else
+              deviceName = "Unknown brand"
+            deviceName += " (" + protocol.type + ")"
+
+            @framework.deviceManager.discoveredDevice(
+              'pimatic-homeduino', deviceName, config
+            )
+        )
+      )
+
       @pendingConnect = new Promise( (resolve, reject) =>
         @framework.on "after init", ( =>
           @board.connect(@config.connectionTimeout).then( =>
@@ -84,12 +160,12 @@ module.exports = (env) ->
           presence: p.values.presence
           lowBattery: p.values.lowBattery
         }
-        for k, v of supports
+        for own k, v of supports
           if v?
             delete p.values[k]
           else
             delete supports[k]
-        for k, v of p.values
+        for own k, v of p.values
           v.type = "string" if v.type is "binary"
       availableProtocolOptions = {}
       for p in protocols
