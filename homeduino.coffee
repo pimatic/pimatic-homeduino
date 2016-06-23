@@ -1344,7 +1344,7 @@ module.exports = (env) ->
             return hasContact
           )
         )
-      @setupPolling('contact', @config.interval or 5000, getContactValue)
+      @_setupPolling('contact', @config.interval or 5000)
       @_createGetter('contact', getContactValue)
       super()
 
