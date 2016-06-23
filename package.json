@@ -12,7 +12,7 @@
     "device-config-schema.coffee",
     "LICENSE"
   ],
-  "version": "0.9.3",
+  "version": "0.9.4",
   "homepage": "http://pimatic.org",
   "repository": {
     "type": "git",
