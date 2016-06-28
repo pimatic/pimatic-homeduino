@@ -728,7 +728,7 @@ module.exports = (env) ->
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
-            unless @_setPresence is event.values.presence
+            unless @_presence is event.values.presence
               @_setPresence(event.values.presence)
             clearTimeout(@_resetPresenceTimeout)
             if @config.autoReset is true
