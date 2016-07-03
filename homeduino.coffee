@@ -97,6 +97,11 @@ module.exports = (env) ->
                   class: 'HomeduinoRFContactSensor'
                   protocols: protocolConfig
                 }
+              when 'pir'
+                config = {
+                  class: 'HomeduinoRFPir'
+                  protocols: protocolConfig
+                }
           if config?
             # Only show devices once
             hash = JSON.stringify(config)
