@@ -170,8 +170,6 @@ module.exports = (env) ->
             delete p.values[k]
           else
             delete supports[k]
-        for own k, v of p.values
-          v.type = "string" if v.type is "binary"
       availableProtocolOptions = {}
       for p in protocols
         availableProtocolOptions[p.name] = {
