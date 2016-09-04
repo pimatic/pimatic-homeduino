@@ -164,6 +164,7 @@ module.exports = (env) ->
           battery: p.values.battery
           presence: p.values.presence
           lowBattery: p.values.lowBattery
+          contact: p.values.contact
         }
         for own k, v of supports
           if v?
