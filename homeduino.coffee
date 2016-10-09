@@ -631,6 +631,7 @@ module.exports = (env) ->
               if event.values.contact? then event.values.contact
               else (not event.values.state)
             )
+            if @config.inverted then hasContact = !hasContact
             @_setContact(hasContact)
             if @config.autoReset is true
               clearTimeout(@_resetContactTimeout)
