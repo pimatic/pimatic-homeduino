@@ -194,7 +194,7 @@ module.exports = {
       inverted:
         description: """Invert open/close state of contact device."""
         type: "boolean"
-        default: "false"
+        default: false
   }
   HomeduinoRFShutter: {
     title: "HomeduinoRFShutter config options"
