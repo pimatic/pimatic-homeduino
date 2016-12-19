@@ -226,6 +226,10 @@ module.exports = {
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
+      inverted:
+        description: "Sending inverted values when pressing up or down"
+        type: "boolean"
+        default: false
   }
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"

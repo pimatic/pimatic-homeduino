@@ -690,9 +690,11 @@ module.exports = (env) ->
         if @_types[p.name] is "command"
           p.options.command = "stop"
 
-      @_sendStateToSwitches(protocols, @_position is 'up').then( =>
-        @_setPosition('stopped')
-      )
+      state = if @config.inverted then @_position is 'down' else @_position is 'up'
+      @_sendStateToSwitches(protocols, state)
+        .then( =>
+          @_setPosition('stopped')
+        )
 
       return Promise.resolve()
 
