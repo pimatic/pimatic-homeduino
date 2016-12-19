@@ -191,6 +191,10 @@ module.exports = {
         description: """Time after that the contact state is reseted."""
         type: "integer"
         default: 10000
+      inverted:
+        description: """Invert open/close state of contact device."""
+        type: "boolean"
+        default: false
   }
   HomeduinoRFShutter: {
     title: "HomeduinoRFShutter config options"
