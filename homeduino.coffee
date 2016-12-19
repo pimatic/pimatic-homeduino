@@ -424,8 +424,8 @@ module.exports = (env) ->
     env.logger.debug(message)
 
   #eventually this can be part of the framework
-  numberMapping = (X, in_min, in_max, out_min, out_max)->
-    return (X-in_min)*(in_max-in_min)/(out_max-out_min)+out_min
+  numberMapping = (X, in_min, in_max, out_min, out_max) ->
+    return Math.round((X-in_min)*(out_max-out_min)/(in_max-in_min)+out_min)
 
   sendToSwitchesMixin = (protocols, state = null) ->
     pending = []
@@ -552,7 +552,7 @@ module.exports = (env) ->
                 if _protocol.values.dimlevel?
                   p_min = _protocol.values.dimlevel.min
                   p_max = _protocol.values.dimlevel.max
-                  dimlevel = Math.round(numberMapping(event.values.dimlevel,0,100,p_min,p_max))
+                  dimlevel = numberMapping(event.values.dimlevel, p_min, p_max, 0, 100)
                   @_setDimlevel(dimlevel)
         )
       @on('destroy', () => @board.removeListener('rf', rfListener) )
@@ -1300,7 +1300,7 @@ module.exports = (env) ->
       super()
 
     _writeLevel: (level) ->
-      dimlevel = Math.round(numberMapping(level,0,100,0,255))
+      dimlevel = numberMapping(level, 0, 100, 0, 255)
       return hdPlugin.pendingConnect.then( =>
         return @board.analogWrite(@config.pin, dimlevel)
       )
