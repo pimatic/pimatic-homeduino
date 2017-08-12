@@ -40,6 +40,9 @@ You can load the plugin by editing your `config.json` to include:
 
 in the `plugins` section. For all configuration options see [homeduino-config-schema](homeduino-config-schema.coffee)
 
+Since pimatic v0.9 you can add and setup the homeduino plugin via GUI in the plugins menu!
+Please be informed to set the baudrate to 57.600 when using an Arduino on 8MHz to avoid communication issues. [Learn more here](https://forum.pimatic.org/topic/1054/homeduino-on-a-8mhz-pro-mini-fails/7)
+
 The pin numbers are Arduino pin numbers. The `receiverPin` must be either `0` (INT0) or `1` (INT1).
 The `transmitterPin` must be a digital pin between `2` (D2) and `13` (D13).
 

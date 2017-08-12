@@ -619,9 +619,49 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_contact = lastState?.contact?.value or false
+      @_lowBattery = lastState?.lowBattery?.value
+      @_battery = lastState?.battery?.value
 
+      hasLowBattery = false # boolean battery indicator
+      hasBattery = false # numeric battery indicator
       for p in @config.protocols
         checkProtocolProperties(p, ["switch","contact"])
+        _protocol = Board.getRfProtocol(p.name)
+        hasLowBattery = true if _protocol.values.lowBattery?
+        hasBattery = true if _protocol.values.battery?
+
+      if hasLowBattery
+        @attributes = _.cloneDeep @attributes
+        @attributes.lowBattery = {
+          description: "the battery status"
+          type: "boolean"
+          labels: ["low", 'ok']
+          icon:
+            noText: true
+            mapping: {
+              'icon-battery-filled': false
+              'icon-battery-empty': true
+            }
+        }
+      if hasBattery
+        @attributes = _.cloneDeep @attributes
+        @attributes.battery = {
+          description: "the battery status"
+          type: "number"
+          unit: '%'
+          displaySparkline: false
+          icon:
+            noText: true
+            mapping: {
+              'icon-battery-empty': 0
+              'icon-battery-fuel-1': [0, 20]
+              'icon-battery-fuel-2': [20, 40]
+              'icon-battery-fuel-3': [40, 60]
+              'icon-battery-fuel-4': [60, 80]
+              'icon-battery-fuel-5': [80, 100]
+              'icon-battery-filled': 100
+            }
+        }
 
       @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
@@ -637,6 +677,12 @@ module.exports = (env) ->
               @_resetContactTimeout = setTimeout(( =>
                 @_setContact(!hasContact)
               ), @config.resetTime)
+            if event.values.lowBattery?
+              @_lowBattery = event.values.lowBattery
+              @emit "lowBattery", @_lowBattery
+            if event.values.battery?
+              @_battery = event.values.battery
+              @emit "battery", @_battery
       )
       @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
