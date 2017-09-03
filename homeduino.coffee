@@ -691,6 +691,9 @@ module.exports = (env) ->
     destroy: ->
       super()
 
+    getLowBattery: -> Promise.resolve @_lowBattery
+    getBattery: -> Promise.resolve @_battery
+
   class HomeduinoRFShutter extends env.devices.ShutterController
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
