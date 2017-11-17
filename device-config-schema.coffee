@@ -234,6 +234,10 @@ module.exports = {
         description: "Sending inverted values when pressing up or down"
         type: "boolean"
         default: false
+      rollingTime:
+        description: "Approx. amount of time (in seconds) for shutter to close or open completely."
+        type: "number"
+        default: 10
   }
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"
