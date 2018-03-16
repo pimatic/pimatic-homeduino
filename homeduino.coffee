@@ -697,6 +697,7 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_position = lastState?.position?.value or 'stopped'
+      @rollingTime = @config.rollingTime
       @_types = {}
       for p in @config.protocols
         checkProtocolProperties(p, ["switch", "command"])
