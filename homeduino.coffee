@@ -78,10 +78,11 @@ module.exports = (env) ->
 
             switch protocol.type
               when 'switch'
-                config = {
-                  class: 'HomeduinoRFSwitch'
-                  protocols: protocolConfig
-                }
+                if typeof event.values.state != 'undefined'
+                  config = {
+                    class: 'HomeduinoRFSwitch'
+                    protocols: protocolConfig
+                  }
               when 'dimmer'
                 config = {
                   class: 'HomeduinoRFDimmer'
