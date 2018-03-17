@@ -88,10 +88,19 @@ module.exports = (env) ->
                   protocols: protocolConfig
                 }
               when 'weather'
-                config = {
-                  class: 'HomeduinoRFWeatherStation'
-                  protocols: protocolConfig
-                }
+                valid = true
+                if typeof event.values.temperature != 'undefined'
+                  if event.values.temperature > 100 or event.values.temperature < -30
+                    valid = false
+                if typeof event.values.humidity != 'undefined'
+                  if event.values.humidity < 0 or event.values.humidity > 100
+                    valid = false
+                if valid
+                  console.log(event)
+                  config = {
+                    class: 'HomeduinoRFWeatherStation'
+                    protocols: protocolConfig
+                  }
               when 'contact'
                 config = {
                   class: 'HomeduinoRFContactSensor'
