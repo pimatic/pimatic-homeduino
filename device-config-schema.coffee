@@ -191,11 +191,15 @@ module.exports = {
         description: """Time after that the contact state is reseted."""
         type: "integer"
         default: 10000
+      inverted:
+        description: "Invert open/close state of contact device."
+        type: "boolean"
+        default: false
   }
   HomeduinoRFShutter: {
     title: "HomeduinoRFShutter config options"
     type: "object"
-    extensions: ["xConfirm", "xLink", "xOnLabel", "xOffLabel"]
+    extensions: ["xConfirm", "xLink"]
     properties:
       protocols:
         description: "The protocols to use."
@@ -226,6 +230,14 @@ module.exports = {
         type: "boolean"
         description: "Resend signal even if switch has the requested state already"
         default: true
+      inverted:
+        description: "Sending inverted values when pressing up or down"
+        type: "boolean"
+        default: false
+      rollingTime:
+        description: "Approx. amount of time (in seconds) for shutter to close or open completely."
+        type: "number"
+        default: 10
   }
   HomeduinoRFTemperature: {
     title: "HomeduinoRFTemperature config options"

@@ -41,6 +41,87 @@ module.exports = (env) ->
         env.logger.warn "Couldn't connect (#{err.message}), retrying..."
       )
 
+      @framework.deviceManager.on('discover', (eventData) =>
+
+        discoveredDevices = {};
+
+        @framework.deviceManager.discoverMessage(
+          'pimatic-homeduino', "Waiting for RF messages"
+        )
+
+        # Stop searching after configured time
+        setTimeout(( =>
+          @board.removeListener("rf", discoverListener)
+        ), eventData.time)
+
+
+
+        # Received presentation message from the gateway
+        @board.on("rf", discoverListener = (event) =>
+          protocolName = event.protocol
+          protocol = null
+          for p in protocols
+            if p.name is protocolName
+              protocol = p
+          if protocol?
+            protocolValues = {}
+            for own k of protocol.values
+              if event.values[k]?
+                protocolValues[k] = event.values[k]
+
+            protocolConfig = [
+              {
+                name: protocolName,
+                options: protocolValues
+              }
+            ]
+
+            switch protocol.type
+              when 'switch'
+                config = {
+                  class: 'HomeduinoRFSwitch'
+                  protocols: protocolConfig
+                }
+              when 'dimmer'
+                config = {
+                  class: 'HomeduinoRFDimmer'
+                  protocols: protocolConfig
+                }
+              when 'weather'
+                config = {
+                  class: 'HomeduinoRFWeatherStation'
+                  protocols: protocolConfig
+                }
+              when 'contact'
+                config = {
+                  class: 'HomeduinoRFContactSensor'
+                  protocols: protocolConfig
+                }
+              when 'pir'
+                config = {
+                  class: 'HomeduinoRFPir'
+                  protocols: protocolConfig
+                }
+          if config?
+            # Only show devices once
+            hash = JSON.stringify(config)
+            if discoveredDevices[hash]
+              return
+            discoveredDevices[hash] = true
+
+            deviceName = ""
+            if protocol.brands? and protocol.brands.length > 0
+              deviceName = protocol.brands.join('/')
+            else
+              deviceName = "Unknown brand"
+            deviceName += " (" + protocol.type + ")"
+
+            @framework.deviceManager.discoveredDevice(
+              'pimatic-homeduino', deviceName, config
+            )
+        )
+      )
+
       @pendingConnect = new Promise( (resolve, reject) =>
         @framework.on "after init", ( =>
           @board.connect(@config.connectionTimeout).then( =>
@@ -83,14 +164,13 @@ module.exports = (env) ->
           battery: p.values.battery
           presence: p.values.presence
           lowBattery: p.values.lowBattery
+          contact: p.values.contact
         }
-        for k, v of supports
+        for own k, v of supports
           if v?
             delete p.values[k]
           else
             delete supports[k]
-        for k, v of p.values
-          v.type = "string" if v.type is "binary"
       availableProtocolOptions = {}
       for p in protocols
         availableProtocolOptions[p.name] = {
@@ -175,27 +255,19 @@ module.exports = (env) ->
       super()
 
       lastError = null
-      setInterval(( =>
-        @_readSensor().then( (result) =>
+      getter = ( =>
+        return @_readSensor().then( (result) =>
           lastError = null
           variableManager = hdPlugin.framework.variableManager
           processing = @config.processing or "$value"
           info = variableManager.parseVariableExpression(
             processing.replace(/\$value\b/g, result.temperature)
           )
-          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-            @emit 'temperature', value
-          )
-          #@emit 'temperature', result.temperature
-        ).catch( (err) =>
-          if lastError is err.message
-            if hdPlugin.config.debug
-              env.logger.debug("Suppressing repeated error message from DST read: #{err.message}")
-            return
-          env.logger.error("Error reading DST Sensor: #{err.message}.")
-          lastError = err.message
+          return variableManager.evaluateNumericExpression(info.tokens)
         )
-      ), @config.interval)
+      )
+      @_createGetter('temperature', getter)
+      @_setupPolling('temperature', @config.interval)
 
     _readSensor: ()->
       # Already reading? return the reading promise
@@ -219,7 +291,9 @@ module.exports = (env) ->
         throw err
       )
 
-    getTemperature: -> @_readSensor().then( (result) -> result.temperature )
+    destroy: ->
+      super()
+
 
   #Original DHT implementation
   class HomeduinoDHTSensor extends env.devices.TemperatureSensor
@@ -242,35 +316,25 @@ module.exports = (env) ->
       super()
 
       lastError = null
-      setInterval(( =>
-        @_readSensor().then( (result) =>
-          lastError = null
-          variableManager = hdPlugin.framework.variableManager
-          processing = @config.processingTemp or "$value"
-          info = variableManager.parseVariableExpression(
-            processing.replace(/\$value\b/g, result.temperature)
+      getterFor = (attrName, processing) =>
+        return( () =>
+          @_readSensor().then( (result) =>
+            lastError = null
+            variableManager = hdPlugin.framework.variableManager
+            info = variableManager.parseVariableExpression(
+              processing.replace(/\$value\b/g, result[attrName])
+            )
+            return variableManager.evaluateNumericExpression(info.tokens)
           )
-          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-            @emit 'temperature', value
-          )
-          #@emit 'temperature', result.temperature
-          processing = @config.processingHum or "$value"
-          info = variableManager.parseVariableExpression(
-            processing.replace(/\$value\b/g, result.humidity)
-          )
-          variableManager.evaluateNumericExpression(info.tokens).then( (value) =>
-            @emit 'humidity', value
-          )
-          #@emit 'humidity', result.humidity
-        ).catch( (err) =>
-          if lastError is err.message
-            if hdPlugin.config.debug
-              env.logger.debug("Suppressing repeated error message from DHT read: #{err.message}")
-            return
-          env.logger.error("Error reading DHT Sensor: #{err.message}.")
-          lastError = err.message
         )
-      ), @config.interval)
+
+      tempGetter = getterFor('temperature', @config.processingTemp or "$value")
+      @_createGetter('temperature', tempGetter)
+      @_setupPolling('temperature', @config.interval)
+
+      humGetter = getterFor('humidity', @config.processingHum or "$value")
+      @_createGetter('humidity', humGetter)
+      @_setupPolling('humidity', @config.interval)
 
     _readSensor: (attempt = 0)->
       # Already reading? return the reading promise
@@ -299,9 +363,8 @@ module.exports = (env) ->
           throw err
       )
 
-    getTemperature: -> @_readSensor().then( (result) -> result.temperature )
-    getHumidity: -> @_readSensor().then( (result) -> result.humidity )
-
+    destroy: ->
+      super()
 
   doesProtocolMatch = (event, protocol) ->
     match = no
@@ -361,8 +424,8 @@ module.exports = (env) ->
     env.logger.debug(message)
 
   #eventually this can be part of the framework
-  numberMapping = (X, in_min, in_max, out_min, out_max)->
-    return (X-in_min)*(in_max-in_min)/(out_max-out_min)+out_min
+  numberMapping = (X, in_min, in_max, out_min, out_max) ->
+    return Math.round((X-in_min)*(out_max-out_min)/(in_max-in_min)+out_min)
 
   sendToSwitchesMixin = (protocols, state = null) ->
     pending = []
@@ -426,7 +489,7 @@ module.exports = (env) ->
       for p in @config.protocols
         checkProtocolProperties(p, ["switch"])
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           unless p.receive is false
             if p.name is "rolling1"
@@ -444,6 +507,7 @@ module.exports = (env) ->
               @emit('rf', event) # used by the RFEventPredicateHandler
               @_setState(event.values.state)
         )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _sendStateToSwitches: sendToSwitchesMixin
@@ -455,6 +519,8 @@ module.exports = (env) ->
         @_setState(state)
       )
 
+    destroy: ->
+      super()
 
   class HomeduinoRFDimmer extends env.devices.DimmerActuator
     _lastdimlevel: null
@@ -469,7 +535,7 @@ module.exports = (env) ->
       for p in @config.protocols
         checkProtocolProperties(p, ["switch", "dimmer"])
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           unless p.receive is false
             match = doesProtocolMatch(event, p)
@@ -486,9 +552,10 @@ module.exports = (env) ->
                 if _protocol.values.dimlevel?
                   p_min = _protocol.values.dimlevel.min
                   p_max = _protocol.values.dimlevel.max
-                  dimlevel = Math.round(numberMapping(event.values.dimlevel,0,100,p_min,p_max))
+                  dimlevel = numberMapping(event.values.dimlevel, p_min, p_max, 0, 100)
                   @_setDimlevel(dimlevel)
         )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _sendLevelToDimmers: sendToDimmersMixin
@@ -507,6 +574,9 @@ module.exports = (env) ->
         @_setDimlevel(level)
       )
 
+    destroy: ->
+      super()
+
   class HomeduinoRFButtonsDevice extends env.devices.ButtonsDevice
 
     constructor: (@config, lastState, @board, @_pluginConfig) ->
@@ -518,7 +588,7 @@ module.exports = (env) ->
           checkProtocolProperties(p, ["switch","command"])
           checkProtocolCommands(p)
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for b in @config.buttons
           unless b.receive is false
             match = no
@@ -527,9 +597,9 @@ module.exports = (env) ->
                 match = yes
             if match
               @emit('button', b.id)
-        )
-
-      super(config)
+      )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
+      super(@config)
 
     _sendStateToSwitches: sendToSwitchesMixin
 
@@ -540,6 +610,8 @@ module.exports = (env) ->
           return @_sendStateToSwitches(b.protocols)
       throw new Error("No button with the id #{buttonId} found")
 
+    destroy: ->
+      super()
 
   class HomeduinoRFContactSensor extends env.devices.ContactSensor
 
@@ -547,11 +619,51 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_contact = lastState?.contact?.value or false
+      @_lowBattery = lastState?.lowBattery?.value
+      @_battery = lastState?.battery?.value
 
+      hasLowBattery = false # boolean battery indicator
+      hasBattery = false # numeric battery indicator
       for p in @config.protocols
         checkProtocolProperties(p, ["switch","contact"])
+        _protocol = Board.getRfProtocol(p.name)
+        hasLowBattery = true if _protocol.values.lowBattery?
+        hasBattery = true if _protocol.values.battery?
 
-      @board.on('rf', (event) =>
+      if hasLowBattery
+        @attributes = _.cloneDeep @attributes
+        @attributes.lowBattery = {
+          description: "the battery status"
+          type: "boolean"
+          labels: ["low", 'ok']
+          icon:
+            noText: true
+            mapping: {
+              'icon-battery-filled': false
+              'icon-battery-empty': true
+            }
+        }
+      if hasBattery
+        @attributes = _.cloneDeep @attributes
+        @attributes.battery = {
+          description: "the battery status"
+          type: "number"
+          unit: '%'
+          displaySparkline: false
+          icon:
+            noText: true
+            mapping: {
+              'icon-battery-empty': 0
+              'icon-battery-fuel-1': [0, 20]
+              'icon-battery-fuel-2': [20, 40]
+              'icon-battery-fuel-3': [40, 60]
+              'icon-battery-fuel-4': [60, 80]
+              'icon-battery-fuel-5': [80, 100]
+              'icon-battery-filled': 100
+            }
+        }
+
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
@@ -559,14 +671,28 @@ module.exports = (env) ->
               if event.values.contact? then event.values.contact
               else (not event.values.state)
             )
+            if @config.inverted then hasContact = !hasContact
             @_setContact(hasContact)
             if @config.autoReset is true
               clearTimeout(@_resetContactTimeout)
               @_resetContactTimeout = setTimeout(( =>
                 @_setContact(!hasContact)
               ), @config.resetTime)
+            if event.values.lowBattery?
+              @_lowBattery = event.values.lowBattery
+              @emit "lowBattery", @_lowBattery
+            if event.values.battery?
+              @_battery = event.values.battery
+              @emit "battery", @_battery
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
+
+    destroy: ->
+      super()
+
+    getLowBattery: -> Promise.resolve @_lowBattery
+    getBattery: -> Promise.resolve @_battery
 
   class HomeduinoRFShutter extends env.devices.ShutterController
 
@@ -574,12 +700,13 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_position = lastState?.position?.value or 'stopped'
+      @rollingTime = @config.rollingTime
       @_types = {}
       for p in @config.protocols
         checkProtocolProperties(p, ["switch", "command"])
         @_types[p.name] = Board.getRfProtocol(p.name).type #save the protocol type
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           unless match
@@ -600,6 +727,7 @@ module.exports = (env) ->
             else
               @_setPosition(event.values.command)
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _sendStateToSwitches: sendToSwitchesMixin
@@ -613,9 +741,11 @@ module.exports = (env) ->
         if @_types[p.name] is "command"
           p.options.command = "stop"
 
-      @_sendStateToSwitches(protocols, @_position is 'up').then( =>
-        @_setPosition('stopped')
-      )
+      state = if @config.inverted then @_position is 'down' else @_position is 'up'
+      @_sendStateToSwitches(protocols, state)
+        .then( =>
+          @_setPosition('stopped')
+        )
 
       return Promise.resolve()
 
@@ -630,10 +760,12 @@ module.exports = (env) ->
           if @_types[p.name] is "command"
             p.options.command = position
         return @_sendStateToSwitches(protocols, position is 'up').then( =>
-        @_lastSendTime = new Date().getTime()
-        @_setPosition(position)
+          @_lastSendTime = new Date().getTime()
+          @_setPosition(position)
         )
 
+    destroy: ->
+      super()
 
   class HomeduinoRFPir extends env.devices.PresenceSensor
 
@@ -649,20 +781,23 @@ module.exports = (env) ->
         @_setPresence(no)
       )
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
-            unless @_setPresence is event.values.presence
+            unless @_presence is event.values.presence
               @_setPresence(event.values.presence)
             clearTimeout(@_resetPresenceTimeout)
             if @config.autoReset is true
               @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     getPresence: -> Promise.resolve @_presence
 
+    destroy: ->
+      super()
 
   class HomeduinoRFTemperature extends env.devices.TemperatureSensor
 
@@ -678,7 +813,7 @@ module.exports = (env) ->
       hasHumidity = false
       hasLowBattery = false # boolean battery indicator
       hasBattery = false # numeric battery indicator
-      isFahrenheit = config.isFahrenheit
+      isFahrenheit = @config.isFahrenheit
       for p in @config.protocols
         checkProtocolProperties(p, ["weather"])
         _protocol = Board.getRfProtocol(p.name)
@@ -737,7 +872,7 @@ module.exports = (env) ->
             }
         }
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
@@ -778,12 +913,16 @@ module.exports = (env) ->
               @emit "battery", @_battery
             @_lastReceiveTime = now
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     getTemperature: -> Promise.resolve @_temperature
     getHumidity: -> Promise.resolve @_humidity
     getLowBattery: -> Promise.resolve @_lowBattery
     getBattery: -> Promise.resolve @_battery
+
+    destroy: ->
+      super()
 
   class HomeduinoRFWeatherStation extends env.devices.Sensor
 
@@ -963,7 +1102,7 @@ module.exports = (env) ->
               "lowBattery, battery"
             )
 
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
@@ -1052,6 +1191,7 @@ module.exports = (env) ->
               @emit "battery", @_battery
             @_lastReceiveTime = now
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _directionToString: (direction)->
@@ -1069,6 +1209,9 @@ module.exports = (env) ->
     getLowBattery: -> Promise.resolve @_lowBattery
     getBattery: -> Promise.resolve @_battery
 
+    destroy: ->
+      super()
+
   class HomeduinoRFGenericSensor extends env.devices.Sensor
 
     constructor: (@config, lastState, @board) ->
@@ -1083,13 +1226,14 @@ module.exports = (env) ->
         @_createAttribute(attributeConfig)
 
       @_lastReceiveTimes = {}
-      @board.on('rf', (event) =>
+      @board.on('rf', rfListener = (event) =>
         for p in @config.protocols
           match = doesProtocolMatch(event, p)
           if match
             for attributeConfig in @config.attributes
               @_updateAttribute(attributeConfig, event)
       )
+      @on('destroy', () => @board.removeListener('rf', rfListener) )
       super()
 
     _createAttribute: (attributeConfig) ->
@@ -1144,6 +1288,9 @@ module.exports = (env) ->
       @emit name, value
       @_lastReceiveTimes[name] = now
 
+    destroy: ->
+      super()
+
   class HomeduinoSwitch extends env.devices.PowerSwitch
 
     constructor: (@config, lastState, @board) ->
@@ -1180,6 +1327,9 @@ module.exports = (env) ->
         @_setState(state)
       )
 
+    destroy: ->
+      super()
+
   class HomeduinoAnalogDimmer extends env.devices.DimmerActuator
 
     constructor: (@config, lastState, @board) ->
@@ -1203,7 +1353,7 @@ module.exports = (env) ->
       super()
 
     _writeLevel: (level) ->
-      dimlevel = Math.round(numberMapping(level,0,100,0,255))
+      dimlevel = numberMapping(level, 0, 100, 0, 255)
       return hdPlugin.pendingConnect.then( =>
         return @board.analogWrite(@config.pin, dimlevel)
       )
@@ -1212,7 +1362,6 @@ module.exports = (env) ->
       assert state is on or state is off
       if state is on then turnOn
       else turnOff
-
 
     turnOn: -> @changeDimlevelTo(@_lastdimlevel)
 
@@ -1226,34 +1375,37 @@ module.exports = (env) ->
         @_setDimlevel(level)
       )
 
+    destroy: ->
+      super()
+
   class HomeduinoContactSensor extends env.devices.ContactSensor
 
     constructor: (@config, lastState, @board) ->
       @id = @config.id
       @name = @config.name
       @_contact = lastState?.contact?.value or false
-
+      modeSet = false
       # setup polling
-      hdPlugin.pendingConnect.then( =>
-        return @board.pinMode(@config.pin, Board.INPUT)
-      ).then( =>
-        requestContactValue = =>
-          @board.digitalRead(@config.pin).then( (value) =>
+      getContactValue = =>
+        hdPlugin.pendingConnect.then( =>
+          unless modeSet
+            return @board.pinMode(@config.pin, Board.INPUT).then( () => modeSet = true )
+        ).catch( (err) => modeSet = false )
+        .then( =>
+          return @board.digitalRead(@config.pin).then( (value) =>
             hasContact = (
               if value is Board.HIGH then !@config.inverted
               else @config.inverted
             )
             @_setContact(hasContact)
-          ).catch( (error) =>
-            env.logger.error error
-            env.logger.debug error.stack
+            return hasContact
           )
-          setTimeout(requestContactValue, @config.interval or 5000)
-        requestContactValue()
-      ).catch( (error) =>
-        env.logger.error error
-        env.logger.debug error.stack
-      )
+        )
+      @_setupPolling('contact', @config.interval or 5000)
+      @_createGetter('contact', getContactValue)
+      super()
+
+    destroy: ->
       super()
 
   class HomeduinoPir extends env.devices.PresenceSensor
@@ -1284,6 +1436,9 @@ module.exports = (env) ->
         env.logger.error error
         env.logger.debug error.stack
       )
+      super()
+
+    destroy: ->
       super()
 
   class HomeduinoAnalogSensor extends env.devices.Sensor
@@ -1348,6 +1503,9 @@ module.exports = (env) ->
         env.logger.error error
         env.logger.debug error.stack
       )
+
+    destroy: ->
+      super()
 
   ###
   The RF-Event Predicate Provider
