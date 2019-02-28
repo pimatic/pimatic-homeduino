@@ -2,10 +2,11 @@ pimatic-homeduino
 =======================
 
 Plugin for using various 433 Mhz devices and sensors with a connected Arduino with
-[homeduino](https://github.com/pimatic/homeduino) sketch or directly with capable hardware like the Raspberry Pi.
+[homeduino](https://github.com/pimatic/homeduino) sketch or directly with capable hardware like the Raspberry Pi. 
+It is based on the [homeduinojs](https://github.com/pimatic/homeduinojs) driver implementation.
 
 This plugins supports all 433 MHz devices with [rfcontroljs](https://github.com/pimatic/rfcontroljs)
-[protocol implementations](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md).
+[protocol implementations](https://github.com/pimatic/rfcontroljs/blob/master/protocols.md). 
 
 
 Drivers
@@ -180,7 +181,7 @@ protocol.
       "receive": true
     }
   ]
-},
+}
 ```
 ##### Shutter sensor example:
 
@@ -244,7 +245,7 @@ For weather stations like the Alecto WS-4500 you should use the weather station 
     "temperature",
     "humidity"
   ]
-},
+}
 ```
 It supports different values to display
 `rain`, `temperature`, `humidity`, `windGust`, `windDirection`, `avgAirspeed`, `lowBattery` and 
