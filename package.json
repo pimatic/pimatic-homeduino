@@ -1,7 +1,18 @@
 {
   "name": "pimatic-homeduino",
-  "description": "pimatic plugin to use various 433 MHz devices, sensors and more with an Arduino.",
+  "description": "Pimatic plugin for using 433mhz devices and sensors with a connected Arduino with homeduino sketch",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://www.sweetpi.de)",
+  "contributors": [
+    "Marcus Wittig <wittigmarcus@gmail.com>",
+    "Ronny Herzberg <ronny_herzberg@web.de>",
+    "Rom Reinartz <tom@tomreinartz.com>",
+    "Amogh Asgekar' <amogh.asgekar@gmail.com>",
+    "Heizelmann <Heizelmann@users.noreply.github.com>",
+    "Chris <leader21@users.noreply.github.com>",
+    "Wiebe Nieuwenhuis <wiebenieuwenhuis@gmail.com>",
+    "Bernd Strebel <b.strebel@digitec.de>",
+    "Michael Kotten <michael.kotten@openknowledge.de>"
+  ],
   "license": "GPL-2.0",
   "main": "homeduino",
   "files": [
@@ -19,14 +30,24 @@
     "url": "git://github.com/pimatic/pimatic-homeduino.git"
   },
   "configSchema": "homeduino-config-schema.coffee",
+  "bundledDependencies": [
+    "homeduino"
+  ],
   "dependencies": {
-    "homeduino": "0.0.65"
+    "homeduino": "0.0.66"
   },
   "peerDependencies": {
     "pimatic": "0.9.*"
   },
   "engines": {
-    "node": ">0.8.x",
-    "npm": ">1.1.x"
-  }
+    "node": ">= 4",
+    "npm": ">= 2"
+  },
+  "keywords": [
+    "pimatic",
+    "pimatic-plugin",
+    "homeduino",
+    "home-automation",
+    "433mhz"
+  ]
 }
