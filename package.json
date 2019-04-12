@@ -34,7 +34,7 @@
     "homeduino"
   ],
   "dependencies": {
-    "homeduino": "0.0.66"
+    "homeduino": "0.0.67"
   },
   "peerDependencies": {
     "pimatic": "0.9.*"
