@@ -199,7 +199,7 @@ module.exports = {
   HomeduinoRFShutter: {
     title: "HomeduinoRFShutter config options"
     type: "object"
-    extensions: ["xConfirm", "xLink"]
+    extensions: ["xConfirm", "xLink", "xUpLabel", "xDownLabel", "xStoppedLabel"]
     properties:
       protocols:
         description: "The protocols to use."
