@@ -31,7 +31,6 @@
   },
   "configSchema": "homeduino-config-schema.coffee",
   "bundledDependencies": [
-    "homeduino"
   ],
   "dependencies": {
     "homeduino": "0.0.67"
