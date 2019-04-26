@@ -1,5 +1,11 @@
 # Release History
 
+* 20190426, V0.9.14
+    * Updated to homeduino@0.0.69 which bundles rfcontroljs and otat-repl. This version
+      should solve issues with stray characters in input causing node.js to bail out
+      wuth "Illegal Token" exception
+    * Minor changes
+      
 * 20190425, V0.9.13
     * Updated to homeduino@0.0.68 which includes updated rfcontroljs@0.0.59 and
       updated vhduino binary
