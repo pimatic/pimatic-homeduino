@@ -33,7 +33,7 @@
   "bundledDependencies": [
   ],
   "dependencies": {
-    "homeduino": "0.0.68"
+    "homeduino": "0.0.69"
   },
   "peerDependencies": {
     "pimatic": "0.9.*"
