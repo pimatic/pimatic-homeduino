@@ -43,7 +43,7 @@ module.exports = (env) ->
 
       @framework.deviceManager.on('discover', (eventData) =>
 
-        discoveredDevices = {};
+        discoveredDevices = {}
 
         @framework.deviceManager.discoverMessage(
           'pimatic-homeduino', "Waiting for RF messages"
@@ -420,7 +420,7 @@ module.exports = (env) ->
           )
       if p.options.command not in _protocol.commands
         throw new Error(
-          "Protocol \"#{p.name}\" can´t handle the command \"#{p.options.command}\". "+
+          "Protocol \"#{p.name}\" can't handle the command \"#{p.options.command}\". "+
           "Available commands are: \"#{_protocol.commands.join(", ")}\""
           )
 
