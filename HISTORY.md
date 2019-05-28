@@ -1,5 +1,13 @@
 # Release History
 
+* 20190528, V0.9.16
+    * Updated to homeduino@0.0.71 which bundles rfcontroljs@0.0.61. 
+      The latter includes new RF protocols:
+        * weather20: FreeTec PT-250 pool thermometer, thanks @Jens for testing
+        * alarm3: Smartwares RF174RF smoke detector, thanks @4nubis for testing
+        * switch32: Rising Sun RSL366 / Conrad RSL366 / PROmax socket switches
+    * Revised README for GPIO board driver wrt. PIN numbering, thanks @layereight for review
+    
 * 20190429, V0.9.15
     * Updated to homeduino@0.0.70 which bundles rfcontroljs and otat-repl. This version
       should solve issues with stray characters in input causing node.js to error
