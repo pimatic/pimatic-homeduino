@@ -50,7 +50,7 @@ The `transmitterPin` must be a digital pin between `2` (D2) and `13` (D13).
 ![nano-pins](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/pins-nano.png)
 
 
-### B. Raspberry Pi with ATTiny45 / 85 Prefilter
+### B. Raspberry Pi with (optional) ATTiny45 / 85 Prefilter
 
 You can load the plugin by editing your `config.json` to include:
 
@@ -59,14 +59,14 @@ You can load the plugin by editing your `config.json` to include:
   "plugin": "homeduino",
   "driver": "gpio",
   "driverOptions": {},
-  "receiverPin": 0,
-  "transmitterPin": 4
+  "receiverPin": 17,
+  "transmitterPin": 23
 }
 ```
 
 in the `plugins` section. For all configuration options see [homeduino-config-schema](homeduino-config-schema.coffee)
 
-The pin numbers are [wiringPi pin numbers](http://wiringpi.com/pins/).
+The [pin numbers](https://raw.githubusercontent.com/pimatic/pimatic-homeduino/master/pins-raspi.md) in this case are BCM GPIO Numbers.
 
 Devices
 ------
