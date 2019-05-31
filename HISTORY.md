@@ -1,5 +1,8 @@
 # Release History
 
+* 20190531, V0.9.17
+    * Removed bundledDependencies property to avoid local nodeModules 
+      gets staged when published via npm pack
 * 20190528, V0.9.16
     * Updated to homeduino@0.0.71 which bundles rfcontroljs@0.0.61. 
       The latter includes new RF protocols:
@@ -16,7 +19,7 @@
     
 * 20190426, V0.9.14
     * defunct - do not install
-      
+        
 * 20190425, V0.9.13
     * Updated to homeduino@0.0.68 which includes updated rfcontroljs@0.0.59 and
       updated vhduino binary
