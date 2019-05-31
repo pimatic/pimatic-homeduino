@@ -30,8 +30,6 @@
     "url": "git://github.com/pimatic/pimatic-homeduino.git"
   },
   "configSchema": "homeduino-config-schema.coffee",
-  "bundledDependencies": [
-  ],
   "dependencies": {
     "homeduino": "0.0.71"
   },
