@@ -745,7 +745,7 @@ module.exports = (env) ->
       unless @config.forceSend
         if @_position is 'stopped' then return Promise.resolve()
 
-      protocols = _.clone(@config.protocols, true)
+      protocols = _.cloneDeep(@config.protocols)
       for p in protocols
         if @_types[p.name] is "command"
           p.options.command = "stop"
@@ -764,7 +764,7 @@ module.exports = (env) ->
         if position is @_position then return Promise.resolve()
       if position is 'stopped' then return @stop()
       else
-        protocols = _.clone(@config.protocols, true)
+        protocols = _.cloneDeep(@config.protocols)
         for p in protocols
           if @_types[p.name] is "command"
             p.options.command = position
