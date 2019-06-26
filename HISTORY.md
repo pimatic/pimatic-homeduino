@@ -1,5 +1,8 @@
 # Release History
 
+* 20190626, V0.9.18
+    * Fixed calls to moveToPosition added command to protocol config, use 
+       lodash cloneDeep instead of clone with obsolete true flag
 * 20190531, V0.9.17
     * Removed bundledDependencies property to avoid local nodeModules 
       gets staged when published via npm pack
