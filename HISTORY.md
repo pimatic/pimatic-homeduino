@@ -1,5 +1,11 @@
 # Release History
 
+* unreleased 
+    * Updated to homeduino@0.0.xx which bundles rfcontroljs@0.0.xx. 
+      The latter includes new RF protocols:
+        * weather21: Auriol HG02832, Auriol HG05124A-DCF, Auriol IAN 321304_1901, 
+          Rubicson 48957
+        * switch33: Lidl Powerfix RCB-I 3600R
 * 20190626, V0.9.18
     * Fixed calls to moveToPosition added command to protocol config, use 
        lodash cloneDeep instead of clone with obsolete true flag
